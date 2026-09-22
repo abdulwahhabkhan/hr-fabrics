@@ -1,0 +1,55 @@
+// ---------------------------------------------------------------------------
+// HR Fabrics — design tokens (compile-time). Loaded before Color Admin's
+// _variables.scss, so every `!default` there picks these up.
+// Runtime polish lives in _theme-modern.scss.
+// ---------------------------------------------------------------------------
+
+// Brand
+$brand: #7c2433 !default;        // wine, matches the logo
+$theme: $brand !default;
+$primary: $brand !default;
+
+// Semantic palette (calmer, more modern tones than the template defaults)
+$teal: #0f8f7e !default;          // success / "Confirm", "Save"
+$cyan: #0e87a8 !default;          // info
+$orange: #d97706 !default;        // warning / "Reset"
+$red: #dc2626 !default;           // danger
+$pink: #db2777 !default;
+$blue: #2563eb !default;
+
+// Neutrals (warm stone scale)
+$body-bg: #f4f3f1 !default;
+$component-bg: #ffffff !default;
+$muted: #f1efec !default;
+$muted-soft: #faf9f7 !default;
+$light: #f5f5f4 !default;
+$border-color: #e7e5e4 !default;
+$input-border-color: #d6d3d1 !default;
+$table-border-color: $border-color !default;
+$card-border-color: $border-color !default;
+$table-hover-bg: rgba($brand, .035) !default;
+$action-icon-color: #78716c !default;
+
+// Typography
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !default;
+$tracking-tight: -.02em !default;
+
+// Shape & depth
+$border-radius: 8px !default;
+$shadow-sm: 0 1px 2px rgba(28, 25, 23, .05) !default;
+
+// Header + top menu (both light now; heights feed the content offset)
+$app-header-bg: #ffffff !default;
+$app-header-height: 56px !default;
+$app-header-height-sm: 56px !default;
+$app-top-menu-bg: #ffffff !default;
+$app-top-menu-height: 48px !default;
+$app-top-menu-link-color: #57534e !default;
+$app-top-menu-link-hover-color: #1c1917 !default;
+$app-top-menu-link-hover-bg: #f5f5f4 !default;
+$app-top-menu-link-font-weight: 500 !default;
+
+// Surfaces
+$modal-content-bg: #ffffff !default;
+$component-dropdown-bg: #ffffff !default;
+$component-dropdown-hover-bg: #f5f5f4 !default;

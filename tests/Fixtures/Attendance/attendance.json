@@ -1,0 +1,28 @@
+{
+  "logs": [
+    {
+      "id": "6a5bd63a5eb04baf64c3ea1b",
+      "worker": {
+        "id": "6a5b910c3e7469f650ccb75e",
+        "deviceUserId": "1",
+        "name": "Shehryar"
+      },
+      "punchedAt": "2026-07-18T19:38:32.000Z",
+      "method": "fingerprint",
+      "rawVerify": "1",
+      "sn": "TTQ5251000193"
+    },
+    {
+      "id": "6a5bcdd58744ce09103bff97",
+      "worker": {
+        "id": "6a5b910c3e7469f650ccb75e",
+        "deviceUserId": "1",
+        "name": "Shehryar"
+      },
+      "punchedAt": "2026-07-18T19:02:43.000Z",
+      "method": "fingerprint",
+      "rawVerify": "1",
+      "sn": "TTQ5251000193"
+    }
+  ]
+}

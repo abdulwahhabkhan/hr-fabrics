@@ -1,0 +1,89 @@
+{
+  "$schema": "https://laravel-ide.com/schema/laravel-ide-v2.json",
+  "completions": [
+    {
+      "complete": "directoryFiles",
+      "options": {
+        "directory": "/tests/Fixtures",
+        "suffixToClear": ".json"
+      },
+      "condition": [
+        {
+          "functionNames": [
+            "getFixtureJSON"
+          ],
+          "parameters": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "complete": "directoryFiles",
+      "options": {
+        "directory": "/tests/Fixtures"
+      },
+      "condition": [
+        {
+          "functionNames": [
+            "getFixtureFile"
+          ],
+          "parameters": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "complete": "eloquentFields",
+      "condition": [
+        {
+          "methodNames": [
+            "filterWhere",
+            "filterStartWith",
+            "filterContain",
+            "filterDate",
+            "filterLike",
+            "qCol"
+          ]
+        }
+      ]
+    },
+    {
+      "complete": "routeName",
+      "condition": [
+        {
+          "methodNames": [
+            "hasPermission",
+            "checkPermissionTo"
+          ],
+          "classFqn": [
+            "App\\Models\\User"
+          ],
+          "parameters": [
+            1
+          ]
+        },
+        {
+          "methodNames": [
+            "attachPermissions"
+          ],
+          "classFqn": [
+            "\\Tests\\TestCase"
+          ],
+          "parameters": [
+            2
+          ]
+        },
+        {
+          "functionNames": [
+            "hasPermission"
+          ],
+          "parameters": [
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

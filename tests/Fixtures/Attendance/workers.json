@@ -1,0 +1,23 @@
+[
+    {
+        "id": "6a5b92703e7469f650ccb769",
+        "deviceUserId": "3",
+        "name": "Ahmad",
+        "nameSource": "device",
+        "lastMethod": "fingerprint"
+    },
+    {
+        "id": "6a5b91183e7469f650ccb75f",
+        "deviceUserId": "2",
+        "name": "Asfand",
+        "nameSource": "device",
+        "lastMethod": "fingerprint"
+    },
+    {
+        "id": "6a5b910c3e7469f650ccb75e",
+        "deviceUserId": "1",
+        "name": "Shehryar",
+        "nameSource": "device",
+        "lastMethod": "fingerprint"
+    }
+]

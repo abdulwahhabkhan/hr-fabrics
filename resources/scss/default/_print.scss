@@ -1,0 +1,72 @@
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  /* Targets all the pages */
+  .page-break {
+    page-break-before: always;
+  }
+  body {
+    background-color: white;
+  }
+  .print-only {
+    display: table-row;
+  }
+  .app-with-top-menu.app-header-fixed {
+    padding-top: 0px;
+  }
+  #header, #top-menu, .page-header, .hidden-print, .app-footer {
+    display: none;
+  }
+  .invoice-company {
+    .sub-title {
+      padding-right: 0;
+    }
+  }
+  .app-content {
+    padding-right: 1cm;
+    padding-left: 2cm;
+  }
+  .invoice .invoice-content {
+    margin: 0 -1.25rem;
+  }
+  .table-responsive {
+    overflow-x: inherit
+  }
+  .table {
+    page-break-before: auto;
+  }
+
+  .table > :not(caption) > * > * {
+    box-shadow: none;
+    background-color: white;
+  }
+  .table thead tr th {
+    border-bottom: 1px solid #565353;
+  }
+
+  .table tr, .invoice-price {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  table {
+    --bs-table-border-color: #565353 !important;
+  }
+
+  span.urdu {
+    font-size: 1.0em;
+    text-align: right;
+  }
+}
+
+
+
+
+
+
+
+
+

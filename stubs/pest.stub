@@ -1,0 +1,11 @@
+<?php @noinspection PhpUnhandledExceptionInspection */
+
+test('example', function () {
+    // Arrange
+
+    // Action
+    $response = $this->get('/');
+
+    // Assert
+    $response->assertOk();
+});

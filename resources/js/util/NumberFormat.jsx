@@ -1,0 +1,1 @@
+export {NumericFormat, NumericFormat as NumberFormat} from "react-number-format";
