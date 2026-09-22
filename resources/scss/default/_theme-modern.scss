@@ -120,28 +120,96 @@ body {
       }
     }
 
-    // Submenu as a floating card
+    // Submenu — floating card, flush to the bar (no hover gap)
     .menu-submenu {
+      padding: .375rem;
+
       @media (min-width: 768px) {
-        margin-top: 6px;
-        padding: .375rem;
-        min-width: 220px;
+        top: 100%;
+        margin: 0;
+        width: auto;
+        min-width: 232px;
         background: var(--hf-surface);
         border: 1px solid var(--hf-border);
-        border-radius: var(--hf-radius-lg);
-        box-shadow: var(--hf-shadow-lg);
+        border-radius: 0 0 var(--hf-radius-lg) var(--hf-radius-lg);
+        box-shadow: 0 12px 28px -10px rgba(28, 25, 23, .22), 0 4px 8px -4px rgba(28, 25, 23, .08);
+        transform-origin: top left;
+        animation: hf-submenu-in .16s var(--hf-ease);
+
+        // Invisible bridge: keeps :hover alive while the pointer travels down
+        &::before {
+          content: '';
+          position: absolute;
+          inset: -8px 0 auto 0;
+          height: 8px;
+        }
       }
 
-      .menu-item .menu-link {
-        padding: .5rem .75rem;
-        border-radius: var(--hf-radius-sm) !important;
-        color: var(--hf-text-2);
-        font-weight: 500;
+      .menu-item {
+        padding: 0;
 
-        &:hover { background: #f5f5f4; color: var(--hf-text); }
+        & + .menu-item { margin-top: 3px; }
+
+        .menu-link {
+          position: relative;
+          gap: .625rem;
+          min-height: 36px;
+          padding: .45rem .75rem;
+          border-radius: var(--hf-radius) !important;
+          font-size: .8125rem;
+          font-weight: 500;
+          color: var(--hf-text-2);
+          transition: background .12s var(--hf-ease), color .12s var(--hf-ease), padding .12s var(--hf-ease);
+
+          // Leading dot marker
+          &::before {
+            content: '';
+            flex: 0 0 6px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--hf-border-strong);
+            transition: background .12s var(--hf-ease), transform .12s var(--hf-ease);
+          }
+
+          &:hover {
+            background: #f5f5f4;
+            color: var(--hf-text);
+            &::before { background: var(--hf-text-3); transform: scale(1.15); }
+          }
+        }
+
+        &.active > .menu-link {
+          background: var(--hf-brand-50) !important;
+          color: var(--hf-brand) !important;
+          font-weight: 600;
+          &::before { background: var(--hf-brand); box-shadow: 0 0 0 3px rgba(var(--hf-brand-rgb), .15); }
+        }
+      }
+
+      // Nested submenus (3rd level) stay inline, indented
+      .menu-submenu {
+        position: static;
+        min-width: 0;
+        margin: .125rem 0 .125rem 1rem;
+        padding: 0 0 0 .5rem;
+        border: 0;
+        border-inline-start: 1px solid var(--hf-border);
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+        &::before { display: none; }
       }
     }
   }
+}
+
+@keyframes hf-submenu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-top-menu .menu .menu-submenu { animation: none !important; }
 }
 
 .app-gradient-enabled .app-top-menu .menu .menu-item.active > .menu-link {
@@ -435,7 +503,16 @@ body {
 // ---------------------------------------------------------------------------
 // Modals
 // ---------------------------------------------------------------------------
-.modal-backdrop.show { opacity: 1; background: rgba(28, 25, 23, .45); backdrop-filter: blur(3px); }
+// Backdrop: flat tint only — an animated backdrop-filter blur repaints the
+// whole page every frame and flickers on heavy screens.
+.modal-backdrop { --bs-backdrop-bg: #1c1917; --bs-backdrop-opacity: .45; }
+
+// No layout jump when a modal locks scrolling: always reserve the scrollbar
+// gutter, and stop Bootstrap adding its compensating padding on top of it.
+html { scrollbar-gutter: stable; }
+body.modal-open { padding-right: 0 !important; overflow: hidden; }
+body.modal-open .app-header,
+body.modal-open .app-top-menu { padding-right: 0 !important; }
 
 .modal-content {
   border: 1px solid var(--hf-border);
@@ -457,7 +534,7 @@ body {
   border-top: 1px solid var(--hf-border);
   > * { margin: 0; }
 }
-.modal.fade .modal-dialog { transform: translateY(8px) scale(.985); transition: transform .2s var(--hf-ease); }
+.modal.fade .modal-dialog { transform: translateY(8px); transition: transform .2s var(--hf-ease); will-change: transform; }
 .modal.show .modal-dialog { transform: none; }
 
 // ---------------------------------------------------------------------------
