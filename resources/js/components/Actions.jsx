@@ -1,7 +1,8 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Tooltip } from 'react-bootstrap';
+import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import { Inertia, Link, router } from '@/util/Inertia';
 import { confirmDelete, confirmSwal } from '@/util/swal';
 

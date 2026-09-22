@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Badge, OverlayTrigger, Tooltip} from "react-bootstrap";
+import { Badge, Tooltip } from "react-bootstrap";
+import OverlayTrigger from "@/components/ui/OverlayTrigger";
 import {NumberFormat} from "@/util/NumberFormat";
 import { Icon } from "@iconify/react";
 

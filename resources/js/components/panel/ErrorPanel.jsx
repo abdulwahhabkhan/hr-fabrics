@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Panel, PanelBody } from '@/components/panel/panel';
 import { Icon } from '@iconify/react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Tooltip } from 'react-bootstrap';
+import OverlayTrigger from '@/components/ui/OverlayTrigger';
 
 const humanizeKey = (key) => {
     return key

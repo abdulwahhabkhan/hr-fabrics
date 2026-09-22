@@ -8,10 +8,10 @@ import {
     Col,
     Form,
     InputGroup,
-    OverlayTrigger,
     Row,
     Tooltip,
 } from 'react-bootstrap';
+import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
 import { settings } from '@/config/page-settings';

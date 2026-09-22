@@ -5,11 +5,11 @@ import {
     Button,
     Col,
     Image,
-    OverlayTrigger,
     ProgressBar,
     Row,
     Tooltip,
 } from 'react-bootstrap';
+import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import Moment, { MomentFull } from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
 

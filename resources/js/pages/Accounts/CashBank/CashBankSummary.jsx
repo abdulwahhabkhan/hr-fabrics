@@ -6,7 +6,8 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { Icon } from '@iconify/react';
 import { Date } from '@/components/CustomDate';
 import DateRangeFilter from '@/pages/Reports/Accounts/DateRangeFilter';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Tooltip } from 'react-bootstrap';
+import OverlayTrigger from '@/components/ui/OverlayTrigger';
 
 const CashBankSummary = () => {
     const { filters, rows } = usePage().props;
