@@ -608,6 +608,116 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
 .badge { font-weight: 600; letter-spacing: .01em; border-radius: 999px; padding: .3em .65em; }
 
 // ---------------------------------------------------------------------------
+// Row actions (components/RowActionsMenu.jsx)
+// ---------------------------------------------------------------------------
+.table .actions { vertical-align: middle; }
+.table .actions > * { vertical-align: middle; }
+
+.row-actions-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--hf-radius-sm);
+  background: transparent;
+  color: var(--hf-text-3);
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background .12s var(--hf-ease), color .12s var(--hf-ease);
+
+  svg { display: block; width: 18px; height: 18px; }
+
+  &:hover, &.is-open { background: var(--hf-hover); color: var(--hf-navy); }
+  &:focus-visible { outline: none; box-shadow: var(--hf-ring); }
+}
+
+.row-actions.dropdown-menu {
+  z-index: 1060;
+  min-width: 200px;
+  margin: 0;
+  padding: .375rem;
+  border: 1px solid var(--hf-border);
+  border-radius: var(--hf-radius-lg);
+  background: var(--hf-surface);
+  box-shadow: 0 16px 36px -12px rgba(var(--hf-navy-rgb), .28), 0 4px 10px -4px rgba(var(--hf-navy-rgb), .1);
+  font-size: .8125rem;
+  transform-origin: top right;
+  animation: hf-row-menu-in .14s var(--hf-ease);
+
+  &.is-up { transform-origin: bottom right; }
+
+  .dropdown-item,
+  .btn.dropdown-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .625rem;
+    width: 100%;
+    min-height: 0;
+    padding: .5rem .625rem;
+    border: 0 !important;
+    border-radius: var(--hf-radius);
+    background: transparent;
+    box-shadow: none !important;
+    color: var(--hf-text);
+    font-size: .8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: start;
+    white-space: nowrap;
+    transform: none !important;
+    overflow: visible;
+
+    .iconify, svg { flex: none; width: 18px; height: 18px; color: var(--hf-text-3); transition: color .12s var(--hf-ease); }
+
+    &:hover, &:focus {
+      background: var(--hf-hover);
+      color: var(--hf-navy);
+      .iconify, svg { color: var(--hf-gold-text); }
+    }
+  }
+
+  .dropdown-item + .dropdown-item { margin-top: 2px; }
+
+  // Destructive items (Unlock, Delete…) get their own group: a soft separator above
+  .dropdown-item:not(:first-child):has(.text-danger-500, .text-danger-600, .text-danger) {
+    margin-top: 9px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: .625rem;
+      right: .625rem;
+      top: -5px;
+      height: 1px;
+      background: var(--hf-border);
+      pointer-events: none;
+    }
+  }
+
+  // Destructive items (Unlock, Delete…) read as danger
+  .dropdown-item:has(.text-danger-500, .text-danger-600, .text-danger) {
+    color: #b3392a;
+    .iconify, svg { color: #c9503f; }
+    &:hover, &:focus { background: #fcefed; color: #9b2c1f; .iconify, svg { color: #b3392a; } }
+  }
+}
+
+@keyframes hf-row-menu-in {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-actions.dropdown-menu { animation: none; }
+}
+
+// ---------------------------------------------------------------------------
 // Toasts (react-toastify) & SweetAlert
 // ---------------------------------------------------------------------------
 .Toastify__toast { border-radius: var(--hf-radius-lg); box-shadow: var(--hf-shadow-lg); font-family: inherit; }

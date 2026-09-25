@@ -43,7 +43,39 @@ test('customer index page can filter results', function () {
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Sales/Customers/CustomerIndex')
-        ->has('customers.data')
+        ->has('customers.data', 1)
+    );
+});
+
+test('customer index page can filter by status', function () {
+    // Arrange
+    Account::factory()->customer()->count(2)->create(['suspended' => false]);
+    Account::factory()->customer()->create(['suspended' => true]);
+
+    // Act
+    $response = $this->get(route('sales.customers.index', ['status' => 'suspended']));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Customers/CustomerIndex')
+        ->has('customers.data', 1)
+    );
+});
+
+test('customer index page can filter by credit', function () {
+    // Arrange
+    Account::factory()->customer()->count(2)->create(['credit' => false]);
+    Account::factory()->customer()->create(['credit' => true]);
+
+    // Act
+    $response = $this->get(route('sales.customers.index', ['credit' => '1']));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Customers/CustomerIndex')
+        ->has('customers.data', 1)
     );
 });
 

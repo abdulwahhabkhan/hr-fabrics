@@ -11,23 +11,24 @@ const initials = (name = '') =>
         .map((part) => part[0].toUpperCase())
         .join('');
 
-function Avatar({ user, avatar }) {
-    return avatar ? (
-        <img src={avatar} alt="" className="hf-avatar" />
-    ) : (
-        <span className="hf-avatar">{initials(user.name)}</span>
+/** Initials avatar drawn in CSS (brand gold foil + subtle weave), no image needed. */
+function Avatar({ user }) {
+    return (
+        <span className="hf-avatar" aria-hidden="true">
+            <span className="hf-avatar-initials">{initials(user.name) || '?'}</span>
+        </span>
     );
 }
 
 /** Account button at the bottom of the sidebar; menu opens to the right. */
 export default function SidebarUser() {
     const { auth } = usePage().props;
-    const { user, avatar } = auth;
+    const { user } = auth;
 
     return (
         <Dropdown drop="end" className="hf-user">
             <Dropdown.Toggle as="button" type="button" className="hf-user-toggle" bsPrefix="hf-user-toggle">
-                <Avatar user={user} avatar={avatar} />
+                <Avatar user={user} />
                 <span className="hf-user-meta">
                     <span className="hf-user-name">{user.name}</span>
                     {user.email && <span className="hf-user-email">{user.email}</span>}
@@ -37,7 +38,7 @@ export default function SidebarUser() {
 
             <Dropdown.Menu className="hf-user-menu" popperConfig={{ strategy: 'fixed' }}>
                 <div className="hf-user-menu-head">
-                    <Avatar user={user} avatar={avatar} />
+                    <Avatar user={user} />
                     <span className="hf-user-meta">
                         <span className="hf-user-name">{user.name}</span>
                         {user.email && <span className="hf-user-email">{user.email}</span>}

@@ -27,24 +27,55 @@ class CustomerController extends Controller
      */
     public function index(Request $request): Response
     {
+        $filters = $request->only('search', 'agent_id', 'city', 'status', 'credit');
+
         $customers = Account::query()
             ->customers()
             ->with('agent')
             ->when($request->input('search'), function ($query, $search) {
-                $query->whereRaw(
-                    "LOWER(CONCAT(name, ' ', JSON_VALUE(address, '$.\"city\"'))) LIKE ?",
-                    ['%'.mb_strtolower($search).'%']
-                );
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('name_urdu', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhereRaw("JSON_VALUE(address, '$.\"city\"') LIKE ?", ["%{$search}%"]);
+                });
+            })
+            ->filterWhere('agent_id', $request->input('agent_id'))
+            ->when($request->filled('city'), function ($query) use ($request) {
+                $query->whereRaw("JSON_VALUE(address, '$.\"city\"') = ?", [$request->input('city')]);
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $status = $request->input('status');
+                if ($status === 'active') {
+                    $query->where('suspended', false);
+                } elseif ($status === 'suspended') {
+                    $query->where('suspended', true);
+                }
+            })
+            ->when($request->filled('credit'), function ($query) use ($request) {
+                $credit = $request->input('credit');
+                if ($credit === '1' || $credit === 'yes') {
+                    $query->where('credit', true);
+                } elseif ($credit === '0' || $credit === 'no') {
+                    $query->where('credit', false);
+                }
             })
             ->orderby('updated_at', 'desc')
             ->paginate()
-            ->appends($request->all());
+            ->appends($filters);
 
         return Inertia::render(
             'Sales/Customers/CustomerIndex',
             [
                 'customers' => CustomerResource::collection($customers),
-                'filters' => $request->only('search'),
+                'filters' => $filters,
+                'agents' => $this->agentOptions(),
+                'cities' => City::getAll(),
+                'canAdd' => $request->user()?->can('sales.customers.store') ?? true,
+                'canUpdate' => $request->user()?->can('sales.customers.update') ?? true,
+                'canSuspend' => $request->user()?->can('sales.customers.suspend') ?? true,
+                'canActivate' => $request->user()?->can('sales.customers.activate') ?? true,
             ]
         );
     }

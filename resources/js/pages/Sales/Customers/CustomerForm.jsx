@@ -8,13 +8,7 @@ import {
 } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
 import { Icon } from '@iconify/react';
-import {
-    Col,
-    Form,
-    InputGroup,
-    Row,
-    Tooltip,
-} from 'react-bootstrap';
+import { Col, Form, InputGroup, Row, Tooltip } from 'react-bootstrap';
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
@@ -294,7 +288,6 @@ const CustomerForm = () => {
                                             {...register('address.city', {
                                                 required: true,
                                             })}
-                                            size={'sm'}
                                         >
                                             <option value="">
                                                 Select City
