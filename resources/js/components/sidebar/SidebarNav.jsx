@@ -54,16 +54,19 @@ export default function SidebarNav() {
                         )}
 
                         {hasChildren && (
-                            <div className="hf-subnav">
-                                {item.children.map((child) => (
-                                    <InertiaLink
-                                        key={child.name}
-                                        href={child.path}
-                                        className={cx('hf-subnav-link', { 'is-active': child.active })}
-                                    >
-                                        {child.title}
-                                    </InertiaLink>
-                                ))}
+                            // Outer grid animates 0fr -> 1fr (smooth height); inner wrapper clips.
+                            <div className="hf-subnav" aria-hidden={!isOpen}>
+                                <div className="hf-subnav-inner">
+                                    {item.children.map((child) => (
+                                        <InertiaLink
+                                            key={child.name}
+                                            href={child.path}
+                                            className={cx('hf-subnav-link', { 'is-active': child.active })}
+                                        >
+                                            {child.title}
+                                        </InertiaLink>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

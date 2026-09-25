@@ -204,15 +204,44 @@
   }
 }
 
+// Sub-menu: smooth height via grid rows (0fr -> 1fr), plus fade/slide.
+// Closed menus are visibility:hidden (after the animation) so they leave the tab order.
 .hf-subnav {
-  display: none;
+  display: grid;
+  grid-template-rows: 0fr;
+  margin: 0 0 0 1.25rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows .26s var(--hf-ease),
+    margin .26s var(--hf-ease),
+    opacity .18s var(--hf-ease),
+    visibility 0s linear .26s;
+}
+.hf-subnav-inner {
+  display: flex;
   flex-direction: column;
   gap: 2px;
-  margin: .25rem 0 .5rem 1.25rem;
+  min-height: 0;
+  overflow: hidden;
   padding-left: .8rem;
   border-left: 1px solid var(--hf-sidebar-divider);
+  transform: translateY(-4px);
+  transition: transform .26s var(--hf-ease);
 }
-.hf-nav-item.is-open > .hf-subnav { display: flex; animation: hf-subnav-in .18s var(--hf-ease); }
+.hf-nav-item.is-open > .hf-subnav {
+  grid-template-rows: 1fr;
+  margin: .25rem 0 .5rem 1.25rem;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows .26s var(--hf-ease),
+    margin .26s var(--hf-ease),
+    opacity .22s var(--hf-ease) .04s,
+    visibility 0s;
+
+  .hf-subnav-inner { transform: none; }
+}
 
 .hf-subnav-link {
   padding: .45rem .625rem;
@@ -231,7 +260,7 @@
 @keyframes hf-subnav-in {
   from { opacity: 0; transform: translateY(-3px); }
   to { opacity: 1; transform: none; }
-}
+}  // used by collapsed-mode flyouts
 
 // Collapsed-mode flyout (hidden unless collapsed on desktop) --------------------
 .hf-flyout { display: none; }
@@ -524,5 +553,5 @@
 @keyframes hf-fade { from { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .hf-sidebar, .hf-subnav, .hf-flyout, .hf-sidebar-backdrop { transition: none !important; animation: none !important; }
+  .hf-sidebar, .hf-subnav, .hf-subnav-inner, .hf-nav-caret, .hf-flyout, .hf-sidebar-backdrop { transition: none !important; animation: none !important; }
 }
