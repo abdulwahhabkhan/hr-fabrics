@@ -5,30 +5,31 @@
 // ---------------------------------------------------------------------------
 
 // Brand
-$brand: #7c2433 !default;        // wine, matches the logo
+$brand: #0d1e45 !default;        // navy — HR Fabrics logo
+$gold: #c09748 !default;         // gold — HR Fabrics logo accent
 $theme: $brand !default;
 $primary: $brand !default;
 
 // Semantic palette (calmer, more modern tones than the template defaults)
 $teal: #0f8f7e !default;          // success / "Confirm", "Save"
 $cyan: #0e87a8 !default;          // info
-$orange: #d97706 !default;        // warning / "Reset"
+$orange: #b7832b !default;        // warning / "Reset" (gold-toned)
 $red: #dc2626 !default;           // danger
 $pink: #db2777 !default;
 $blue: #2563eb !default;
 
-// Neutrals (warm stone scale)
-$body-bg: #f4f3f1 !default;
+// Neutrals (warm cream scale, navy-tinted text)
+$body-bg: #f4f1eb !default;      // cream, from the logo paper
 $component-bg: #ffffff !default;
-$muted: #f1efec !default;
-$muted-soft: #faf9f7 !default;
-$light: #f5f5f4 !default;
-$border-color: #e7e5e4 !default;
-$input-border-color: #d6d3d1 !default;
+$muted: #efebe3 !default;
+$muted-soft: #faf8f4 !default;
+$light: #f5f2ec !default;
+$border-color: #e7e1d6 !default;
+$input-border-color: #d8d0c1 !default;
 $table-border-color: $border-color !default;
 $card-border-color: $border-color !default;
 $table-hover-bg: rgba($brand, .035) !default;
-$action-icon-color: #78716c !default;
+$action-icon-color: #6b7385 !default;
 
 // Typography
 $font-family-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !default;
@@ -44,12 +45,12 @@ $app-header-height: 56px !default;
 $app-header-height-sm: 56px !default;
 $app-top-menu-bg: #ffffff !default;
 $app-top-menu-height: 48px !default;
-$app-top-menu-link-color: #57534e !default;
-$app-top-menu-link-hover-color: #1c1917 !default;
-$app-top-menu-link-hover-bg: #f5f5f4 !default;
+$app-top-menu-link-color: #566074 !default;
+$app-top-menu-link-hover-color: #141b2d !default;
+$app-top-menu-link-hover-bg: #f3efe8 !default;
 $app-top-menu-link-font-weight: 500 !default;
 
 // Surfaces
 $modal-content-bg: #ffffff !default;
 $component-dropdown-bg: #ffffff !default;
-$component-dropdown-hover-bg: #f5f5f4 !default;
+$component-dropdown-hover-bg: #f3efe8 !default;

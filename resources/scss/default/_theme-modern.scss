@@ -12,14 +12,22 @@
   --hf-brand-50: #{mix($brand, #fff, 7%)};
   --hf-brand-100: #{mix($brand, #fff, 14%)};
 
+  --hf-navy: #{$brand};
+  --hf-navy-rgb: #{red($brand)}, #{green($brand)}, #{blue($brand)};
+  --hf-gold: #{$gold};
+  --hf-gold-rgb: #{red($gold)}, #{green($gold)}, #{blue($gold)};
+  --hf-gold-text: #{darken($gold, 22%)};
+  --hf-gold-50: #{mix($gold, #fff, 12%)};
+  --hf-hover: #f3efe8;
+
   --hf-bg: #{$body-bg};
   --hf-surface: #ffffff;
   --hf-surface-2: #{$muted-soft};
   --hf-border: #{$border-color};
   --hf-border-strong: #{$input-border-color};
-  --hf-text: #1c1917;
-  --hf-text-2: #57534e;
-  --hf-text-3: #a8a29e;
+  --hf-text: #141b2d;
+  --hf-text-2: #566074;
+  --hf-text-3: #99a0ad;
 
   --hf-radius-sm: 6px;
   --hf-radius: 8px;
@@ -37,7 +45,7 @@
   --bs-component-border-color: var(--hf-border-strong);
   --bs-component-focus-border-color: rgba(var(--hf-brand-rgb), .55);
   --bs-component-active-bg: var(--hf-brand);
-  --bs-component-dropdown-hover-bg: #f5f5f4;
+  --bs-component-dropdown-hover-bg: var(--hf-hover);
 }
 
 body {
@@ -99,7 +107,7 @@ body {
     color: var(--hf-text-2);
     transition: background .15s var(--hf-ease);
 
-    &:hover { background: #f5f5f4; color: var(--hf-text); }
+    &:hover { background: var(--hf-hover); color: var(--hf-text); }
   }
 }
 
@@ -132,7 +140,7 @@ body {
         .menu-caret { color: var(--hf-text-3); font-size: 14px !important; margin-inline-start: .25rem; }
 
         &:hover {
-          background: #f5f5f4;
+          background: var(--hf-hover);
           color: var(--hf-text);
           .menu-icon { color: var(--hf-text-2); }
         }
@@ -192,7 +200,7 @@ body {
           }
 
           &:hover {
-            background: #f5f5f4;
+            background: var(--hf-hover);
             color: var(--hf-text);
             &::before { background: var(--hf-text-3); transform: scale(1.15); }
           }
@@ -371,7 +379,7 @@ body {
   color: var(--hf-text-3);
   transition: background .12s var(--hf-ease), color .12s var(--hf-ease);
 
-  &:hover { background: #f5f5f4; color: var(--hf-brand); }
+  &:hover { background: var(--hf-hover); color: var(--hf-brand); }
   svg { font-size: 1.1rem; }
 }
 .table .actions > * + * { margin-inline-start: .125rem; }
@@ -400,7 +408,7 @@ body {
   transition: border-color .15s var(--hf-ease), box-shadow .15s var(--hf-ease);
 
   &::placeholder { color: var(--hf-text-3); }
-  &:hover:not(:focus):not(:disabled) { border-color: #a8a29e; }
+  &:hover:not(:focus):not(:disabled) { border-color: var(--hf-text-3); }
   &:focus {
     border-color: rgba(var(--hf-brand-rgb), .55);
     box-shadow: var(--hf-ring);
@@ -474,11 +482,11 @@ body {
   --bs-btn-bg: #fff;
   --bs-btn-color: var(--hf-text);
   --bs-btn-border-color: var(--hf-border-strong);
-  --bs-btn-hover-bg: #fafaf9;
+  --bs-btn-hover-bg: var(--hf-surface-2);
   --bs-btn-hover-color: var(--hf-text);
-  --bs-btn-hover-border-color: #a8a29e;
-  --bs-btn-active-bg: #f5f5f4;
-  --bs-btn-active-border-color: #a8a29e;
+  --bs-btn-hover-border-color: var(--hf-text-3);
+  --bs-btn-active-bg: var(--hf-hover);
+  --bs-btn-active-border-color: var(--hf-text-3);
   box-shadow: var(--hf-shadow-xs);
 }
 
@@ -524,7 +532,7 @@ body {
 // ---------------------------------------------------------------------------
 // Backdrop: flat tint only — an animated backdrop-filter blur repaints the
 // whole page every frame and flickers on heavy screens.
-.modal-backdrop { --bs-backdrop-bg: #1c1917; --bs-backdrop-opacity: .45; }
+.modal-backdrop { --bs-backdrop-bg: #{$brand}; --bs-backdrop-opacity: .45; }
 
 // No layout jump when a modal locks scrolling: always reserve the scrollbar
 // gutter, and stop Bootstrap adding its compensating padding on top of it.
@@ -563,7 +571,7 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
   --bs-dropdown-bg: var(--hf-surface);
   --bs-dropdown-border-color: var(--hf-border);
   --bs-dropdown-border-radius: var(--hf-radius-lg);
-  --bs-dropdown-link-hover-bg: #f5f5f4;
+  --bs-dropdown-link-hover-bg: var(--hf-hover);
   --bs-dropdown-link-active-bg: var(--hf-brand-50);
   --bs-dropdown-link-active-color: var(--hf-brand);
   --bs-dropdown-item-border-radius: var(--hf-radius-sm);
@@ -575,7 +583,7 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
   .dropdown-divider { margin: .375rem -.375rem; border-color: var(--hf-border); }
 }
 
-.tooltip { --bs-tooltip-bg: #1c1917; --bs-tooltip-border-radius: var(--hf-radius-sm); --bs-tooltip-font-size: .75rem; }
+.tooltip { --bs-tooltip-bg: var(--hf-navy); --bs-tooltip-border-radius: var(--hf-radius-sm); --bs-tooltip-font-size: .75rem; }
 
 .pagination {
   gap: .25rem;
@@ -583,7 +591,7 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
   --bs-pagination-color: var(--hf-text-2);
   --bs-pagination-bg: #fff;
   --bs-pagination-border-color: var(--hf-border);
-  --bs-pagination-hover-bg: #f5f5f4;
+  --bs-pagination-hover-bg: var(--hf-hover);
   --bs-pagination-hover-color: var(--hf-text);
   --bs-pagination-hover-border-color: var(--hf-border-strong);
   --bs-pagination-active-bg: var(--hf-brand);
@@ -638,7 +646,7 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
         width: 4px;
         height: 1.4em;
         border-radius: 4px;
-        background: var(--hf-brand);
+        background: var(--hf-gold);
         margin-inline-end: -.25rem;
       }
 
@@ -648,8 +656,8 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
         margin-inline-start: auto;
         padding: .3rem .75rem;
         border-radius: 999px;
-        background: var(--hf-brand-50);
-        color: var(--hf-brand);
+        background: var(--hf-gold-50);
+        color: var(--hf-gold-text);
         font-size: .75rem;
         font-weight: 600;
         letter-spacing: .04em;
@@ -784,7 +792,7 @@ body.modal-open .app-top-menu { padding-right: 0 !important; }
         color: #fff;
         background: linear-gradient(135deg, var(--hf-brand) 0%, var(--hf-brand-600) 100%);
 
-        small { color: rgba(255, 255, 255, .7); top: 1rem; inset-inline-start: 1.5rem; }
+        small { color: var(--hf-gold); top: 1rem; inset-inline-start: 1.5rem; }
       }
     }
 
