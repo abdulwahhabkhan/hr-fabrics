@@ -70,7 +70,9 @@ const ProductIndex = () => {
                                         <th className="w-1">Size</th>
                                         <th className="w-1">Price</th>
                                         <th className="w-1">Last Modified</th>
-                                        <th className="w-1">Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -120,23 +122,29 @@ const ProductIndex = () => {
                                                             date={updated_at}
                                                         />
                                                     </td>
-                                                    <td className={'actions'}>
-                                                        {canUpdate && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'catalog.products.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {canDelete && (
-                                                            <Delete
-                                                                action={
-                                                                    'catalog.products.destroy'
-                                                                }
-                                                                id={id}
-                                                            />
-                                                        )}
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {canUpdate && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
+                                                                        href={route(
+                                                                            'catalog.products.edit',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {canDelete && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
+                                                                    <Delete
+                                                                        action={
+                                                                            'catalog.products.destroy'
+                                                                        }
+                                                                        id={id}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

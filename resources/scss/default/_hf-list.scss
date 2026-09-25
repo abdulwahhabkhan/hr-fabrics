@@ -1,0 +1,185 @@
+// ===========================================================================
+// Shared list primitives (tables, row actions, pills) — used by Customers,
+// Accounts and any future list page.
+// ===========================================================================
+
+.min-w-0 { min-width: 0; }
+.hf-muted-value { color: var(--hf-text-3); }
+.hf-link { color: inherit; text-decoration: none; &:hover { color: var(--hf-navy); text-decoration: underline; } }
+.hf-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ---------------------------------------------------------------------------
+// Status pill with dot
+// ---------------------------------------------------------------------------
+.hf-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  &.is-active { background: #e7f4ee; color: #1d7a50; }
+  &.is-suspended { background: #fcebe8; color: #b3392a; }
+}
+
+// ---------------------------------------------------------------------------
+// Row actions
+// ---------------------------------------------------------------------------
+.hf-row-actions,
+.hf-cust-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.hf-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--hf-text-3);
+  transition: background .12s var(--hf-ease), color .12s var(--hf-ease);
+
+  > a { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: inherit; }
+  svg { width: 18px; height: 18px; }
+
+  &:hover { background: var(--hf-hover); color: var(--hf-navy); }
+
+  // components from Actions.jsx render their own <button class="btn btn-link">; neutralise it
+  > .btn, > .btn-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none !important;
+    color: inherit;
+  }
+
+  // bordered "real button" variant
+  &--boxed {
+    width: 30px;
+    height: 28px;
+    border: 1px solid var(--hf-border-strong);
+    border-radius: var(--hf-radius-sm);
+    background: var(--hf-surface);
+    color: var(--hf-text-2);
+    box-shadow: var(--hf-shadow-xs);
+    cursor: pointer;
+    transition: background .12s var(--hf-ease), color .12s var(--hf-ease), border-color .12s var(--hf-ease), transform .08s var(--hf-ease);
+
+    svg { width: 17px; height: 17px; }
+    &:hover { background: var(--hf-hover); border-color: #bfb6a7; color: var(--hf-navy); }
+    &:active { transform: translateY(1px); box-shadow: none; }
+  }
+
+  // destructive (delete)
+  &.is-danger { color: #c9503f; }
+  &.is-danger:hover { background: #fcebe8; border-color: #e3a79c; color: #9b2c1f; }
+  &.is-danger .text-danger-500 { color: inherit !important; }
+
+  // status toggle: colour shows the current state
+  &.is-active { color: #1d7a50; }
+  &.is-active:hover { background: #e7f4ee; border-color: #a9d8c2; color: #16613f; }
+  &.is-suspended { color: #b3392a; border-color: #efc4bc; background: #fdf4f2; }
+  &.is-suspended:hover { background: #fcebe8; border-color: #e3a79c; color: #9b2c1f; }
+}
+
+// "More actions" toggle (RowActionsMenu) matches the boxed row buttons
+.hf-row-actions .row-actions-toggle {
+  width: 30px;
+  height: 28px;
+  border: 1px solid var(--hf-border-strong);
+  background: var(--hf-surface);
+  color: var(--hf-text-2);
+  box-shadow: var(--hf-shadow-xs);
+  transition: background .12s var(--hf-ease), color .12s var(--hf-ease), border-color .12s var(--hf-ease), transform .08s var(--hf-ease);
+
+  svg { width: 17px; height: 17px; }
+  &:hover, &.is-open { background: var(--hf-hover); border-color: #bfb6a7; color: var(--hf-navy); }
+  &:active { transform: translateY(1px); box-shadow: none; }
+}
+
+
+// ---------------------------------------------------------------------------
+// Generic list-table cells
+// ---------------------------------------------------------------------------
+.hf-list-table {
+  > :not(caption) > * > * { padding-inline: .7rem; }
+  > tbody > tr > td:first-child, > thead > tr > th:first-child { padding-left: .9rem; }
+}
+.hf-cell-title { font-size: .8125rem; font-weight: 600; line-height: 1.3; color: var(--hf-navy); }
+.hf-cell-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: .5rem;
+  margin-top: .15rem;
+  font-size: .75rem;
+  color: var(--hf-text-3);
+}
+.hf-dot-sep::before { content: '·'; margin-right: .5rem; color: var(--hf-border-strong); }
+.hf-mono { font-variant-numeric: tabular-nums; }
+
+// Category pill (e.g. account type) with stable tones
+.hf-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-transform: capitalize;
+
+  svg { width: 13px; height: 13px; }
+
+  &.tone-navy  { background: #e6eaf3; color: #1f3470; }
+  &.tone-green { background: #e7f4ee; color: #1d7a50; }
+  &.tone-gold  { background: #f7efe0; color: #8d6a2a; }
+  &.tone-plum  { background: #f1e7ef; color: #6d2f5f; }
+  &.tone-teal  { background: #e1f1ee; color: #0f6b5f; }
+  &.tone-red   { background: #fcebe8; color: #a33426; }
+  &.tone-olive { background: #eef0e2; color: #5b6326; }
+  &.tone-slate { background: #e9ecef; color: #3f4a5a; }
+}
+
+.hf-chip {
+  display: inline-block;
+  padding: .05rem .45rem;
+  border-radius: 6px;
+  background: var(--hf-gold-50);
+  color: var(--hf-gold-text);
+  font-size: .7rem;
+  font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+  // list filter bars (input-group of search + selects) stack on phones
+  .default-search .input-group {
+    flex-wrap: wrap;
+    gap: .5rem;
+    box-shadow: none;
+    > .form-control, > .form-select { flex: 1 1 100%; width: 100%; max-width: none; border-radius: var(--hf-radius) !important; margin-left: 0 !important; }
+    > .form-select { flex-basis: calc(50% - .25rem); }
+  }
+  .page-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+}

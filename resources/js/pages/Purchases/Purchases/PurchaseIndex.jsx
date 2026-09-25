@@ -66,7 +66,9 @@ const PurchaseIndex = () => {
                                         </th>
                                         <th className="w-1">Status</th>
                                         <th className="w-1">Total</th>
-                                        <th className="w-1">Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -129,109 +131,113 @@ const PurchaseIndex = () => {
                                                             }
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'w-1 actions'
-                                                        }
-                                                    >
-                                                        {can.view && (
-                                                            <InertiaView
-                                                                href={route(
-                                                                    'purchases.pos.show',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can.edit && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'purchases.pos.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {(can.delete ||
-                                                            can.inventory ||
-                                                            can.ledger ||
-                                                            can.unlock) && (
-                                                            <RowActionsMenu>
-                                                                {can.inventory && (
-                                                                    <InertiaLink
-                                                                        className={
-                                                                            'dropdown-item border-top'
-                                                                        }
-                                                                        target={
-                                                                            '_blank'
-                                                                        }
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {can.view && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaView
                                                                         href={route(
-                                                                            'purchases.pos.inventory',
+                                                                            'purchases.pos.show',
                                                                             id,
                                                                         )}
-                                                                    >
-                                                                        <Icon
-                                                                            icon={
-                                                                                'solar:clipboard-list-bold-duotone'
-                                                                            }
-                                                                        />{' '}
-                                                                        Inventory
-                                                                    </InertiaLink>
-                                                                )}
-                                                                {can.ledger && (
-                                                                    <InertiaLink
-                                                                        className={
-                                                                            'dropdown-item border-top'
-                                                                        }
-                                                                        target={
-                                                                            '_blank'
-                                                                        }
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can.edit && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
                                                                         href={route(
-                                                                            'purchases.pos.ledger',
+                                                                            'purchases.pos.edit',
                                                                             id,
                                                                         )}
-                                                                    >
-                                                                        <Icon
-                                                                            icon={
-                                                                                'duo-icons:book-3'
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {(can.delete ||
+                                                                can.inventory ||
+                                                                can.ledger ||
+                                                                can.unlock) && (
+                                                                <RowActionsMenu>
+                                                                    {can.inventory && (
+                                                                        <InertiaLink
+                                                                            className={
+                                                                                'dropdown-item border-top'
                                                                             }
-                                                                        />{' '}
-                                                                        View
-                                                                        Ledger
-                                                                    </InertiaLink>
-                                                                )}
-                                                                {can.unlock && (
-                                                                    <UnLockDropdownItem
-                                                                        action={
-                                                                            'actions.purchase.open'
-                                                                        }
-                                                                        id={id}
-                                                                    >
-                                                                        Unlock
-                                                                        Record
-                                                                    </UnLockDropdownItem>
-                                                                )}
-                                                                {can.delete && (
-                                                                    <div
-                                                                        className={
-                                                                            'dropdown-item border-top p-0'
-                                                                        }
-                                                                        onClick={(
-                                                                            event,
-                                                                        ) =>
-                                                                            event.stopPropagation()
-                                                                        }
-                                                                    >
-                                                                        <Delete
+                                                                            target={
+                                                                                '_blank'
+                                                                            }
+                                                                            href={route(
+                                                                                'purchases.pos.inventory',
+                                                                                id,
+                                                                            )}
+                                                                        >
+                                                                            <Icon
+                                                                                icon={
+                                                                                    'solar:clipboard-list-bold-duotone'
+                                                                                }
+                                                                            />{' '}
+                                                                            Inventory
+                                                                        </InertiaLink>
+                                                                    )}
+                                                                    {can.ledger && (
+                                                                        <InertiaLink
+                                                                            className={
+                                                                                'dropdown-item border-top'
+                                                                            }
+                                                                            target={
+                                                                                '_blank'
+                                                                            }
+                                                                            href={route(
+                                                                                'purchases.pos.ledger',
+                                                                                id,
+                                                                            )}
+                                                                        >
+                                                                            <Icon
+                                                                                icon={
+                                                                                    'duo-icons:book-3'
+                                                                                }
+                                                                            />{' '}
+                                                                            View
+                                                                            Ledger
+                                                                        </InertiaLink>
+                                                                    )}
+                                                                    {can.unlock && (
+                                                                        <UnLockDropdownItem
                                                                             action={
-                                                                                'purchases.pos.destroy'
+                                                                                'actions.purchase.open'
                                                                             }
                                                                             id={
                                                                                 id
                                                                             }
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            </RowActionsMenu>
-                                                        )}
+                                                                        >
+                                                                            Unlock
+                                                                            Record
+                                                                        </UnLockDropdownItem>
+                                                                    )}
+                                                                    {can.delete && (
+                                                                        <div
+                                                                            className={
+                                                                                'dropdown-item border-top p-0'
+                                                                            }
+                                                                            onClick={(
+                                                                                event,
+                                                                            ) =>
+                                                                                event.stopPropagation()
+                                                                            }
+                                                                        >
+                                                                            <Delete
+                                                                                action={
+                                                                                    'purchases.pos.destroy'
+                                                                                }
+                                                                                id={
+                                                                                    id
+                                                                                }
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </RowActionsMenu>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

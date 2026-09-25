@@ -55,7 +55,9 @@ const Suppliers = () => {
                                         <th className={'w-1'}>Name</th>
                                         <th>Address</th>
                                         <th className={'w-1'}>Last Modified</th>
-                                        <th className={'w-1'}>Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -100,16 +102,18 @@ const Suppliers = () => {
                                                             date={updated_at}
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'actions w-1'
-                                                        }
-                                                    >
-                                                        <Edit
-                                                            onClick={() =>
-                                                                handleEdit(id)
-                                                            }
-                                                        />
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                <Edit
+                                                                    onClick={() =>
+                                                                        handleEdit(
+                                                                            id,
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

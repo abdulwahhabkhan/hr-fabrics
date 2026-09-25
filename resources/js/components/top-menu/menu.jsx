@@ -40,7 +40,7 @@ const Menu = [
         children: [
             {
                 path: route('sales.customers.index'),
-                title: 'Add Customers',
+                title: 'Manage Customers',
                 name: 'sales.customers.index',
             },
             {

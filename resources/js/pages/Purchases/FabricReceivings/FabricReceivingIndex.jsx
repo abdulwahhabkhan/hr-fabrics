@@ -64,7 +64,7 @@ const FabricReceivingIndex = () => {
                                         </th>
                                         <th className={'num w-1'}>Qty</th>
                                         <th className={'num w-1'}>Meters</th>
-                                        <th className={'actions w-1'}>
+                                        <th className="w-1 text-end">
                                             Actions
                                         </th>
                                     </tr>
@@ -151,54 +151,62 @@ const FabricReceivingIndex = () => {
                                                             }
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'actions w-1'
-                                                        }
-                                                    >
-                                                        {can.view && (
-                                                            <InertiaView
-                                                                href={route(
-                                                                    'purchases.fabric-receivings.show',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can.edit && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'purchases.fabric-receivings.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can.delete && (
-                                                            <Delete
-                                                                action={
-                                                                    'purchases.fabric-receivings.destroy'
-                                                                }
-                                                                id={id}
-                                                            />
-                                                        )}
-                                                        {can.inventory && (
-                                                            <InertiaInventory
-                                                                href={route(
-                                                                    'purchases.fabric-receivings.inventory',
-                                                                    id,
-                                                                )}
-                                                                target={
-                                                                    '_blank'
-                                                                }
-                                                            />
-                                                        )}
-                                                        {can.unlock && (
-                                                            <UnLock
-                                                                action={
-                                                                    'purchases.fabric-receivings.unlock'
-                                                                }
-                                                                id={id}
-                                                            />
-                                                        )}
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {can.view && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaView
+                                                                        href={route(
+                                                                            'purchases.fabric-receivings.show',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can.edit && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
+                                                                        href={route(
+                                                                            'purchases.fabric-receivings.edit',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can.delete && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
+                                                                    <Delete
+                                                                        action={
+                                                                            'purchases.fabric-receivings.destroy'
+                                                                        }
+                                                                        id={id}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can.inventory && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaInventory
+                                                                        href={route(
+                                                                            'purchases.fabric-receivings.inventory',
+                                                                            id,
+                                                                        )}
+                                                                        target={
+                                                                            '_blank'
+                                                                        }
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can.unlock && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <UnLock
+                                                                        action={
+                                                                            'purchases.fabric-receivings.unlock'
+                                                                        }
+                                                                        id={id}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

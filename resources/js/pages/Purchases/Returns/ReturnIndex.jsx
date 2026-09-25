@@ -45,7 +45,9 @@ const ReturnIndex = () => {
                                         <th className={'w-1'}>Date</th>
                                         <th className={'w-1'}>Status</th>
                                         <th className={'w-1'}>Total</th>
-                                        <th className={'w-1'}>Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -98,60 +100,64 @@ const ReturnIndex = () => {
                                                             }
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'w-1 actions'
-                                                        }
-                                                    >
-                                                        {can.view && (
-                                                            <InertiaView
-                                                                href={route(
-                                                                    'purchases.por.show',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can.edit && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'purchases.por.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {(can.inventory ||
-                                                            can.ledger ||
-                                                            can.unlock) && (
-                                                            <RowActionsMenu>
-                                                                {can.inventory && (
-                                                                    <InertiaInventoryAction
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {can.view && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaView
                                                                         href={route(
-                                                                            'purchases.por.inventory',
+                                                                            'purchases.por.show',
                                                                             id,
                                                                         )}
-                                                                        target="_blank"
                                                                     />
-                                                                )}
+                                                                </span>
+                                                            )}
+                                                            {can.edit && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
+                                                                        href={route(
+                                                                            'purchases.por.edit',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {(can.inventory ||
+                                                                can.ledger ||
+                                                                can.unlock) && (
+                                                                <RowActionsMenu>
+                                                                    {can.inventory && (
+                                                                        <InertiaInventoryAction
+                                                                            href={route(
+                                                                                'purchases.por.inventory',
+                                                                                id,
+                                                                            )}
+                                                                            target="_blank"
+                                                                        />
+                                                                    )}
 
-                                                                {can.ledger && (
-                                                                    <InertiaLedgerAction
-                                                                        href={route(
-                                                                            'purchases.por.ledger',
-                                                                            id,
-                                                                        )}
-                                                                        target="_blank"
-                                                                    />
-                                                                )}
-                                                                {can.unlock && (
-                                                                    <UnLockDropdownItem
-                                                                        action={
-                                                                            'purchases.por.unlock'
-                                                                        }
-                                                                        id={id}
-                                                                    />
-                                                                )}
-                                                            </RowActionsMenu>
-                                                        )}
+                                                                    {can.ledger && (
+                                                                        <InertiaLedgerAction
+                                                                            href={route(
+                                                                                'purchases.por.ledger',
+                                                                                id,
+                                                                            )}
+                                                                            target="_blank"
+                                                                        />
+                                                                    )}
+                                                                    {can.unlock && (
+                                                                        <UnLockDropdownItem
+                                                                            action={
+                                                                                'purchases.por.unlock'
+                                                                            }
+                                                                            id={
+                                                                                id
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                </RowActionsMenu>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

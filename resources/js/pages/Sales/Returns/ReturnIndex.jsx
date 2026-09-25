@@ -60,7 +60,9 @@ const ReturnIndex = () => {
                                         <th className={'w-1'}>Mode</th>
                                         <th className={'w-1'}>Status</th>
                                         <th className={'w-1'}>Total</th>
-                                        <th className={'w-1'}>Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -117,59 +119,67 @@ const ReturnIndex = () => {
                                                             }
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'w-1 actions'
-                                                        }
-                                                    >
-                                                        {canView && (
-                                                            <InertiaView
-                                                                href={route(
-                                                                    'sales.returns.show',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can_edit && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'sales.returns.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {can_ledger && (
-                                                            <InertiaLedger
-                                                                target={
-                                                                    '_blank'
-                                                                }
-                                                                href={route(
-                                                                    'sales.returns.ledger',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {canView && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaView
+                                                                        href={route(
+                                                                            'sales.returns.show',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can_edit && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
+                                                                        href={route(
+                                                                            'sales.returns.edit',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {can_ledger && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaLedger
+                                                                        target={
+                                                                            '_blank'
+                                                                        }
+                                                                        href={route(
+                                                                            'sales.returns.ledger',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
 
-                                                        {can_inventory && (
-                                                            <InertiaInventory
-                                                                target={
-                                                                    '_blank'
-                                                                }
-                                                                href={route(
-                                                                    'sales.returns.inventory',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
+                                                            {can_inventory && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaInventory
+                                                                        target={
+                                                                            '_blank'
+                                                                        }
+                                                                        href={route(
+                                                                            'sales.returns.inventory',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
 
-                                                        {can_unlock && (
-                                                            <UnLock
-                                                                action={
-                                                                    'actions.returns.open'
-                                                                }
-                                                                id={id}
-                                                            />
-                                                        )}
+                                                            {can_unlock && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <UnLock
+                                                                        action={
+                                                                            'actions.returns.open'
+                                                                        }
+                                                                        id={id}
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

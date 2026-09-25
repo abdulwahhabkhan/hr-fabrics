@@ -64,7 +64,9 @@ const Finish = () => {
                                         <th className={'w-1'}>Finish Name</th>
                                         <th>Description</th>
                                         <th className={'w-1'}>Last Modified</th>
-                                        <th className={'w-1'}>Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -98,25 +100,25 @@ const Finish = () => {
                                                             date={updated_at}
                                                         />
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'actions w-1'
-                                                        }
-                                                    >
-                                                        {canUpdate && (
-                                                            <Edit
-                                                                onClick={() =>
-                                                                    handleEdit(
-                                                                        id,
-                                                                    )
-                                                                }
-                                                            />
-                                                        )}
-                                                        {/*{
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {canUpdate && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <Edit
+                                                                        onClick={() =>
+                                                                            handleEdit(
+                                                                                id,
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </span>
+                                                            )}
+                                                            {/*{
                                                     canDelete && (
                                                         <Delete action={'catalog.finish.destroy'} id={id}/>
                                                     )
                                                 }*/}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

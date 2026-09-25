@@ -75,7 +75,9 @@ const OrderIndex = () => {
                                         <th className="w-1">Payment</th>
                                         <th className="w-1">Type</th>
                                         <th className="w-1">Status</th>
-                                        <th className="w-1">Actions</th>
+                                        <th className="w-1 text-end">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -165,117 +167,121 @@ const OrderIndex = () => {
                                                     >
                                                         {getOrderStatus(status)}
                                                     </td>
-                                                    <td
-                                                        className={
-                                                            'actions w-1'
-                                                        }
-                                                    >
-                                                        {can_view && (
-                                                            <InertiaView
-                                                                href={route(
-                                                                    'sales.orders.show',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
+                                                    <td className="w-1 text-end">
+                                                        <div className="hf-row-actions">
+                                                            {can_view && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaView
+                                                                        href={route(
+                                                                            'sales.orders.show',
+                                                                            id,
+                                                                        )}
+                                                                    />
+                                                                </span>
+                                                            )}
 
-                                                        {can_update && (
-                                                            <InertiaEdit
-                                                                href={route(
-                                                                    'sales.orders.edit',
-                                                                    id,
-                                                                )}
-                                                            />
-                                                        )}
-                                                        {(can_gate_pass ||
-                                                            can_unlock ||
-                                                            can_bilti ||
-                                                            can_ledger ||
-                                                            can_inventory) && (
-                                                            <RowActionsMenu>
-                                                                {can_gate_pass && (
-                                                                    <InertiaLink
-                                                                        className={
-                                                                            'dropdown-item border-top'
-                                                                        }
+                                                            {can_update && (
+                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
+                                                                    <InertiaEdit
                                                                         href={route(
-                                                                            'sales.orders.gate-pass',
-                                                                            id,
-                                                                        )}
-                                                                    >
-                                                                        <Icon
-                                                                            icon={
-                                                                                'solar:login-3-bold-duotone'
-                                                                            }
-                                                                        />{' '}
-                                                                        Gate
-                                                                        Pass
-                                                                    </InertiaLink>
-                                                                )}
-                                                                {can_bilti && (
-                                                                    <InertiaLink
-                                                                        className={
-                                                                            'dropdown-item border-top' +
-                                                                            (bilti
-                                                                                ? ' text-success'
-                                                                                : '')
-                                                                        }
-                                                                        href={route(
-                                                                            'sales.order.bilti',
-                                                                            id,
-                                                                        )}
-                                                                    >
-                                                                        <Icon
-                                                                            icon={
-                                                                                'solar:delivery-bold-duotone'
-                                                                            }
-                                                                        />{' '}
-                                                                        Upload
-                                                                        Bilti
-                                                                    </InertiaLink>
-                                                                )}
-                                                                {can_ledger && (
-                                                                    <InertiaLedgerAction
-                                                                        target={
-                                                                            '_blank'
-                                                                        }
-                                                                        href={route(
-                                                                            'sales.orders.ledger',
+                                                                            'sales.orders.edit',
                                                                             id,
                                                                         )}
                                                                     />
-                                                                )}
-                                                                {can_inventory && (
-                                                                    <InertiaInventoryAction
-                                                                        target={
-                                                                            '_blank'
-                                                                        }
-                                                                        href={route(
-                                                                            'sales.orders.inventory',
-                                                                            id,
-                                                                        )}
-                                                                    />
-                                                                )}
-                                                                {can_unlock && (
-                                                                    <UnLockDropdownItem
-                                                                        action={
-                                                                            'actions.order.open'
-                                                                        }
-                                                                        id={id}
-                                                                    >
-                                                                        <span>
-                                                                            Unlock
-                                                                            Record
-                                                                        </span>
-                                                                    </UnLockDropdownItem>
-                                                                )}
-                                                            </RowActionsMenu>
-                                                        )}
-                                                        {/*{
+                                                                </span>
+                                                            )}
+                                                            {(can_gate_pass ||
+                                                                can_unlock ||
+                                                                can_bilti ||
+                                                                can_ledger ||
+                                                                can_inventory) && (
+                                                                <RowActionsMenu>
+                                                                    {can_gate_pass && (
+                                                                        <InertiaLink
+                                                                            className={
+                                                                                'dropdown-item border-top'
+                                                                            }
+                                                                            href={route(
+                                                                                'sales.orders.gate-pass',
+                                                                                id,
+                                                                            )}
+                                                                        >
+                                                                            <Icon
+                                                                                icon={
+                                                                                    'solar:login-3-bold-duotone'
+                                                                                }
+                                                                            />{' '}
+                                                                            Gate
+                                                                            Pass
+                                                                        </InertiaLink>
+                                                                    )}
+                                                                    {can_bilti && (
+                                                                        <InertiaLink
+                                                                            className={
+                                                                                'dropdown-item border-top' +
+                                                                                (bilti
+                                                                                    ? ' text-success'
+                                                                                    : '')
+                                                                            }
+                                                                            href={route(
+                                                                                'sales.order.bilti',
+                                                                                id,
+                                                                            )}
+                                                                        >
+                                                                            <Icon
+                                                                                icon={
+                                                                                    'solar:delivery-bold-duotone'
+                                                                                }
+                                                                            />{' '}
+                                                                            Upload
+                                                                            Bilti
+                                                                        </InertiaLink>
+                                                                    )}
+                                                                    {can_ledger && (
+                                                                        <InertiaLedgerAction
+                                                                            target={
+                                                                                '_blank'
+                                                                            }
+                                                                            href={route(
+                                                                                'sales.orders.ledger',
+                                                                                id,
+                                                                            )}
+                                                                        />
+                                                                    )}
+                                                                    {can_inventory && (
+                                                                        <InertiaInventoryAction
+                                                                            target={
+                                                                                '_blank'
+                                                                            }
+                                                                            href={route(
+                                                                                'sales.orders.inventory',
+                                                                                id,
+                                                                            )}
+                                                                        />
+                                                                    )}
+                                                                    {can_unlock && (
+                                                                        <UnLockDropdownItem
+                                                                            action={
+                                                                                'actions.order.open'
+                                                                            }
+                                                                            id={
+                                                                                id
+                                                                            }
+                                                                        >
+                                                                            <span>
+                                                                                Unlock
+                                                                                Record
+                                                                            </span>
+                                                                        </UnLockDropdownItem>
+                                                                    )}
+                                                                </RowActionsMenu>
+                                                            )}
+                                                            {/*{
                                                     canDelete && (
                                                         <Delete action={'sales.orders.destroy'} id={id}/>
                                                     )
                                                 }*/}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

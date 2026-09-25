@@ -10,7 +10,7 @@ export default function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileCl
         <>
             <aside id="sidebar" className={cx('hf-sidebar', { 'is-mobile-open': mobileOpen })}>
                 <div className="hf-sidebar-head">
-                    <SidebarBrand />
+                    <SidebarBrand tone="light" />
                     <button
                         type="button"
                         className="hf-sidebar-close"

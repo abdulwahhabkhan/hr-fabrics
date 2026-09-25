@@ -8,8 +8,8 @@ import monogramDark from '@/img/brand/hr-fabrics-monogram-reverse.svg';
 
 /**
  * HR Fabrics brand mark (vector SVGs in img/brand, no web-font dependency).
- * tone="dark"  → for navy backgrounds (sidebar)
- * tone="light" → for light backgrounds (mobile bar)
+ * tone="light" → original navy + gold, for light backgrounds (sidebar, mobile bar)
+ * tone="dark"  → white + gold, for navy backgrounds
  * The full lockup swaps to the H|R monogram when the sidebar is collapsed (CSS).
  */
 export default function SidebarBrand({ tone = 'dark' }) {
