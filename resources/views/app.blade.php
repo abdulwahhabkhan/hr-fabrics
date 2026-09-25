@@ -26,7 +26,6 @@
     <!-- Styles -->
     @vite('resources/scss/default/styles.scss')
 
-    @routes
     @viteReactRefresh
     @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.jsx"])
     <x-inertia::head>

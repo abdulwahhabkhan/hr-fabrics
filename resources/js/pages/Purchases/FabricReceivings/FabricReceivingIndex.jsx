@@ -16,6 +16,7 @@ import { Date } from '@/components/CustomDate';
 import PurchasesFabricReceivingFilter from '@/components/filters/PurchasesFabricReceivingFilter';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import fabricReceivings from '@/routes/purchases/fabric-receivings';
 
 const FabricReceivingIndex = () => {
     const { rows, canAdd } = usePage().props;
@@ -34,7 +35,7 @@ const FabricReceivingIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('purchases.fabric-receivings.create')}
+                            href={fabricReceivings.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Add Fabric
@@ -156,29 +157,21 @@ const FabricReceivingIndex = () => {
                                                             {can.view && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={route(
-                                                                            'purchases.fabric-receivings.show',
-                                                                            id,
-                                                                        )}
+                                                                        href={fabricReceivings.show(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can.edit && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'purchases.fabric-receivings.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={fabricReceivings.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can.delete && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
                                                                     <Delete
-                                                                        action={
-                                                                            'purchases.fabric-receivings.destroy'
-                                                                        }
+                                                                        action={fabricReceivings.destroy}
                                                                         id={id}
                                                                     />
                                                                 </span>
@@ -186,10 +179,7 @@ const FabricReceivingIndex = () => {
                                                             {can.inventory && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaInventory
-                                                                        href={route(
-                                                                            'purchases.fabric-receivings.inventory',
-                                                                            id,
-                                                                        )}
+                                                                        href={fabricReceivings.inventory(id)}
                                                                         target={
                                                                             '_blank'
                                                                         }
@@ -199,9 +189,7 @@ const FabricReceivingIndex = () => {
                                                             {can.unlock && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <UnLock
-                                                                        action={
-                                                                            'purchases.fabric-receivings.unlock'
-                                                                        }
+                                                                        action={fabricReceivings.unlock}
                                                                         id={id}
                                                                     />
                                                                 </span>

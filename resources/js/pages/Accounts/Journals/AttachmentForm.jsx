@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { Inertia } from '@/util/Inertia';
 import axios from 'axios';
 import { AttachFiles } from '@/components/File.jsx';
+import journals from '@/routes/accounts/journals';
+import attachmentRoutes from '@/routes/accounts/journals/attachment';
 
 export default ({ id, show, callback }) => {
     const title = 'Attachment';
@@ -26,7 +28,7 @@ export default ({ id, show, callback }) => {
         if (id) {
             setLoading(true);
             axios
-                .get(route('accounts.journals.attachment', { journal: id }))
+                .get(journals.attachment(id).url)
                 .then((res) => {
                     const {
                         data: { journal, files, directory, morph_class },
@@ -53,7 +55,7 @@ export default ({ id, show, callback }) => {
         const post_data = { ...data, file: file };
         setProcessing(true);
         Inertia.post(
-            route('accounts.journals.attachment.store', { journal: id }),
+            attachmentRoutes.store(id),
             post_data,
             options,
         );

@@ -1,4 +1,5 @@
 import inertia from '@inertiajs/vite';
+import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
@@ -15,6 +16,7 @@ export default defineConfig({
                 })
             ]
         }),
+        wayfinder(),
         inertia(),
         react()
     ]),
@@ -31,6 +33,7 @@ export default defineConfig({
             "bootstrap/ssr/**",
             "tailwind.config.js",
             "resources/js/routes/**",
+            "resources/js/actions/**",
             "resources/js/wayfinder/**"
         ],
         options: {

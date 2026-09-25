@@ -20,6 +20,8 @@ import now from 'lodash';
 import axios from 'axios';
 import { NumberFormat } from '@/util/NumberFormat';
 import Back from '@/components/button/back';
+import journals, { singleStore } from '@/routes/accounts/journals';
+import accountsModule from '@/routes/accounts/accounts';
 
 const JournalSingleForm = () => {
     const { errors: serverErrors, accounts, directory } = usePage().props;
@@ -46,7 +48,7 @@ const JournalSingleForm = () => {
         const post_data = { ...data, file: file };
         setProcessing(true);
         Inertia.post(
-            route('accounts.journals.single-store'),
+            singleStore(),
             post_data,
             options,
         );
@@ -62,7 +64,7 @@ const JournalSingleForm = () => {
     }, [serverErrors, selectedAccount]);
 
     const getBalance = (id) => {
-        axios.get(route('accounts.accounts.balance', id)).then((res) => {
+        axios.get(accountsModule.balance(id).url).then((res) => {
             setBalance(res.data.balance);
         });
     };
@@ -75,7 +77,7 @@ const JournalSingleForm = () => {
                     <>
                         <Back
                             label="Journals List"
-                            href={route('accounts.journals.index')}
+                            href={journals.index()}
                         />
                     </>
                 }
@@ -228,7 +230,7 @@ const JournalSingleForm = () => {
                     <PanelFooter className={'text-center'}>
                         <Back
                             label="Journals List"
-                            href={route('accounts.journals.index')}
+                            href={journals.index()}
                         />
 
                         <LoadingButton

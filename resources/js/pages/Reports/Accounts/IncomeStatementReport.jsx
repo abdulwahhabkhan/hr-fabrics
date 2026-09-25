@@ -7,6 +7,7 @@ import { Icon } from '@iconify/react';
 import { Date } from '@/components/CustomDate';
 import Print from '@/components/button/Print.jsx';
 import IncomeStatementFilter from '@/pages/Reports/Accounts/IncomeStatementFilter.jsx';
+import accountsNamespace from '@/routes/accounts';
 
 const IncomeStatementReport = () => {
     const {
@@ -66,7 +67,7 @@ const IncomeStatementReport = () => {
                                 <a
                                     target="_blank"
                                     className={'btn btn-xs btn-gray'}
-                                    href={route('accounts.legacy.profit-loss')}
+                                    href={accountsNamespace.legacy.profitLoss().url}
                                 >
                                     Legacy Income Statement
                                 </a>
@@ -152,15 +153,14 @@ const IncomeStatementReport = () => {
                                             <td colSpan={3}>
                                                 Cost of Goods Sold: &nbsp;
                                                 <a
-                                                    href={route(
-                                                        'accounts.income-statement.detail',
-                                                        {
+                                                    href={accountsNamespace.incomeStatement.detail({
+                                                        query: {
                                                             start_date:
                                                                 filters.start_date,
                                                             end_date:
                                                                 filters.end_date,
                                                         },
-                                                    )}
+                                                    }).url}
                                                     target="_blank"
                                                     className="btn btn-xs ml-2 hidden-print"
                                                 >

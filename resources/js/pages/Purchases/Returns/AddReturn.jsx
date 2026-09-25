@@ -7,6 +7,8 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import axios from 'axios';
 import { notifyMessage } from '@/util/util.jsx';
+import { suppliers as suppliersAutocomplete } from '@/routes/autocomplete';
+import por from '@/routes/purchases/por';
 
 export default () => {
     const {canAdd} = usePage().props
@@ -19,7 +21,7 @@ export default () => {
 
     const fetchSuppliers = () => {
         setLoading(true)
-        axios(route('autocomplete.suppliers'))
+        axios(suppliersAutocomplete().url)
             .then(res => {
                 setSuppliers(res.data)
             })
@@ -38,7 +40,7 @@ export default () => {
 
     const sendRequest = async (data) => {
         setProcessing(true)
-        axios.post(route('purchases.por.store'), data)
+        axios.post(por.store().url, data)
             .then(res => {
                 const {data: {message, redirect}} = res
                 notifyMessage({title: "Success", type: 'success', message: message})

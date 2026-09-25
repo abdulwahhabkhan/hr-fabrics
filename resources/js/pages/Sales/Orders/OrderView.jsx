@@ -8,6 +8,7 @@ import { Address } from '@/components/Address';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import orders from '@/routes/sales/orders';
 
 const OrderView = () => {
     const { order, transaction_date, appName, auth, total_summary, balance, net_balance } = usePage().props;
@@ -45,10 +46,10 @@ const OrderView = () => {
     return (
         <>
             <PageHeader title="Order View" buttons={(<>
-                <BackButton href={route("sales.orders.index")} label="Orders List" />
+                <BackButton href={orders.index()} label="Orders List" />
                 {
                     order.status === 0 && (
-                        <InertiaLink href={route("sales.orders.edit", order.id)}
+                        <InertiaLink href={orders.edit(order.id)}
                                      className={"btn btn-sm btn-white"}>
                             <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
                         </InertiaLink>

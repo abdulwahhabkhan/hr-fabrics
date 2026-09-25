@@ -8,6 +8,7 @@ import Pagination from '@/components/Pagination';
 import SearchFilter from '@/components/SearchFilter';
 import { Delete, InertiaEdit } from '@/components/Actions';
 import NoData from '@/components/NoData.jsx';
+import rolesRoutes from '@/routes/settings/roles';
 
 const Roles = () => {
     const { roles } = usePage().props;
@@ -21,7 +22,7 @@ const Roles = () => {
                 <Panel>
                     <PanelHeader heading={"Roles List"} buttons={(
                         <>
-                            <InertiaLink href={route("settings.roles.create")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={rolesRoutes.create()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:add-bold-duotone"} /> Create Role
                             </InertiaLink>
                         </>
@@ -45,8 +46,8 @@ const Roles = () => {
                                             <td>{name}</td>
 
                                             <td className={"actions"}>
-                                                <InertiaEdit href={route("settings.roles.edit", id)} />
-                                                <Delete id={id} />
+                                                <InertiaEdit href={rolesRoutes.edit(id)} />
+                                                <Delete action={rolesRoutes.destroy} id={id} />
                                             </td>
                                         </tr>
                                     );

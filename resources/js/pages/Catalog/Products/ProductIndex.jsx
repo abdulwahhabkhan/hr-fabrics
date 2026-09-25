@@ -12,10 +12,11 @@ import { PriceView } from '@/components/PriceView';
 import ProductFilter from '@/components/filters/ProductFilter.jsx';
 import NoData from '@/components/NoData.jsx';
 import PaginationFull from '@/components/PaginationFull.jsx';
+import products from '@/routes/catalog/products';
 
 const ProductIndex = () => {
-    const { products, canAdd, canUpdate, canDelete } = usePage().props;
-    const { data, links } = products;
+    const { products: productsProp, canAdd, canUpdate, canDelete } = usePage().props;
+    const { data, links } = productsProp;
     const [id, setId] = useState(0);
     const [show, setShow] = useState(false);
     const handleAdd = () => {
@@ -39,7 +40,7 @@ const ProductIndex = () => {
                     canAdd && (
                         <>
                             <InertiaLink
-                                href={route('catalog.products.create')}
+                                href={products.create()}
                                 className="btn btn-sm  btn-theme"
                             >
                                 <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -127,19 +128,14 @@ const ProductIndex = () => {
                                                             {canUpdate && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'catalog.products.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={products.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {canDelete && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
                                                                     <Delete
-                                                                        action={
-                                                                            'catalog.products.destroy'
-                                                                        }
+                                                                        action={products.destroy}
                                                                         id={id}
                                                                     />
                                                                 </span>
@@ -154,7 +150,7 @@ const ProductIndex = () => {
                             </table>
                         </div>
                         {data.length === 0 && <NoData />}
-                        <PaginationFull meta={products} />
+                        <PaginationFull meta={productsProp} />
                     </PanelBody>
                 </Panel>
             </PageContent>

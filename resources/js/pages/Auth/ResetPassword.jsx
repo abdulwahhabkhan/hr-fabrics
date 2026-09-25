@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import ValidationErrors from '@/components/ValidationErrors';
 import { Head, setLayoutProps, useForm } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
+import { update as passwordUpdate } from '@/routes/password';
 
 export default function ResetPassword({ token, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -24,7 +25,7 @@ export default function ResetPassword({ token, email }) {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('password.update'));
+        post(passwordUpdate().url);
     };
     setLayoutProps({
         title: 'Reset Password',

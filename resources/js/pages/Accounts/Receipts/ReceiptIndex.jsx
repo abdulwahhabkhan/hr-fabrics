@@ -13,10 +13,11 @@ import Form from '@/pages/Catalog/Brands/BrandForm';
 import { NumberFormat } from '@/util/NumberFormat';
 import { FileIcon } from '@/components/File';
 import NoData from '@/components/NoData.jsx';
+import journals from '@/routes/accounts/journals';
 
 const ReceiptIndex = () => {
-    const { receipts, canAdd, canUpdate, canDelete, canView } = usePage().props;
-    const { data, links } = receipts;
+    const { receipts: receiptsProp, canAdd, canUpdate, canDelete, canView } = usePage().props;
+    const { data, links } = receiptsProp;
     const [id, setId] = useState(0);
     const [show, setShow] = useState(false);
     const handleAdd = () => {
@@ -39,7 +40,7 @@ const ReceiptIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('accounts.receipts.create')}
+                            href={journals.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Add Receipt
@@ -111,18 +112,12 @@ const ReceiptIndex = () => {
                                                     <td className={'actions'}>
                                                         {canUpdate && (
                                                             <InertiaEdit
-                                                                href={route(
-                                                                    'accounts.receipts.edit',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                         {canView && (
                                                             <InertiaView
-                                                                href={route(
-                                                                    'accounts.receipts.show',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                     </td>

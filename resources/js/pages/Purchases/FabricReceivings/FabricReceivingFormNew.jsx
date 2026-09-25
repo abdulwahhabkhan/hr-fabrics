@@ -7,6 +7,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import BackButton from '@/components/button/back';
+import fabricReceivings from '@/routes/purchases/fabric-receivings';
 
 const FabricReceivingFormNew = () => {
     const { suppliers } = usePage().props;
@@ -22,7 +23,7 @@ const FabricReceivingFormNew = () => {
     const sendRequest = async (data) => {
         const post_data = { ...data };
         setProcessing(true);
-        Inertia.post(route("purchases.fabric-receivings.store"), post_data, options);
+        Inertia.post(fabricReceivings.store(), post_data, options);
     };
 
 
@@ -31,7 +32,7 @@ const FabricReceivingFormNew = () => {
             <Head title="Create Fabric Receiving" />
             <PageHeader title="Create Fabric Receiving" buttons={(
                 <>
-                    <BackButton href={route("purchases.fabric-receivings.index")}  />
+                    <BackButton href={fabricReceivings.index()}  />
                 </>
             )}/>
             <PageContent>

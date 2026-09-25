@@ -22,6 +22,7 @@ import NoData from '@/components/NoData.jsx';
 import BackButton from '@/components/button/back.tsx';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import { Icon } from '@iconify/react';
+import storeTransfers from '@/routes/stocks/store-transfers';
 
 const STORE_TRANSFER_TYPE_STORE = 'store';
 
@@ -60,7 +61,7 @@ const StoreTransferForm = () => {
     const sendRequest = async (data) => {
         setProcessing(true);
         Inertia.put(
-            route('stocks.store-transfers.update', storeTransfer['id']),
+            storeTransfers.update(storeTransfer['id']),
             data,
             options,
         );
@@ -69,7 +70,7 @@ const StoreTransferForm = () => {
         const post_data = { ...data, status: ORDER_CLOSED };
         setProcessing(true);
         Inertia.put(
-            route('stocks.store-transfers.update', storeTransfer['id']),
+            storeTransfers.update(storeTransfer['id']),
             post_data,
             options,
         );
@@ -84,7 +85,7 @@ const StoreTransferForm = () => {
 
         axios({
             method: 'post',
-            url: route('stocks.store-transfers.item', storeTransfer.id),
+            url: storeTransfers.item(storeTransfer.id).url,
             data: item,
         })
             .then((res) => {
@@ -116,7 +117,7 @@ const StoreTransferForm = () => {
 
         axios({
             method: 'post',
-            url: route('stocks.store-transfers.items.bulk', storeTransfer.id),
+            url: storeTransfers.items.bulk(storeTransfer.id).url,
             data: payload,
         })
             .then((res) => {
@@ -143,7 +144,7 @@ const StoreTransferForm = () => {
     const deleteItem = (id) => {
         axios({
             method: 'delete',
-            url: route('stocks.store-transfers.item.destroy', id),
+            url: storeTransfers.item.destroy(id).url,
         })
             .then((res) => {
                 setItems(res.data.items);
@@ -177,13 +178,12 @@ const StoreTransferForm = () => {
                 buttons={
                     <>
                         <PreviewButton
-                            href={route(
-                                'stocks.store-transfers.show',
+                            href={storeTransfers.show(
                                 storeTransfer.id,
                             )}
                         />
                         <BackButton
-                            href={route('stocks.store-transfers.index')}
+                            href={storeTransfers.index()}
                         />
                     </>
                 }

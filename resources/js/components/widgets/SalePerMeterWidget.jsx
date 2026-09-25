@@ -4,6 +4,7 @@ import { Button, InputGroup, Table } from 'react-bootstrap';
 import { Controller, useForm } from 'react-hook-form';
 import Datetime from 'react-datetime';
 import { settings } from '@/config/page-settings';
+import widgets from '@/routes/widgets';
 
 export const SalePerMeterWidget = () => {
     const filters = {};
@@ -12,7 +13,7 @@ export const SalePerMeterWidget = () => {
         start_date: filters.start_date || "",
         end_date: filters.end_date || ""
     });
-    axios.get(route("widgets.average-sale-meter")).then((res) => {
+    axios.get(widgets.averageSaleMeter().url).then((res) => {
         console.log(res.data);
     });
     const { setValue, control } = useForm([]);

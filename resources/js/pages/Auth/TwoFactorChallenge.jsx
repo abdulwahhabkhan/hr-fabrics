@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ValidationErrors from '@/components/ValidationErrors';
 import { Head, setLayoutProps, useForm } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
+import twoFactorLogin from '@/routes/two-factor/login';
 
 export default function TwoFactorChallenge() {
     const [useRecoveryCode, setUseRecoveryCode] = useState(false);
@@ -22,7 +23,7 @@ export default function TwoFactorChallenge() {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route("two-factor.login"));
+        post(twoFactorLogin.store().url);
     };
 
     setLayoutProps({

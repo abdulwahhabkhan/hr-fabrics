@@ -21,10 +21,10 @@
         "laravel/passkeys": "^0.2.1",
         "laravel/sanctum": "^4.3.3",
         "laravel/tinker": "^3.0.2",
+        "laravel/wayfinder": "^0.1.21",
         "league/flysystem-aws-s3-v3": "^3.35.3",
         "league/flysystem-path-prefixing": "^3.31",
-        "spatie/laravel-login-link": "^1.6.7",
-        "tightenco/ziggy": "^2.6.4"
+        "spatie/laravel-login-link": "^1.6.7"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.6.2",

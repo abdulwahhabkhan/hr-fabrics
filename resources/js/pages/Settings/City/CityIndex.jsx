@@ -10,6 +10,7 @@ import Pagination from '@/components/Pagination';
 import SearchFilter from '@/components/SearchFilter';
 import { Delete, InertiaEdit } from '@/components/Actions';
 import NoData from '@/components/NoData.jsx';
+import citiesRoutes from '@/routes/settings/cities';
 
 const Cities = () => {
     const { cities } = usePage().props;
@@ -23,7 +24,7 @@ const Cities = () => {
                 <Panel>
                     <PanelHeader heading={"Users List"} buttons={(
                         <>
-                            <InertiaLink href={route("settings.cities.create")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={citiesRoutes.create()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:add-bold-duotone"} /> Create City
                             </InertiaLink>
                         </>
@@ -52,8 +53,8 @@ const Cities = () => {
                                                     date={updated_at} />
                                             </td>
                                             <td className={"actions"}>
-                                                <InertiaEdit href={route("settings.cities.edit", id)} />
-                                                <Delete action={"settings.cities.destroy"} id={id} />
+                                                <InertiaEdit href={citiesRoutes.edit(id)} />
+                                                <Delete action={citiesRoutes.destroy} id={id} />
                                             </td>
                                         </tr>
                                     );

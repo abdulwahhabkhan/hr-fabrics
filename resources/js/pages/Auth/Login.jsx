@@ -4,6 +4,8 @@ import { Head, Link, setLayoutProps, useForm, usePage } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
 import LoginLink from '@/components/LoginLink/LoginLink.jsx';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
+import { dashboard, login } from '@/routes';
+import { request as passwordRequest } from '@/routes/password';
 
 export default function Login() {
     const { status, canResetPassword, environment } = usePage().props;
@@ -41,7 +43,7 @@ export default function Login() {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('login'));
+        post(login().url);
     };
 
     setLayoutProps({
@@ -108,7 +110,7 @@ export default function Login() {
                         />
                         {canResetPassword && (
                             <Link
-                                href={route('password.request')}
+                                href={passwordRequest()}
                                 className="text-decoration-none small text-muted hover-underline"
                             >
                                 Forgot password?
@@ -154,7 +156,7 @@ export default function Login() {
                             label="Login as Admin"
                             className="btn btn-warning w-100"
                             keyId="1"
-                            redirectUrl={route('dashboard')}
+                            redirectUrl={dashboard().url}
                         />
                     </div>
                 )}

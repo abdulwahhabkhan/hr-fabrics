@@ -16,6 +16,8 @@ import { NumberFormat } from '@/util/NumberFormat';
 import BackButton from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import pos from '@/routes/purchases/pos';
+import poAjax from '@/routes/ajax/po';
 
 const PurchaseForm = () => {
     const {
@@ -61,13 +63,13 @@ const PurchaseForm = () => {
         const post_data = { ...data, status: status_open };
         setProcessing(true);
 
-        Inertia.put(route("purchases.pos.update", order["id"]), post_data, options);
+        Inertia.put(pos.update(order["id"]), post_data, options);
     };
     const confirmRequest = async (data) => {
         const post_data = { ...data, status: status_close };
         setProcessing(true);
 
-        Inertia.put(route("purchases.pos.update", order["id"]), post_data, options);
+        Inertia.put(pos.update(order["id"]), post_data, options);
     };
     const updateItem = (item) => {
         setItem(item);
@@ -87,7 +89,7 @@ const PurchaseForm = () => {
     const deleteItem = (id) => {
         axios({
             method: "delete",
-            url: route("ajax.po.item.destroy", id)
+            url: poAjax.item.destroy(id).url
         }).then(res => {
             setItems(res.data.items);
             notifyMessage({ title: "Success", type: "success", message: "Items deleted successfully" });
@@ -116,8 +118,8 @@ const PurchaseForm = () => {
         <>
             <Head title="Purchase Update" />
             <PageHeader title="Purchase Update" buttons={(<>
-                <PreviewButton href={route("purchases.pos.show", order.id)} />
-                <BackButton href={route("purchases.pos.index")} />
+                <PreviewButton href={pos.show(order.id)} />
+                <BackButton href={pos.index()} />
             </>)} />
             <PageContent>
                 <Panel theme={"default"}>

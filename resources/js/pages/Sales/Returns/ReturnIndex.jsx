@@ -16,6 +16,8 @@ import SalesReturnFilter from '@/components/filters/SalesReturnFilter';
 import { Date } from '@/components/CustomDate';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import returns from '@/routes/sales/returns';
+import { open as openReturns } from '@/routes/actions/returns';
 
 const ReturnIndex = () => {
     const { rows, canAdd, canView } = usePage().props;
@@ -34,7 +36,7 @@ const ReturnIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('sales.returns.create')}
+                            href={returns.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Add Return
@@ -124,20 +126,14 @@ const ReturnIndex = () => {
                                                             {canView && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={route(
-                                                                            'sales.returns.show',
-                                                                            id,
-                                                                        )}
+                                                                        href={returns.show(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can_edit && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'sales.returns.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={returns.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -147,10 +143,7 @@ const ReturnIndex = () => {
                                                                         target={
                                                                             '_blank'
                                                                         }
-                                                                        href={route(
-                                                                            'sales.returns.ledger',
-                                                                            id,
-                                                                        )}
+                                                                        href={returns.ledger(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -161,10 +154,7 @@ const ReturnIndex = () => {
                                                                         target={
                                                                             '_blank'
                                                                         }
-                                                                        href={route(
-                                                                            'sales.returns.inventory',
-                                                                            id,
-                                                                        )}
+                                                                        href={returns.inventory(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -172,9 +162,7 @@ const ReturnIndex = () => {
                                                             {can_unlock && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <UnLock
-                                                                        action={
-                                                                            'actions.returns.open'
-                                                                        }
+                                                                        action={openReturns}
                                                                         id={id}
                                                                     />
                                                                 </span>

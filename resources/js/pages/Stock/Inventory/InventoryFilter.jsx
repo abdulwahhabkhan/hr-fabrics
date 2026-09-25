@@ -5,6 +5,7 @@ import { Inertia } from '@/util/Inertia';
 import { Icon } from '@iconify/react';
 import { UNIT_THAAN, UNITS } from '@/util/util';
 import pickBy from 'lodash/pickBy';
+import inventories from '@/routes/stocks/inventories';
 
 export const InventoryFilter = ({ filters }) => {
     const [processing, setProcessing] = useState(false);
@@ -25,7 +26,7 @@ export const InventoryFilter = ({ filters }) => {
     const sendRequest = async (data) => {
         const post_data = { ...data };
         setProcessing(true);
-        Inertia.get(route('stocks.inventories.index'), post_data, options);
+        Inertia.get(inventories.index().url, post_data, options);
     };
 
     return (

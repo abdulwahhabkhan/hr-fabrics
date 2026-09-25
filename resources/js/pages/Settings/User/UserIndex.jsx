@@ -10,6 +10,7 @@ import Pagination from '@/components/Pagination';
 import SearchFilter from '@/components/SearchFilter';
 import { InertiaEdit, ToggleAction } from '@/components/Actions';
 import NoData from '@/components/NoData.jsx';
+import usersRoutes from '@/routes/settings/users';
 
 const Users = () => {
     const { users } = usePage().props;
@@ -23,7 +24,7 @@ const Users = () => {
                 <Panel>
                     <PanelHeader heading={"Users List"} buttons={(
                         <>
-                            <InertiaLink href={route("settings.users.create")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={usersRoutes.create()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:add-bold-duotone"} /> Create User
                             </InertiaLink>
                         </>
@@ -65,8 +66,8 @@ const Users = () => {
 
                                             </td>
                                             <td className={"actions"}>
-                                                <InertiaEdit href={route("settings.users.edit", id)} />
-                                                <ToggleAction action={"settings.users.destroy"}
+                                                <InertiaEdit href={usersRoutes.edit(id)} />
+                                                <ToggleAction action={usersRoutes.destroy}
                                                               message={"Active/Deactivate the user."} id={id} />
                                             </td>
                                         </tr>

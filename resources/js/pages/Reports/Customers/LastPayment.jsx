@@ -5,6 +5,7 @@ import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Date } from '@/components/CustomDate';
 import { Icon } from '@iconify/react';
+import accounts from '@/routes/accounts';
 
 
 const LastPayment = () => {
@@ -66,13 +67,15 @@ const LastPayment = () => {
                                                 <a className="d-print-none ms-2"
                                                    title={"Open Detail"}
                                                    target={"_blank"}
-                                                   href={route("accounts.balance-history", {
-                                                       customer: {
-                                                           id: id,
-                                                           name: name,
-                                                           city: city
+                                                   href={accounts.balanceHistory({
+                                                       query: {
+                                                           customer: {
+                                                               id: id,
+                                                               name: name,
+                                                               city: city
+                                                           }
                                                        }
-                                                   })}>
+                                                   }).url}>
                                                     <Icon icon={"solar:square-arrow-right-up-bold-duotone"} />
                                                 </a>
                                             </td>

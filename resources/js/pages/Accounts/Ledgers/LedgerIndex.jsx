@@ -8,6 +8,7 @@ import StyledSelect from '@/components/StyledSelect';
 import Datetime from 'react-datetime';
 import { settings } from '@/config/page-settings';
 import 'react-datetime/css/react-datetime.css';
+import ledgers from '@/routes/accounts/ledgers';
 
 const LedgerIndex = () => {
     const DatetimeComponent = Datetime.default ? Datetime.default : Datetime;
@@ -24,10 +25,12 @@ const LedgerIndex = () => {
         const post_data = { ...data };
         const { start_date, end_date, account } = post_data;
 
-        Inertia.get(route("accounts.ledgers.show", account.id), {
-            start_date: start_date.toString(),
-            end_date: end_date.toString()
-        });
+        Inertia.get(ledgers.show(account.id, {
+            query: {
+                start_date: start_date.toString(),
+                end_date: end_date.toString()
+            }
+        }).url);
     };
     return (
         <>

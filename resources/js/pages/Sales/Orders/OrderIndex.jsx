@@ -21,6 +21,9 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { getOrderStatus } from '@/util/util';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import orders from '@/routes/sales/orders';
+import orderRoute from '@/routes/sales/order';
+import { open as openOrder } from '@/routes/actions/order';
 
 const OrderIndex = () => {
     const { rows, canAdd } = usePage().props;
@@ -47,7 +50,7 @@ const OrderIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('sales.orders.create')}
+                            href={orders.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -172,21 +175,14 @@ const OrderIndex = () => {
                                                             {can_view && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={route(
-                                                                            'sales.orders.show',
-                                                                            id,
-                                                                        )}
+                                                                        href={orders.show(id)}
                                                                     />
                                                                 </span>
                                                             )}
-
                                                             {can_update && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'sales.orders.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={orders.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -201,10 +197,7 @@ const OrderIndex = () => {
                                                                             className={
                                                                                 'dropdown-item border-top'
                                                                             }
-                                                                            href={route(
-                                                                                'sales.orders.gate-pass',
-                                                                                id,
-                                                                            )}
+                                                                            href={orders.gatePass(id)}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -223,10 +216,7 @@ const OrderIndex = () => {
                                                                                     ? ' text-success'
                                                                                     : '')
                                                                             }
-                                                                            href={route(
-                                                                                'sales.order.bilti',
-                                                                                id,
-                                                                            )}
+                                                                            href={orderRoute.bilti(id)}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -242,10 +232,7 @@ const OrderIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={route(
-                                                                                'sales.orders.ledger',
-                                                                                id,
-                                                                            )}
+                                                                            href={orders.ledger(id)}
                                                                         />
                                                                     )}
                                                                     {can_inventory && (
@@ -253,17 +240,12 @@ const OrderIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={route(
-                                                                                'sales.orders.inventory',
-                                                                                id,
-                                                                            )}
+                                                                            href={orders.inventory(id)}
                                                                         />
                                                                     )}
                                                                     {can_unlock && (
                                                                         <UnLockDropdownItem
-                                                                            action={
-                                                                                'actions.order.open'
-                                                                            }
+                                                                            action={openOrder}
                                                                             id={
                                                                                 id
                                                                             }

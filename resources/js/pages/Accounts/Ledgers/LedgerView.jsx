@@ -8,6 +8,7 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import Print from '@/components/button/Print.jsx';
 import BackButton from '@/components/button/back.tsx';
+import ledgers from '@/routes/accounts/ledgers';
 
 const LedgerView = () => {
     const { account, appName, ledger, date, balance, net_balance, start_balance, ledger_sum } = usePage().props;
@@ -19,7 +20,7 @@ const LedgerView = () => {
         <>
             <Head title="View Ledger" />
             <PageHeader title="View Ledger" buttons={(<>
-                <BackButton href={route("accounts.ledgers.index")} label="Ledgers List" />
+                <BackButton href={ledgers.index()} label="Ledgers List" />
                 <Print />
             </>)} />
             <PageContent>

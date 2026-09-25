@@ -8,6 +8,7 @@ import StyledSelect from '@/components/StyledSelect';
 import ValidationErrors from '@/components/ValidationErrors';
 import Back from '@/components/button/back.tsx';
 import LoadingButton from '@/components/LoadingButton.jsx';
+import storeTransfers from '@/routes/stocks/store-transfers';
 
 const StoreTransferFormNew = () => {
     const { stores, errors: serverSideError } = usePage().props;
@@ -30,7 +31,7 @@ const StoreTransferFormNew = () => {
             account_id: data.from_account.account_id,
         };
         setProcessing(true);
-        Inertia.post(route('stocks.store-transfers.store'), post_data, options);
+        Inertia.post(storeTransfers.store(), post_data, options);
     };
 
     return (
@@ -42,7 +43,7 @@ const StoreTransferFormNew = () => {
                     <>
                         <Back
                             label="Store Transfers List"
-                            href={route('stocks.store-transfers.index')}
+                            href={storeTransfers.index()}
                         />
                     </>
                 }

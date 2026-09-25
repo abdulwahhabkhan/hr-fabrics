@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Inertia } from '@/util/Inertia';
 import axios from 'axios';
 import { formAlert, notifyMessage } from '@/util/util';
+import suppliers from '@/routes/purchases/suppliers';
 
 export default ({id, show, callback}) => {
     const title = id ? 'Update' : 'Create'
@@ -16,7 +17,7 @@ export default ({id, show, callback}) => {
 
         if (id) {
             setLoading(true)
-            axios.get(route('purchases.suppliers.edit', id))
+            axios.get(suppliers.edit(id).url)
                 .then(res => {
                     const {data: {detail}} = res
                     setLoading(false)
@@ -42,12 +43,12 @@ export default ({id, show, callback}) => {
         const method = id ? "PUT" : 'POST'
         axios({
             method: method,
-            url: route('purchases.suppliers.store') + (id ? '/' + id : ''),
+            url: id ? suppliers.update(id).url : suppliers.store().url,
             data: data
         }).then(res => {
             const {data: {message}} = res
             notifyMessage({title: "Success", type: 'success', message: message})
-            Inertia.visit(route('purchases.suppliers.index'))
+            Inertia.visit(suppliers.index().url)
         }).catch((res) => {
             const {response} = {...res}
             if (response) {

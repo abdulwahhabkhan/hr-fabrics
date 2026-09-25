@@ -9,6 +9,7 @@ import { FileIcon } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import returns from '@/routes/sales/returns';
 
 
 const ReturnView = () => {
@@ -53,17 +54,16 @@ const ReturnView = () => {
         <>
             <Head title="Sales Return View" />
             <PageHeader title="Sales Return View" buttons={(<>
-                <BackButton href={route("sales.returns.index")} />
+                <BackButton href={returns.index()} />
                 {
                     canModify && (
-                        <InertiaLink href={route("sales.returns.edit", so_return.id)}
+                        <InertiaLink href={returns.edit(so_return.id)}
                                      className={"btn btn-sm btn-white"}>
                             <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
                         </InertiaLink>
                     )
                 }
                 <Print />
-                <FileIcon file={file_info} size={"xs"} />
             </>)} />
             <PageContent>
                 <Head title={so_return.invoice_no + " Sale Return "} />

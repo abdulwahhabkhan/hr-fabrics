@@ -7,6 +7,7 @@ import { Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
+import users from '@/routes/settings/users';
 
 
 const UserForm = () => {
@@ -24,9 +25,9 @@ const UserForm = () => {
             }
         };
         if (user)
-            Inertia.put(route("settings.users.update", user.id), { ...data }, options);
+            Inertia.put(users.update(user.id), { ...data }, options);
         else
-            Inertia.post(route("settings.users.store"), { ...data }, options);
+            Inertia.post(users.store(), { ...data }, options);
     };
     useEffect(() => {
         if (!_.isEmpty(serverErrors)) {
@@ -42,7 +43,7 @@ const UserForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <InertiaLink href={route("settings.users.index")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={users.index()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:reply-bold-duotone"} /> User List
                             </InertiaLink>
                         </>
@@ -116,7 +117,7 @@ const UserForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("settings.users.index")} className={"btn btn-white"}>
+                        <InertiaLink href={users.index()} className={"btn btn-white"}>
                             <Icon icon={"solar:reply-bold-duotone"} />
                         </InertiaLink>
                         &nbsp;

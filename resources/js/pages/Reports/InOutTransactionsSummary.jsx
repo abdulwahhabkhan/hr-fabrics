@@ -8,6 +8,7 @@ import { faExternalLinkAlt, faPrint } from '@fortawesome/free-solid-svg-icons';
 import { Date } from '@/components/CustomDate';
 import { Currency } from '@/components/Currency.jsx';
 import InOutTransactionFilter from '@/pages/Reports/InOutTransactionFilter.jsx';
+import inMethod from '@/routes/reports/in';
 
 const InOutTransactionsSummary = () => {
     const {
@@ -35,12 +36,14 @@ const InOutTransactionsSummary = () => {
         <>
             {children}{' '}
             <a
-                href={route('reports.in.out.transactions.detail', {
-                    category,
-                    side,
-                    start_date: filters.start_date,
-                    end_date: filters.end_date,
-                })}
+                href={inMethod.out.transactions.detail({
+                    query: {
+                        category,
+                        side,
+                        start_date: filters.start_date,
+                        end_date: filters.end_date,
+                    },
+                }).url}
                 target={'_blank'}
                 rel={'noreferrer'}
             >

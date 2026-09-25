@@ -9,6 +9,7 @@ import { Address } from '@/components/Address';
 import { FileIcon } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
+import por from '@/routes/purchases/por';
 
 
 const ReturnView = () => {
@@ -52,10 +53,10 @@ const ReturnView = () => {
         <>
             <Head title="Fabric Return View" />
             <PageHeader title="Fabric Return View" buttons={(<>
-                <BackButton href={route("purchases.por.index")} />
+                <BackButton href={por.index()} />
                 {
                     canModify && (
-                        <InertiaLink href={route("purchases.por.edit", pr_return.id)}
+                        <InertiaLink href={por.edit(pr_return.id)}
                                      className={"btn btn-sm btn-white"}>
                             <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
                         </InertiaLink>

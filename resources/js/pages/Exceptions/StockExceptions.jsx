@@ -4,6 +4,7 @@ import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import BackButton from '@/components/button/back';
 import NoData from '@/components/NoData.jsx';
 import { Head, usePage } from '@/util/Inertia';
+import { home } from '@/routes/exceptions';
 
 const StockExceptions = () => {
     const { exceptions } = usePage().props;
@@ -16,7 +17,7 @@ const StockExceptions = () => {
                 <Panel>
                     <PanelHeader
                         heading="Exceptions : Stock"
-                        buttons={<BackButton href={route('exceptions.home')} label="Exceptions" size="xs" />}
+                        buttons={<BackButton href={home()} label="Exceptions" size="xs" />}
                     />
                     <PanelBody>
                         <div className="table-responsive">

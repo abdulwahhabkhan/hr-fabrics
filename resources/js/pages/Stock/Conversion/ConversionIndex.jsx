@@ -10,6 +10,7 @@ import Pagination from '@/components/Pagination';
 import SearchFilter from '@/components/SearchFilter';
 import { Delete } from '@/components/Actions';
 import NoData from '@/components/NoData.jsx';
+import conversions from '@/routes/stocks/conversions';
 
 const Coversion = () => {
     const { items } = usePage().props;
@@ -29,7 +30,7 @@ const Coversion = () => {
                         buttons={
                             <>
                                 <InertiaLink
-                                    href={route('stocks.conversions.create')}
+                                    href={conversions.create()}
                                     className="btn btn-xs  btn-primary"
                                 >
                                     <Icon icon={'solar:add-bold-duotone'} />{' '}
@@ -86,9 +87,7 @@ const Coversion = () => {
                                                     </td>
                                                     <td className={'actions'}>
                                                         <Delete
-                                                            action={
-                                                                'stocks.conversions.destroy'
-                                                            }
+                                                            action={conversions.destroy}
                                                             id={id}
                                                         />
                                                     </td>

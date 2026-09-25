@@ -8,6 +8,7 @@ import { Date } from '@/components/CustomDate';
 import DateRangeFilter from '@/pages/Reports/Accounts/DateRangeFilter';
 import { Tooltip } from 'react-bootstrap';
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
+import ledgers from '@/routes/accounts/ledgers';
 
 const CashBankSummary = () => {
     const { filters, rows } = usePage().props;
@@ -107,17 +108,17 @@ const CashBankSummary = () => {
                                                     <td>
                                                         {name}
                                                         <a
-                                                            href={route(
-                                                                'accounts.ledgers.show',
+                                                            href={ledgers.show(
+                                                                account_id,
                                                                 {
-                                                                    account:
-                                                                        account_id,
-                                                                    start_date:
-                                                                        filters.start_date,
-                                                                    end_date:
-                                                                        filters.end_date,
+                                                                    query: {
+                                                                        start_date:
+                                                                            filters.start_date,
+                                                                        end_date:
+                                                                            filters.end_date,
+                                                                    },
                                                                 },
-                                                            )}
+                                                            ).url}
                                                             className="hidden-print ms-5px"
                                                             target={'_blank'}
                                                         >

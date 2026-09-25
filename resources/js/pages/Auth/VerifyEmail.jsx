@@ -1,6 +1,8 @@
 import Button from '@/components/Button';
 import React from 'react';
-import { InertiaLink, useForm } from '@/util/Inertia';
+import { Head, InertiaLink, useForm } from '@/util/Inertia';
+import { logout } from '@/routes';
+import { send as sendVerification } from '@/routes/verification';
 
 export default function VerifyEmail({ status }) {
     const { post, processing } = useForm();
@@ -8,7 +10,7 @@ export default function VerifyEmail({ status }) {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('verification.send'));
+        post(sendVerification().url);
     };
 
     return (
@@ -36,7 +38,7 @@ export default function VerifyEmail({ status }) {
                         </Button>
 
                         <InertiaLink
-                            href={route('logout')}
+                            href={logout()}
                             method="post"
                             as="button"
                             className="underline text-sm text-gray-600 hover:text-gray-900"

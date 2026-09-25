@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faIdCard, faMagnifyingGlass, faTable } from '@fortawesome/free-solid-svg-icons';
 import { InertiaView } from '@/components/Actions';
 import './AttendanceRegister.css';
+import attendance from '@/routes/reports/attendance';
 
 const initials = name => name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 const toMin = t => {
@@ -22,7 +23,7 @@ const AttendanceRegister = () => {
     const [view, setView] = useState('table');
 
     const changeDate = value => {
-        router.get(route('reports.attendance.register'), { date: value }, { replace: true, preserveState: true });
+        router.get(attendance.register().url, { date: value }, { replace: true, preserveState: true });
     };
 
     const shiftDay = days => {
@@ -196,7 +197,7 @@ const AttendanceRegister = () => {
                         {filtered.map((row, index) => (
                             <Link
                                 key={row.id}
-                                href={route('reports.attendance.register.detail', { worker_id: row.id, date })}
+                                href={attendance.register.detail({ query: { worker_id: row.id, date } })}
                                 className={'ar-card-item'}
                                 data-status={row.status}
                             >
@@ -287,9 +288,11 @@ const AttendanceRegister = () => {
                                     </td>
                                     <td className="w-1 actions">
                                         <InertiaView
-                                            href={route('reports.attendance.register.detail', {
-                                                worker_id: row.id,
-                                                date
+                                            href={attendance.register.detail({
+                                                query: {
+                                                    worker_id: row.id,
+                                                    date
+                                                }
                                             })}
                                             link_title={'View Details'}
                                         />

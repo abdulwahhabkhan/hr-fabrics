@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import Select from 'react-select';
 import BackButton from '@/components/button/back';
+import journals from '@/routes/accounts/journals';
 
 const JournalBookForm = () => {
     const { voucher, errors: serverErrors, accounts } = usePage().props;
@@ -34,9 +35,9 @@ const JournalBookForm = () => {
         const post_data = { ...data };
         setProcessing(true);
         if (voucher)
-            Inertia.put(route("accounts.journal-voucher.update", voucher["id"]), post_data, options);
+            Inertia.post(journals.store(), post_data, options);
         else
-            Inertia.post(route("accounts.journal-voucher.store"), post_data, options);
+            Inertia.post(journals.store(), post_data, options);
     };
     useEffect(() => {
         if (!_.isEmpty(serverErrors)) {
@@ -51,7 +52,7 @@ const JournalBookForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <BackButton href={route("accounts.journal-voucher.index")} size="xs" />
+                            <BackButton href={journals.index()} size="xs" />
                         </>
                     )} />
                     <PanelBody>
@@ -133,7 +134,7 @@ const JournalBookForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("accounts.journal-voucher.index")} className="btn btn-warning">
+                        <InertiaLink href={journals.index()} className="btn btn-warning">
                             <Icon icon={"solar:close-bold-duotone"} /> Close
                         </InertiaLink>&nbsp;
                         <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>

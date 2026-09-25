@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import { useAccountTypes } from '@/util/util';
 import BackButton from '@/components/button/back';
+import accounts from '@/routes/accounts/accounts';
 
 const AccountForm = () => {
     const { account, expense_accounts, errors: serverErrors } = usePage().props;
@@ -27,9 +28,9 @@ const AccountForm = () => {
         const post_data = { ...data };
         setProcessing(true);
         if (account)
-            Inertia.put(route("accounts.accounts.update", account["id"]), post_data, options);
+            Inertia.put(accounts.update(account["id"]), post_data, options);
         else
-            Inertia.post(route("accounts.accounts.store"), post_data, options);
+            Inertia.post(accounts.store(), post_data, options);
     };
     useEffect(() => {
         if (!_.isEmpty(serverErrors)) {
@@ -40,7 +41,7 @@ const AccountForm = () => {
         <>
             <Head title="Account Update" />
             <PageHeader title="Account Update" buttons={<>
-                <BackButton href={route("accounts.accounts.index")}  />
+                <BackButton href={accounts.index()}  />
             </>} />
             <PageContent>
                 <Panel>
@@ -154,7 +155,7 @@ const AccountForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <BackButton href={route("accounts.accounts.index")} size={'md'} />
+                        <BackButton href={accounts.index()} size={'md'} />
                         <LoadingButton variant="theme" processing={processing} onClick={handleSubmit(sendRequest)}>
                             Save Changes
                         </LoadingButton>

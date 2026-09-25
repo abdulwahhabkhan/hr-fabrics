@@ -1,6 +1,8 @@
 import React from 'react';
 import { Dropdown } from 'react-bootstrap';
 import { InertiaLink, usePage } from '@/util/Inertia';
+import { logout } from '@/routes';
+import profile from '@/routes/profile';
 import SidebarGlyph from './SidebarGlyph';
 
 const initials = (name = '') =>
@@ -45,12 +47,12 @@ export default function SidebarUser() {
                     </span>
                 </div>
                 <Dropdown.Divider />
-                <Dropdown.Item as={InertiaLink} href={route('profile.index')}>
+                <Dropdown.Item as={InertiaLink} href={profile.index()}>
                     <SidebarGlyph name="user" /> My profile
                 </Dropdown.Item>
                 <Dropdown.Divider />
                 <InertiaLink
-                    href={route('logout')}
+                    href={logout()}
                     method="post"
                     as="button"
                     type="button"

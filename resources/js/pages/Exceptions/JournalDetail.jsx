@@ -5,6 +5,8 @@ import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import BackButton from '@/components/button/back';
 import NoData from '@/components/NoData.jsx';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
+import { accounts } from '@/routes/exceptions';
+import { detail } from '@/routes/exceptions/accounts';
 
 const JournalDetail = () => {
     const { ledgers } = usePage().props;
@@ -17,7 +19,7 @@ const JournalDetail = () => {
                 <Panel>
                     <PanelHeader
                         heading="Exceptions : Journal"
-                        buttons={<BackButton href={route('exceptions.accounts')} label="Accounts" size="xs" />}
+                        buttons={<BackButton href={accounts()} label="Accounts" size="xs" />}
                     />
                     <PanelBody>
                         <div className="table-responsive">
@@ -43,11 +45,13 @@ const JournalDetail = () => {
                                                 <td></td>
                                                 <td className="actions">
                                                     <InertiaLink
-                                                        href={route('exceptions.accounts.detail', {
-                                                            id: ledger.id,
-                                                            type: ledger.resource_type,
-                                                            resource_id: ledger.resource_id,
-                                                            action: 'delete'
+                                                        href={detail({
+                                                            query: {
+                                                                id: ledger.id,
+                                                                type: ledger.resource_type,
+                                                                resource_id: ledger.resource_id,
+                                                                action: 'delete'
+                                                            }
                                                         })}
                                                     >
                                                         <Icon icon="solar:trash-bin-trash-bold-duotone" />

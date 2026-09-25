@@ -24,7 +24,7 @@ export default () => {
         // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
         if (prevValues) {
             const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
-            Inertia.get(route(route().current()), query, {
+            Inertia.get(window.location.pathname, query, {
                 replace: true,
                 preserveState: true,
             });

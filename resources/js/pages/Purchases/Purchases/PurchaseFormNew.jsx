@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { ErrorPanel } from '@/components/panel/ErrorPanel';
 import BackButton from '@/components/button/back';
+import pos from '@/routes/purchases/pos';
 
 const PurchaseFormNew = () => {
     const { stocks, errors: serverErrors } = usePage().props;
@@ -24,14 +25,14 @@ const PurchaseFormNew = () => {
         const stock = { ...data.stock };
         const post_data = { stock: stock };
         setProcessing(true);
-        Inertia.post(route("purchases.pos.store"), post_data, options);
+        Inertia.post(pos.store(), post_data, options);
     };
 
     return (
         <>
             <Head title="Create Purchase" />
             <PageHeader title="Create Purchase" buttons={<>
-                <BackButton href={route("purchases.pos.index")} />
+                <BackButton href={pos.index()} />
             </>} />
             <PageContent>
                 <Panel theme={"default"}>

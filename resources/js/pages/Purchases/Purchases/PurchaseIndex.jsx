@@ -16,6 +16,8 @@ import PurchasesPurchaseFilter from '@/components/filters/PurchasesPurchaseFilte
 import { Date } from '@/components/CustomDate';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import pos from '@/routes/purchases/pos';
+import { open as openPurchase } from '@/routes/actions/purchase';
 
 const PurchaseIndex = () => {
     const { rows, canAdd } = usePage().props;
@@ -35,7 +37,7 @@ const PurchaseIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('purchases.pos.create')}
+                            href={pos.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -136,20 +138,14 @@ const PurchaseIndex = () => {
                                                             {can.view && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={route(
-                                                                            'purchases.pos.show',
-                                                                            id,
-                                                                        )}
+                                                                        href={pos.show(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can.edit && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'purchases.pos.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={pos.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -166,10 +162,7 @@ const PurchaseIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={route(
-                                                                                'purchases.pos.inventory',
-                                                                                id,
-                                                                            )}
+                                                                            href={pos.inventory(id)}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -187,10 +180,7 @@ const PurchaseIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={route(
-                                                                                'purchases.pos.ledger',
-                                                                                id,
-                                                                            )}
+                                                                            href={pos.ledger(id)}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -203,9 +193,7 @@ const PurchaseIndex = () => {
                                                                     )}
                                                                     {can.unlock && (
                                                                         <UnLockDropdownItem
-                                                                            action={
-                                                                                'actions.purchase.open'
-                                                                            }
+                                                                            action={openPurchase}
                                                                             id={
                                                                                 id
                                                                             }
@@ -226,12 +214,10 @@ const PurchaseIndex = () => {
                                                                             }
                                                                         >
                                                                             <Delete
-                                                                                action={
-                                                                                    'purchases.pos.destroy'
-                                                                                }
+                                                                                action={pos.destroy}
                                                                                 id={
-                                                                                    id
-                                                                                }
+                                                                                id
+                                                                            }
                                                                             />
                                                                         </div>
                                                                     )}

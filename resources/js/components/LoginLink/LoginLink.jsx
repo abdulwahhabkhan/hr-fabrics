@@ -1,5 +1,6 @@
 import React from "react";
 import { router } from "@/util/Inertia.jsx";
+import { loginLinkLogin } from "@/routes";
 
 export default function LoginLink({
     className = "underline",
@@ -12,7 +13,7 @@ export default function LoginLink({
 }) {
     function submit(event) {
         event.preventDefault();
-        router.post(route("loginLinkLogin"), {
+        router.post(loginLinkLogin().url, {
             email: email,
             key: keyId,
             redirect_url: redirectUrl,

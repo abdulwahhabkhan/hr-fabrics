@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import Select from 'react-select';
 import BackButton from '@/components/button/back';
+import conversions from '@/routes/stocks/conversions';
 
 const ValueAdditionForm = () => {
     const { accounts, data, errors: serverErrors } = usePage().props;
@@ -24,7 +25,7 @@ const ValueAdditionForm = () => {
     const sendRequest = async (data) => {
         const post_data = { ...data };
         setProcessing(true);
-        Inertia.post(route("stocks.conversions.store"), post_data, options);
+        Inertia.post(conversions.store(), post_data, options);
     };
 
     useEffect(() => {
@@ -42,7 +43,7 @@ const ValueAdditionForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <BackButton href={route("stocks.conversions.index")} size="xs" />
+                            <BackButton href={conversions.index()} size="xs" />
                         </>
                     )} />
                     <PanelBody>
@@ -205,7 +206,7 @@ const ValueAdditionForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("stocks.conversions.index")} className="btn btn-warning">
+                        <InertiaLink href={conversions.index()} className="btn btn-warning">
                             <Icon icon={"solar:close-bold-duotone"} /> Close
                         </InertiaLink>&nbsp;
                         <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>

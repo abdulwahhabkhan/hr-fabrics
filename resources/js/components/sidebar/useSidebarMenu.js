@@ -7,35 +7,43 @@ import menu from '@/components/top-menu/menu.jsx';
  * user's permissions and annotated with the active item for the current URL.
  * Same rules as the legacy top menu, so both layouts always agree.
  */
-const ROUTE_SUFFIX = /\.(index|show|create|edit|store|update|destroy)$/;
-
-export const isRouteActive = (name) => {
-    if (!name || typeof route !== 'function') {
+export const isRouteActive = (item, currentUrl) => {
+    if (!item?.path || item.path === '#' || !currentUrl) {
         return false;
     }
 
-    return Boolean(route().current(name.replace(ROUTE_SUFFIX, '') + '*'));
+    const cleanUrl = currentUrl.split('?')[0].split('#')[0];
+    const cleanPath = typeof item.path === 'string' ? item.path.split('?')[0].split('#')[0] : '';
+
+    if (!cleanPath) {
+        return false;
+    }
+
+    if (cleanPath === '/' || cleanPath === '/dashboard') {
+        return cleanUrl === cleanPath || (cleanPath === '/dashboard' && cleanUrl === '/');
+    }
+
+    return cleanUrl === cleanPath || cleanUrl.startsWith(cleanPath + '/');
 };
 
 export default function useSidebarMenu() {
     const { url, props } = usePage();
-    const permissions = props.auth?.permissions ?? [];
 
     return useMemo(() => {
+        const permissions = props.auth?.permissions ?? [];
         const allowed = (item) => item.always || permissions.includes(item.name);
 
         return menu.filter(allowed).map((item) => {
             const children = (item.children ?? [])
                 .filter(allowed)
-                .map((child) => ({ ...child, active: isRouteActive(child.name) }));
+                .map((child) => ({ ...child, active: isRouteActive(child, url) }));
 
             return {
                 ...item,
                 children,
-                active: isRouteActive(item.name) || children.some((child) => child.active),
+                active: isRouteActive(item, url) || children.some((child) => child.active),
             };
         });
         // `url` re-evaluates active state after every Inertia visit.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [url, permissions]);
+    }, [url, props.auth?.permissions]);
 }

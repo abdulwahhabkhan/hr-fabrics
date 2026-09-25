@@ -7,6 +7,7 @@ import SearchFilter from '@/components/SearchFilter';
 import NoData from '@/components/NoData.jsx';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import AccountTable from '@/components/accounts/AccountTable';
+import accountsRoutes from '@/routes/accounts/accounts';
 
 const AccountIndex = () => {
     const { accounts, canAdd, canUpdate, canDelete } = usePage().props;
@@ -20,7 +21,7 @@ const AccountIndex = () => {
                 description={accounts.total ? `${accounts.total} total` : undefined}
                 buttons={
                     canAdd && (
-                        <InertiaLink href={route('accounts.accounts.create')} className="btn btn-sm btn-theme">
+                        <InertiaLink href={accountsRoutes.create()} className="btn btn-sm btn-theme">
                             <Icon icon="solar:add-bold-duotone" /> New account
                         </InertiaLink>
                     )

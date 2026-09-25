@@ -84,23 +84,7 @@ export default [
                     argsIgnorePattern: '^_',
                 },
             ],
-            'import/order': [
-                'error',
-                {
-                    groups: [
-                        'builtin',
-                        'external',
-                        'internal',
-                        'parent',
-                        'sibling',
-                        'index',
-                    ],
-                    alphabetize: {
-                        order: 'asc',
-                        caseInsensitive: true,
-                    },
-                },
-            ],
+            'import/order': 'off',
             'import/consistent-type-specifier-style': [
                 'error',
                 'prefer-top-level',

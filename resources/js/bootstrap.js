@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import _ from 'lodash';
+import { confirm } from '@/routes/password';
 
 if (typeof window !== 'undefined') {
     window._ = _;
@@ -20,11 +21,7 @@ if (typeof window !== 'undefined') {
         (response) => response,
         (error) => {
             if (error?.response?.status === 423) {
-                if (typeof route === 'function') {
-                    window.location.href = route('password.confirm');
-                } else {
-                    window.location.href = '/user/confirm-password';
-                }
+                window.location.href = confirm().url;
             }
 
             return Promise.reject(error);

@@ -29,6 +29,8 @@ import ValidationErrors from '@/components/ValidationErrors';
 import Back from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import orders from '@/routes/sales/orders';
+import soAjax from '@/routes/ajax/so';
 
 const OrderForm = () => {
     const {
@@ -67,7 +69,7 @@ const OrderForm = () => {
         setProcessing(true);
 
         Inertia.put(
-            route('sales.orders.update', order['id']),
+            orders.update(order['id']),
             post_data,
             options,
         );
@@ -76,7 +78,7 @@ const OrderForm = () => {
         const post_data = { ...data, status: ORDER_CLOSED };
         setProcessing(true);
         Inertia.put(
-            route('sales.orders.update', order['id']),
+            orders.update(order['id']),
             post_data,
             options,
         );
@@ -94,7 +96,7 @@ const OrderForm = () => {
     const getItems = () => {
         axios({
             method: 'get',
-            url: route('ajax.so.items', order.id),
+            url: soAjax.items(order.id).url,
         })
             .then((res) => {
                 setItems(res.data.items);
@@ -110,7 +112,7 @@ const OrderForm = () => {
     const deleteItem = (id) => {
         axios({
             method: 'delete',
-            url: route('ajax.so.item.destroy', id),
+            url: soAjax.item.destroy(id).url,
         })
             .then((res) => {
                 setItems(res.data.items);
@@ -171,12 +173,12 @@ const OrderForm = () => {
                 buttons={
                     <>
                         <PreviewButton
-                            href={route('sales.orders.show', order.id)}
+                            href={orders.show(order.id)}
                             size="sm"
                         />
 
                         <Back
-                            href={route('sales.orders.index')}
+                            href={orders.index()}
                             size="sm"
                             label={'Orders List'}
                         />

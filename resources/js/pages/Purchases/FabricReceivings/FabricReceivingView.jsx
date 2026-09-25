@@ -11,6 +11,7 @@ import { Col, Row } from 'react-bootstrap';
 import { PreviewAttachments } from '@/components/File.jsx';
 import Print from '@/components/button/Print.jsx';
 import BackButton from '@/components/button/back.tsx';
+import fabricReceivings from '@/routes/purchases/fabric-receivings';
 
 
 const FabricReceivingView = () => {
@@ -41,10 +42,10 @@ const FabricReceivingView = () => {
         <>
             <Head title="Fabric Receiving View" />
             <PageHeader title="Fabric Receiving View" buttons={(<>
-                <BackButton href={route("purchases.fabric-receivings.index")} label="Fabric Receivings" />
+                <BackButton href={fabricReceivings.index()} label="Fabric Receivings" />
                 {
                     canModify && (
-                        <InertiaLink href={route("purchases.fabric-receivings.edit", order.id)}
+                        <InertiaLink href={fabricReceivings.edit(order.id)}
                                      className={"btn btn-sm btn-white"}>
                             <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
                         </InertiaLink>

@@ -11,6 +11,7 @@ import SearchFilter from '@/components/SearchFilter';
 import { Delete } from '@/components/Actions';
 import NoData from '@/components/NoData.jsx';
 //import Form from "@/pages/Sales/Customers/CustomerForm";
+import valueAddition from '@/routes/stocks/value-addition';
 
 const ValueAddition = () => {
     const { items } = usePage().props;
@@ -27,7 +28,7 @@ const ValueAddition = () => {
                         buttons={
                             <>
                                 <InertiaLink
-                                    href={route('stocks.value-addition.create')}
+                                    href={valueAddition.create()}
                                     className="btn btn-xs  btn-primary"
                                 >
                                     <Icon icon={'solar:add-bold-duotone'} />{' '}
@@ -85,7 +86,7 @@ const ValueAddition = () => {
                                                     <td className={'actions'}>
                                                         <Delete
                                                             action={
-                                                                ' stocks.value-addition.edit'
+                                                                valueAddition.destroy
                                                             }
                                                             id={id}
                                                         />

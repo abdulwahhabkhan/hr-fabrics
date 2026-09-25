@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { notifyMessage, serverSideError, UNIT_SUIT, usePackingUnits } from '@/util/util';
+import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
 
 export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, products }) => {
     const packingUnits = usePackingUnits();
@@ -49,7 +50,7 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
         setProcessing(true);
         axios({
             method: "post",
-            url: route("ajax.fabric-receiving.item", orderId),
+            url: fabricReceivingAjax.item(orderId).url,
             data: { ...data, order_id: item.order_id, item_id: item.id },
         })
             .then((res) => {

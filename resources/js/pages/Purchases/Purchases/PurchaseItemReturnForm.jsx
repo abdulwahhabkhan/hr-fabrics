@@ -4,6 +4,7 @@ import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
 import { Inertia } from '@/util/Inertia';
+import por from '@/routes/purchases/por';
 
 export const PurchaseItemReturnForm = ({item, onClose, show}) => {
 
@@ -18,7 +19,7 @@ export const PurchaseItemReturnForm = ({item, onClose, show}) => {
     const sendRequest = async (data) => {
         setLoading(true)
         Inertia.post(
-            route('purchases.pos.return'),
+            por.store(),
             {...data, purchase_id: item.purchase_id, id: item.id},
             {
                 onError: (error) => {

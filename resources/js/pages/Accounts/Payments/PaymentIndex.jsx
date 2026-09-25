@@ -13,10 +13,11 @@ import Form from '@/pages/Catalog/Brands/BrandForm';
 import { NumberFormat } from '@/util/NumberFormat';
 import { FileIcon } from '@/components/File';
 import NoData from '@/components/NoData.jsx';
+import journals from '@/routes/accounts/journals';
 
 const PaymentIndex = () => {
-    const { payments, canAdd, canUpdate, canDelete, canView } = usePage().props;
-    const { data, links } = payments;
+    const { payments: paymentsProp, canAdd, canUpdate, canDelete, canView } = usePage().props;
+    const { data, links } = paymentsProp;
     const [id, setId] = useState(0);
     const [show, setShow] = useState(false);
     const handleAdd = () => {
@@ -39,7 +40,7 @@ const PaymentIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('accounts.payments.create')}
+                            href={journals.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Make
@@ -112,18 +113,12 @@ const PaymentIndex = () => {
                                                     <td className={'actions'}>
                                                         {canUpdate && (
                                                             <InertiaEdit
-                                                                href={route(
-                                                                    'accounts.payments.edit',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                         {canView && (
                                                             <InertiaView
-                                                                href={route(
-                                                                    'accounts.payments.show',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                     </td>

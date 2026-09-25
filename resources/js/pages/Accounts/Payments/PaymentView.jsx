@@ -8,6 +8,8 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { toWords } from 'number-to-words';
 import { ViewFile } from '@/components/File';
+import pos from '@/routes/purchases/pos';
+import journals from '@/routes/accounts/journals';
 
 
 const PaymentView = () => {
@@ -33,7 +35,7 @@ const PaymentView = () => {
     						<span className="float-end hidden-print">
                                 {
                                     canModify && (
-                                        <InertiaLink href={route("purchases.pos.edit", payment.id)}
+                                        <InertiaLink href={pos.edit(payment.id)}
                                                      className={"btn btn-sm btn-white mb-10px ms-5px me-5px"}>
                                             <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
                                         </InertiaLink>
@@ -43,7 +45,7 @@ const PaymentView = () => {
                                 <button className="btn btn-sm btn-white mb-10px ms-5px me-5px" onClick={() => print()}>
                                     <Icon icon={"solar:printer-bold-duotone"} /> Print
     							</button>
-    							<InertiaLink href={route("accounts.payments.index")}
+    							<InertiaLink href={journals.index()}
                                              className={"btn btn-sm btn-warning mb-10px ms-5px me-5px"}>
                                     <Icon icon={"solar:close-bold-duotone"} /> Close
                                 </InertiaLink>

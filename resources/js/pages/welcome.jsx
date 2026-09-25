@@ -3,6 +3,7 @@ import homeBg from "@/img/bg/bg-home.jpg";
 import logo from "@/img/logo-2.png";
 import LoginLink from "@/components/LoginLink/LoginLink.jsx";
 import { Head, usePage } from "@/util/Inertia.jsx";
+import { dashboard, login } from '@/routes';
 
 export default function Welcome() {
     const { auth, appName, environment } = usePage().props;
@@ -20,11 +21,11 @@ export default function Welcome() {
                         <ul className="nav navbar-nav navbar-right">
                             <li className="nav-item">
                                 {auth.user ? (
-                                    <a href={route("login")} className="nav-link">
+                                    <a href={dashboard().url} className="nav-link">
                                         Dashboard
                                     </a>
                                 ) : (
-                                    <a href={route("login")} className="nav-link">
+                                    <a href={login().url} className="nav-link">
                                         Log in
                                     </a>
                                 )}
@@ -41,7 +42,7 @@ export default function Welcome() {
                                 label="Login as Admin"
                                 className="pb-3 text-red-500 btn btn-primary"
                                 keyId={"1"}
-                                redirectUrl={route("dashboard")}
+                                redirectUrl={dashboard().url}
                             />
                         )}
                     </div>

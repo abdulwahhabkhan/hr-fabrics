@@ -24,7 +24,7 @@ const SalesBySuit = () => {
         const post_data = { ...data };
         const { start_date, end_date } = post_data;
         Inertia.get(
-            route(route().current()),
+            window.location.pathname,
             {
                 start_date: start_date,
                 end_date: end_date

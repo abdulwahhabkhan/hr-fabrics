@@ -5,6 +5,7 @@ import {Inertia} from "@/util/Inertia";
 import { Icon } from "@iconify/react";
 import {usePage} from "@/util/Inertia";
 import Select from "react-select";
+import stocks from '@/routes/stocks';
 
 export const ProductSearchFilter = ({filters}) => {
     const {products, product} = usePage().props
@@ -12,7 +13,7 @@ export const ProductSearchFilter = ({filters}) => {
     const {register, control, setValue, formState: {errors}, handleSubmit, watch} = useForm({defaultValues: filters});
     const sendRequest = async (data) => {
         const post_data = {...data}
-        Inertia.get(route('stocks.product-history'), post_data)
+        Inertia.get(stocks.productHistory().url, post_data)
     }
 
     const updateValue = (item) => {

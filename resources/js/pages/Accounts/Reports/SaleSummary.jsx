@@ -40,7 +40,7 @@ const SaleSummary = () => {
     useEffect(() => {
         if (updatedDate != summary_date) {
             Inertia.get(
-                route(route().current()),
+                window.location.pathname,
                 { date: updatedDate.format(settings.SEARCH_DATE_FORMAT) },
                 {
                     replace: true,

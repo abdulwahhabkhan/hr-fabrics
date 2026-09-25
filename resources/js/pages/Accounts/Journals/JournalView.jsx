@@ -8,6 +8,7 @@ import { toWords } from 'number-to-words';
 import { PreviewAttachments } from '@/components/File';
 import Print from '@/components/button/Print.jsx';
 import BackButton from '@/components/button/back';
+import journals from '@/routes/accounts/journals';
 
 const JournalView = () => {
     const { journal, transactions, appName, files, amount, user } =
@@ -21,7 +22,7 @@ const JournalView = () => {
                 buttons={
                     <>
                         <BackButton
-                            href={route('accounts.journals.index')}
+                            href={journals.index()}
                             label="Journals List"
                         />
                         <Print />

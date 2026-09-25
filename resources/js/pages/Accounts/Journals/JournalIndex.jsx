@@ -15,6 +15,7 @@ import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import AttachmentForm from '@/pages/Accounts/Journals/AttachmentForm';
 import NoData from '@/components/NoData.jsx';
 import PaginationFull from '@/components/PaginationFull.jsx';
+import journals from '@/routes/accounts/journals';
 
 const JournalIndex = () => {
     const { vouchers, canAdd, canView, canDelete, canAddSingle } =
@@ -53,7 +54,7 @@ const JournalIndex = () => {
 
                         {canAddSingle && (
                             <InertiaLink
-                                href={route('accounts.journals.single')}
+                                href={journals.single()}
                                 className="btn btn-sm  btn-inverse"
                             >
                                 <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -63,7 +64,7 @@ const JournalIndex = () => {
 
                         {canAdd && (
                             <InertiaLink
-                                href={route('accounts.journals.create')}
+                                href={journals.create()}
                                 className="btn btn-sm  btn-theme"
                             >
                                 <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -186,17 +187,12 @@ const JournalIndex = () => {
                                                         </a>
                                                         {canView && (
                                                             <InertiaView
-                                                                href={route(
-                                                                    'accounts.journals.show',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                         {canDelete && (
                                                             <Delete
-                                                                action={
-                                                                    'accounts.journals.destroy'
-                                                                }
+                                                                action={journals.destroy}
                                                                 id={id}
                                                             />
                                                         )}

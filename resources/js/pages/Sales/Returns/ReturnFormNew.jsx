@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import ValidationErrors from '@/components/ValidationErrors';
 import BackButton from '@/components/button/back';
+import returns from '@/routes/sales/returns';
 
 const ReturnFormNew = () => {
     const { customers, errors: serverSideError } = usePage().props;
@@ -23,7 +24,7 @@ const ReturnFormNew = () => {
     const sendRequest = async (data) => {
         const post_data = { ...data, customer_id: data.customer.customer_id };
         setProcessing(true);
-        Inertia.post(route("sales.returns.store"), post_data, options);
+        Inertia.post(returns.store(), post_data, options);
     };
 
     return (
@@ -38,7 +39,7 @@ const ReturnFormNew = () => {
                                            onClick={handleSubmit(sendRequest)}>
                                 Create Return
                             </LoadingButton>
-                            <BackButton href={route("sales.returns.index")} size="xs" />
+                            <BackButton href={returns.index()} size="xs" />
                         </>
                     )} />
                     <PanelBody>

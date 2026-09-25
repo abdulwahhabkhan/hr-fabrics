@@ -7,6 +7,7 @@ import CustomerFilter from '@/components/filters/CustomerFilter.jsx';
 import PaginationFull from '@/components/PaginationFull';
 import NoData from '@/components/NoData';
 import CustomerTable from '@/components/customers/CustomerTable';
+import customersRoutes from '@/routes/sales/customers';
 
 const Customers = () => {
     const { customers, canAdd = true, canUpdate = true } = usePage().props;
@@ -21,7 +22,7 @@ const Customers = () => {
                 description={meta?.total ? `${meta.total} total` : undefined}
                 buttons={
                     canAdd && (
-                        <InertiaLink href={route('sales.customers.create')} className="btn btn-sm btn-theme">
+                        <InertiaLink href={customersRoutes.create()} className="btn btn-sm btn-theme">
                             <Icon icon="solar:add-bold-duotone" /> New customer
                         </InertiaLink>
                     )

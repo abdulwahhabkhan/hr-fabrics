@@ -5,6 +5,7 @@ import { Head, Inertia, usePage } from '@/util/Inertia';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Icon } from '@iconify/react';
 import { ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
+import accounts from '@/routes/accounts';
 
 const BalanceReport = () => {
     const { rows, suspended, hasBalance, limit, total_balance } = usePage().props;
@@ -21,7 +22,7 @@ const BalanceReport = () => {
             firstRun.current = false;
             return;
         }
-        Inertia.get(route(route().current()), values, {
+        Inertia.get(window.location.pathname, values, {
             replace: true,
             preserveState: true,
         });
@@ -133,13 +134,15 @@ const BalanceReport = () => {
                                                         className="d-print-none ms-2"
                                                         title={"Open Detail"}
                                                         target={"_blank"}
-                                                        href={route("accounts.balance-history", {
-                                                            customer: {
-                                                                id: id,
-                                                                name: name,
-                                                                city: city,
+                                                        href={accounts.balanceHistory({
+                                                            query: {
+                                                                customer: {
+                                                                    id: id,
+                                                                    name: name,
+                                                                    city: city,
+                                                                },
                                                             },
-                                                        })}
+                                                        }).url}
                                                     >
                                                         <Icon icon={"solar:square-arrow-right-up-bold-duotone"} />
                                                     </a>

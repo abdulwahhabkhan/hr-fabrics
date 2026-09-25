@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import StyledSelect from '@/components/StyledSelect';
 import { UNIT_BOX, usePackingUnits } from '@/util/util';
 import NoData from '@/components/NoData.jsx';
+import storeTransfers from '@/routes/stocks/store-transfers';
 
 export const StoreTransferLoadStockForm = ({
     show,
@@ -54,7 +55,7 @@ export const StoreTransferLoadStockForm = ({
         setLoadingStock(true);
         axios({
             method: 'get',
-            url: route('stocks.store-transfers.stock', storeTransferId),
+            url: storeTransfers.stock(storeTransferId).url,
             params: { product_id: product.product_id, unit },
         })
             .then((res) => {

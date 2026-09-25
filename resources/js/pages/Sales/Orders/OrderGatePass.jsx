@@ -8,6 +8,7 @@ import { Form } from 'react-bootstrap';
 import { getSOUnit } from '@/util/util';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import orders from '@/routes/sales/orders';
 
 const OrderGatePass = () => {
     const { order, appName, auth, transaction_date } = usePage().props;
@@ -47,7 +48,7 @@ const OrderGatePass = () => {
         <>
             <Head title="Invoice Gate Pass" />
             <PageHeader title="Invoice Gate Pass" buttons={(<>
-                <BackButton href={route("sales.orders.index")} />
+                <BackButton href={orders.index()} />
                 <Print />
             </>)} />
             <PageContent>

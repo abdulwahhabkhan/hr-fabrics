@@ -17,7 +17,7 @@ const HistoryIndex = () => {
 
     const { register, handleSubmit, formState: { errors }, control } = useForm({ defaultValues: { customer } });
     const sendRequest = async (data) => {
-        Inertia.get(route(route().current()), data, {
+        Inertia.get(window.location.pathname, data, {
             replace: true,
             preserveState: true,
             except: ["accounts"]

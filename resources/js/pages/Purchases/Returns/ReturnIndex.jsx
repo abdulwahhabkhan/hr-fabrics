@@ -16,6 +16,7 @@ import PaginationFull from '@/components/PaginationFull.jsx';
 import AddReturn from '@/pages/Purchases/Returns/AddReturn.jsx';
 import NoData from '@/components/NoData.jsx';
 import RowActionsMenu from '@/components/RowActionsMenu.jsx';
+import por from '@/routes/purchases/por';
 
 const ReturnIndex = () => {
     const { rows, canAdd } = usePage().props;
@@ -105,20 +106,14 @@ const ReturnIndex = () => {
                                                             {can.view && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={route(
-                                                                            'purchases.por.show',
-                                                                            id,
-                                                                        )}
+                                                                        href={por.show(id)}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can.edit && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={route(
-                                                                            'purchases.por.edit',
-                                                                            id,
-                                                                        )}
+                                                                        href={por.edit(id)}
                                                                     />
                                                                 </span>
                                                             )}
@@ -128,28 +123,20 @@ const ReturnIndex = () => {
                                                                 <RowActionsMenu>
                                                                     {can.inventory && (
                                                                         <InertiaInventoryAction
-                                                                            href={route(
-                                                                                'purchases.por.inventory',
-                                                                                id,
-                                                                            )}
+                                                                            href={por.inventory(id)}
                                                                             target="_blank"
                                                                         />
                                                                     )}
 
                                                                     {can.ledger && (
                                                                         <InertiaLedgerAction
-                                                                            href={route(
-                                                                                'purchases.por.ledger',
-                                                                                id,
-                                                                            )}
+                                                                            href={por.ledger(id)}
                                                                             target="_blank"
                                                                         />
                                                                     )}
                                                                     {can.unlock && (
                                                                         <UnLockDropdownItem
-                                                                            action={
-                                                                                'purchases.por.unlock'
-                                                                            }
+                                                                            action={por.unlock}
                                                                             id={
                                                                                 id
                                                                             }

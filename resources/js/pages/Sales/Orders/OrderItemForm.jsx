@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
 import { confirmSwal } from '@/util/swal';
+import soAjax from '@/routes/ajax/so';
 
 export const OrderItemForm = ({
     orderId,
@@ -100,7 +101,7 @@ export const OrderItemForm = ({
         setProcessing(true);
         axios({
             method: "post",
-            url: route("ajax.so.item.add", orderId),
+            url: soAjax.item.add(orderId).url,
             data: {
                 ...data,
                 order_id: item.order_id,

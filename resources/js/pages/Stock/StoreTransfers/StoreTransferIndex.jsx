@@ -18,6 +18,8 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { getOrderStatus } from '@/util/util';
 import NoData from '@/components/NoData.jsx';
 import { Icon } from '@iconify/react';
+import storeTransfers from '@/routes/stocks/store-transfers';
+import { open as openStoreTransfer } from '@/routes/actions/store-transfer';
 
 const StoreTransferIndex = () => {
     const { rows, canAdd } = usePage().props;
@@ -34,7 +36,7 @@ const StoreTransferIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('stocks.store-transfers.create')}
+                            href={storeTransfers.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -131,25 +133,21 @@ const StoreTransferIndex = () => {
                                                     <td className={'actions'}>
                                                         {can_view && (
                                                             <InertiaView
-                                                                href={route(
-                                                                    'stocks.store-transfers.show',
+                                                                href={storeTransfers.show(
                                                                     id,
                                                                 )}
                                                             />
                                                         )}
                                                         {can_update && (
                                                             <InertiaEdit
-                                                                href={route(
-                                                                    'stocks.store-transfers.edit',
+                                                                href={storeTransfers.edit(
                                                                     id,
                                                                 )}
                                                             />
                                                         )}
                                                         {can_unlock && (
                                                             <UnLock
-                                                                action={
-                                                                    'actions.store-transfer.open'
-                                                                }
+                                                                action={openStoreTransfer}
                                                                 id={id}
                                                             />
                                                         )}
@@ -161,8 +159,7 @@ const StoreTransferIndex = () => {
                                                                         target={
                                                                             '_blank'
                                                                         }
-                                                                        href={route(
-                                                                            'stocks.store-transfers.ledger',
+                                                                        href={storeTransfers.ledger(
                                                                             id,
                                                                         )}
                                                                     />
@@ -172,8 +169,7 @@ const StoreTransferIndex = () => {
                                                                         target={
                                                                             '_blank'
                                                                         }
-                                                                        href={route(
-                                                                            'stocks.store-transfers.inventory',
+                                                                        href={storeTransfers.inventory(
                                                                             id,
                                                                         )}
                                                                     />

@@ -40,7 +40,7 @@ export default () => {
             const { cancel, token } = axios.CancelToken.source();
             const timeOutId = setTimeout(() => {
                 const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
-                Inertia.get(route(route().current()), query, {
+                Inertia.get(window.location.pathname, query, {
                     replace: true,
                     preserveState: true,
                 });
@@ -63,7 +63,7 @@ export default () => {
     function doSearch(e) {
         e.preventDefault();
         const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
-        Inertia.get(route(route().current()), query, {
+        Inertia.get(window.location.pathname, query, {
             replace: true,
             preserveState: true,
         });

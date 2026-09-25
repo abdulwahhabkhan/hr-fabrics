@@ -18,6 +18,7 @@ import BackButton from '@/components/button/back';
 import round from 'lodash';
 import NoData from '@/components/NoData.jsx';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
+import returns from '@/routes/sales/returns';
 
 const ReturnForm = () => {
     const {
@@ -50,7 +51,7 @@ const ReturnForm = () => {
         const post_data = { ...data, items: items, status: status };
         setProcessing(true);
         Inertia.put(
-            route('sales.returns.update', order['id']),
+            returns.update(order['id']),
             post_data,
             options,
         );
@@ -128,11 +129,11 @@ const ReturnForm = () => {
                 buttons={
                     <>
                         <PreviewButton
-                            href={route('sales.returns.show', order.id)}
+                            href={returns.show(order.id)}
                         />
                         <BackButton
                             label={'Returns'}
-                            href={route('sales.returns.index')}
+                            href={returns.index()}
                         />
                     </>
                 }

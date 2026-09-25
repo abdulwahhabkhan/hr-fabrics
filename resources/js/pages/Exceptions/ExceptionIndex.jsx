@@ -2,13 +2,14 @@ import React from 'react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
+import { accounts, stock } from '@/routes/exceptions';
 
 const ExceptionIndex = () => {
     const { account_exceptions, stock_exceptions } = usePage().props;
 
     const links = [
-        { label: 'Accounts', href: route('exceptions.accounts'), count: account_exceptions },
-        { label: 'Stock', href: route('exceptions.stock'), count: stock_exceptions }
+        { label: 'Accounts', href: accounts().url, count: account_exceptions },
+        { label: 'Stock', href: stock().url, count: stock_exceptions }
     ];
 
     return (

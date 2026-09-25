@@ -12,6 +12,7 @@ import { settings } from '@/config/page-settings';
 import 'react-datetime/css/react-datetime.css';
 import { FileUpload } from '@/components/File';
 import BackButton from '@/components/button/back';
+import journals from '@/routes/accounts/journals';
 
 const JournalForm = () => {
     const { errors: serverErrors, accounts, date } = usePage().props;
@@ -42,7 +43,7 @@ const JournalForm = () => {
     const sendRequest = async (data) => {
         const post_data = { ...data, file: file };
         setProcessing(true);
-        Inertia.post(route('accounts.journals.store'), post_data, options);
+        Inertia.post(journals.store(), post_data, options);
     };
     useEffect(() => {
         if (!_.isEmpty(serverErrors)) {
@@ -54,7 +55,7 @@ const JournalForm = () => {
             <Head title="Journal Voucher Update" />
             <PageHeader title="Journal Voucher Update" buttons={(
                 <>
-                    <BackButton href={route('accounts.journals.index')} />
+                    <BackButton href={journals.index()} />
                 </>
             )} />
             <PageContent>
@@ -176,7 +177,7 @@ const JournalForm = () => {
                         </form>
                     </PanelBody>
                     <PanelFooter className={'text-center'}>
-                        <BackButton size={'md'} href={route('accounts.journals.index')} />
+                        <BackButton size={'md'} href={journals.index()} />
 
                         <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>
                             Save Changes

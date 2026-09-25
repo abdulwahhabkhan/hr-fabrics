@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { notifyMessage, serverSideError, usePackingUnits } from '@/util/util';
+import returnAjax from '@/routes/ajax/return';
 
 export const ReturnItemForm = ({returnId, onClose, setItems, products}) => {
     const packingUnits = usePackingUnits();
@@ -37,7 +38,7 @@ export const ReturnItemForm = ({returnId, onClose, setItems, products}) => {
     const sendRequest = async (data) => {
         setProcessing(true);
         axios.post(
-            route('ajax.return.item.save', returnId),
+            returnAjax.item.save(returnId).url,
             {...data, product_id: data?.product?.product_id}
         )
             .then(res => {

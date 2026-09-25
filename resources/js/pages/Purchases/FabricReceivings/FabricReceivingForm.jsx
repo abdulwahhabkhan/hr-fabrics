@@ -15,6 +15,8 @@ import { AttachFiles, FileUpload } from '@/components/File';
 import BackButton from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import fabricReceivings from '@/routes/purchases/fabric-receivings';
+import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
 
 const FabricReceivingForm = () => {
     const {
@@ -53,7 +55,7 @@ const FabricReceivingForm = () => {
         setProcessing(true);
 
         Inertia.put(
-            route('purchases.fabric-receivings.update', order['id']),
+            fabricReceivings.update(order['id']),
             post_data,
             options,
         );
@@ -64,7 +66,7 @@ const FabricReceivingForm = () => {
         setProcessing(true);
 
         Inertia.put(
-            route('purchases.fabric-receivings.update', order['id']),
+            fabricReceivings.update(order['id']),
             post_data,
             options,
         );
@@ -85,7 +87,7 @@ const FabricReceivingForm = () => {
     const deleteItem = (id) => {
         axios({
             method: 'delete',
-            url: route('ajax.fabric-receiving.item.destroy', id),
+            url: fabricReceivingAjax.item.destroy(id).url,
         })
             .then((res) => {
                 setItems(res.data.items);
@@ -123,13 +125,10 @@ const FabricReceivingForm = () => {
                 buttons={
                     <>
                         <PreviewButton
-                            href={route(
-                                'purchases.fabric-receivings.show',
-                                order.id,
-                            )}
+                            href={fabricReceivings.show(order.id)}
                         />
                         <BackButton
-                            href={route('purchases.fabric-receivings.index')}
+                            href={fabricReceivings.index()}
                         />
                     </>
                 }

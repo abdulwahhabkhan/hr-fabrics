@@ -11,6 +11,7 @@ import SearchFilter from '@/components/SearchFilter';
 import { Delete, InertiaEdit } from '@/components/Actions';
 import Form from '@/pages/Catalog/Brands/BrandForm';
 import NoData from '@/components/NoData.jsx';
+import journals from '@/routes/accounts/journals';
 
 const JournalBookIndex = () => {
     const { vouchers, canAdd, canUpdate, canDelete } = usePage().props;
@@ -37,7 +38,7 @@ const JournalBookIndex = () => {
                 buttons={
                     canAdd && (
                         <InertiaLink
-                            href={route('accounts.journal-voucher.create')}
+                            href={journals.create()}
                             className="btn btn-sm  btn-theme"
                         >
                             <Icon icon={'solar:add-bold-duotone'} /> Create
@@ -102,17 +103,12 @@ const JournalBookIndex = () => {
                                                     <td className={'actions'}>
                                                         {canUpdate && (
                                                             <InertiaEdit
-                                                                href={route(
-                                                                    'accounts.journal-voucher.edit',
-                                                                    id,
-                                                                )}
+                                                                href={journals.show(id)}
                                                             />
                                                         )}
                                                         {canDelete && (
                                                             <Delete
-                                                                action={
-                                                                    'accounts.journal-voucher.destroy'
-                                                                }
+                                                                action={journals.destroy}
                                                                 id={id}
                                                             />
                                                         )}

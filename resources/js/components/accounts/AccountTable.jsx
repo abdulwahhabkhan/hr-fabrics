@@ -4,6 +4,7 @@ import { InertiaLink } from '@/util/Inertia';
 import { Moment } from '@/components/Moment';
 import { settings } from '@/config/page-settings';
 import { Delete } from '@/components/Actions';
+import accountsRoutes from '@/routes/accounts/accounts';
 import AccountTypeBadge from './AccountTypeBadge';
 
 export default function AccountTable({ accounts, startIndex = 1, canUpdate, canDelete }) {
@@ -47,7 +48,7 @@ export default function AccountTable({ accounts, startIndex = 1, canUpdate, canD
                                     <div className="hf-row-actions">
                                         {canUpdate && (
                                             <InertiaLink
-                                                href={route('accounts.accounts.edit', id)}
+                                                href={accountsRoutes.edit(id)}
                                                 className="hf-icon-btn hf-icon-btn--boxed"
                                                 title="Edit account"
                                                 aria-label={`Edit ${name}`}
@@ -57,7 +58,7 @@ export default function AccountTable({ accounts, startIndex = 1, canUpdate, canD
                                         )}
                                         {canDelete && (
                                             <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
-                                                <Delete action="accounts.accounts.destroy" id={id} />
+                                                <Delete action={accountsRoutes.destroy} id={id} />
                                             </span>
                                         )}
                                     </div>

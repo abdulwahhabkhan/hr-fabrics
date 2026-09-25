@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import ValidationErrors from '@/components/ValidationErrors';
 import { Head, setLayoutProps, useForm } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
+import { confirm } from '@/routes/password';
 
 export default function ConfirmPassword() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -21,7 +22,7 @@ export default function ConfirmPassword() {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('password.confirm'));
+        post(confirm().url);
     };
     setLayoutProps({
         title: 'Confirm Password',

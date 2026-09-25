@@ -10,6 +10,7 @@ import { getPOUnit, STATUS_CLOSE, STATUS_OPEN } from '@/util/util';
 import { Col, Row } from 'react-bootstrap';
 import Print from '@/components/button/Print.jsx';
 import BackButton from '@/components/button/back.tsx';
+import pos from '@/routes/purchases/pos';
 
 const PurchaseView = () => {
     const { receipt, appName, total_summary, transaction_date } =
@@ -43,12 +44,12 @@ const PurchaseView = () => {
                 buttons={
                     <>
                         <BackButton
-                            href={route('purchases.pos.index')}
+                            href={pos.index()}
                             label="Fabric Purchases"
                         />
                         {canModify && (
                             <InertiaLink
-                                href={route('purchases.pos.edit', receipt.id)}
+                                href={pos.edit(receipt.id)}
                                 className={'btn btn-sm btn-white'}
                             >
                                 <Icon icon={'solar:pen-2-bold-duotone'} /> Edit

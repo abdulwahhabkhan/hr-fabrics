@@ -11,6 +11,9 @@ import BackButton from '@/components/button/back';
 import { Icon } from '@iconify/react';
 import NoData from '@/components/NoData.jsx';
 import { DeleteAjax } from '@/components/Actions';
+import orderRoute from '@/routes/sales/order';
+import orders from '@/routes/sales/orders';
+import { deleteMethod as deleteFileRoute, show as showFile } from '@/routes/file';
 
 const OrderBiltiForm = () => {
     const {
@@ -24,7 +27,7 @@ const OrderBiltiForm = () => {
     const [file, setFile] = useState(null);
     const [attachments, setAttachments] = useState(initialAttachments);
     const deleteFile = async (id) => {
-        await axios.delete(route('file.delete', id));
+        await axios.delete(deleteFileRoute(id).url);
         setAttachments((current) => current.filter((a) => a.id !== id));
         if (file && file.id === id) {
             setFile(null);
@@ -45,7 +48,7 @@ const OrderBiltiForm = () => {
         const post_data = { ...data, file: file };
         setProcessing(true);
         Inertia.post(
-            route('sales.order.bilti.create', {
+            orderRoute.bilti.create({
                 order: order['id'],
                 file: file['id'],
             }),
@@ -61,7 +64,7 @@ const OrderBiltiForm = () => {
                 title="Order Bilti Info"
                 buttons={
                     <>
-                        <BackButton href={route('sales.orders.index')} />
+                        <BackButton href={orders.index()} />
                     </>
                 }
             />
@@ -114,10 +117,9 @@ const OrderBiltiForm = () => {
                                                             className={
                                                                 'btn btn-sm btn-outline-cyan flex-fill'
                                                             }
-                                                            href={route(
-                                                                'file.show',
+                                                            href={showFile(
                                                                 file.id,
-                                                            )}
+                                                            ).url}
                                                             target={'_blank'}
                                                             rel={
                                                                 'noopener noreferrer'
@@ -223,10 +225,9 @@ const OrderBiltiForm = () => {
                                                     className={
                                                         'btn btn-sm btn-outline-cyan flex-fill'
                                                     }
-                                                    href={route(
-                                                        'file.show',
+                                                    href={showFile(
                                                         attachment.id,
-                                                    )}
+                                                    ).url}
                                                     target={'_blank'}
                                                     rel={'noopener noreferrer'}
                                                     title={'Download file'}

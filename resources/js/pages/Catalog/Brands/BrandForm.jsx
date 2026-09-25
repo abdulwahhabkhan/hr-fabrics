@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Inertia } from '@/util/Inertia';
 import axios from 'axios';
 import { notifyMessage } from '@/util/util';
+import brands from '@/routes/catalog/brands';
 
 
 export default ({id, show, callback}) => {
@@ -17,7 +18,7 @@ export default ({id, show, callback}) => {
 
         if (id) {
             setLoading(true)
-            axios.get(route('catalog.brands.edit', id))
+            axios.get(brands.edit(id).url)
                 .then(res => {
                     const {data: {brand}} = res
                     setLoading(false)
@@ -35,12 +36,12 @@ export default ({id, show, callback}) => {
         const method = id ? "PUT" : 'POST'
         axios({
             method: method,
-            url: route('catalog.brands.store') + (id ? '/' + id : ''),
+            url: id ? brands.update(id).url : brands.store().url,
             data: data
         }).then(res => {
             const {data: {message}} = res
             notifyMessage({title: "Success", type: 'success', message: message})
-            Inertia.visit(route('catalog.brands.index'))
+            Inertia.visit(brands.index().url)
         }).catch(res => {
             console.log('invalid request', res)
         }).finally(data => {

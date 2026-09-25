@@ -25,7 +25,7 @@ const ReceivableReport = () => {
     } = useForm({ defaultValues: filters });
 
     const doSearch = async (data) => {
-        Inertia.get(route(route().current()), data, {
+        Inertia.get(window.location.pathname, data, {
             replace: true,
             preserveState: true
         });

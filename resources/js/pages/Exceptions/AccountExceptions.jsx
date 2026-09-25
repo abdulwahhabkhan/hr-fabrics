@@ -5,6 +5,8 @@ import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import BackButton from '@/components/button/back';
 import NoData from '@/components/NoData.jsx';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
+import { home } from '@/routes/exceptions';
+import { detail } from '@/routes/exceptions/accounts';
 
 const AccountExceptions = () => {
     const { ledgers } = usePage().props;
@@ -17,7 +19,7 @@ const AccountExceptions = () => {
                 <Panel>
                     <PanelHeader
                         heading="Exceptions : Journal"
-                        buttons={<BackButton href={route('exceptions.home')} label="Exceptions" size="xs" />}
+                        buttons={<BackButton href={home()} label="Exceptions" size="xs" />}
                     />
                     <PanelBody>
                         <div className="table-responsive">
@@ -40,9 +42,11 @@ const AccountExceptions = () => {
                                             <td>{ledger.total}</td>
                                             <td className="actions">
                                                 <InertiaLink
-                                                    href={route('exceptions.accounts.detail', {
-                                                        type: ledger.resource_type,
-                                                        resource_id: ledger.resource_id
+                                                    href={detail({
+                                                        query: {
+                                                            type: ledger.resource_type,
+                                                            resource_id: ledger.resource_id
+                                                        }
                                                     })}
                                                 >
                                                     <Icon icon="solar:document-text-bold-duotone" />

@@ -9,6 +9,7 @@ import StyledSelect from '@/components/StyledSelect';
 import BackButton from '@/components/button/back';
 import axios from 'axios';
 import { notifyMessage } from '@/util/util.jsx';
+import por from '@/routes/purchases/por';
 
 const ReturnFormNew = () => {
     const { suppliers } = usePage().props;
@@ -19,7 +20,7 @@ const ReturnFormNew = () => {
 
     const sendRequest = async (data) => {
         setProcessing(true);
-        axios.post(route("purchases.por.store"), data)
+        axios.post(por.store().url, data)
             .then(res => {
                 const { data: { message, redirect } } = res;
                 notifyMessage({ title: "Success", type: 'success', message: message });
@@ -42,7 +43,7 @@ const ReturnFormNew = () => {
                                            onClick={handleSubmit(sendRequest)}>
                                 Create Return
                             </LoadingButton>
-                            <BackButton href={route("purchases.por.index")} size="xs" />
+                            <BackButton href={por.index()} size="xs" />
                         </>
                     )} />
                     <PanelBody>

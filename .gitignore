@@ -21,6 +21,9 @@ yarn-error.log
 /public/fonts-manifest.dev.json
 /public/build
 /public/images/
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
 test.json
 _ide_helper.php
 _ide_helper_models.php

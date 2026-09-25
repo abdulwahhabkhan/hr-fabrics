@@ -15,6 +15,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import StyledSelect from '@/components/StyledSelect';
 import BackButton from '@/components/button/back';
+import customers from '@/routes/sales/customers';
 
 const CustomerForm = () => {
     const {
@@ -48,11 +49,11 @@ const CustomerForm = () => {
         setProcessing(true);
         if (customer)
             Inertia.put(
-                route('sales.customers.update', customer['id']),
+                customers.update(customer['id']),
                 post_data,
                 options,
             );
-        else Inertia.post(route('sales.customers.store'), post_data, options);
+        else Inertia.post(customers.store(), post_data, options);
     };
 
     useEffect(() => {
@@ -67,7 +68,7 @@ const CustomerForm = () => {
                 title="Customer Update"
                 buttons={
                     <>
-                        <BackButton href={route('sales.customers.index')} />
+                        <BackButton href={customers.index()} />
                     </>
                 }
             />
@@ -319,7 +320,7 @@ const CustomerForm = () => {
                     <PanelFooter className={'text-center'}>
                         <BackButton
                             size={'md'}
-                            href={route('sales.customers.index')}
+                            href={customers.index()}
                         />
 
                         <LoadingButton

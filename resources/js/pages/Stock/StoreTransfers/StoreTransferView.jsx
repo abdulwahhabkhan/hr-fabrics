@@ -14,6 +14,7 @@ import React from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { getSOUnit, ORDER_OPEN } from '@/util/util';
 import { Address } from '@/components/Address';
+import storeTransfers from '@/routes/stocks/store-transfers';
 
 const StoreTransferView = () => {
     const { storeTransfer } = usePage().props;
@@ -27,13 +28,12 @@ const StoreTransferView = () => {
                 buttons={
                     <>
                         <BackButton
-                            href={route('stocks.store-transfers.index')}
+                            href={storeTransfers.index()}
                             label="Store Transfers List"
                         />
                         {storeTransfer.status === ORDER_OPEN && (
                             <InertiaLink
-                                href={route(
-                                    'stocks.store-transfers.edit',
+                                href={storeTransfers.edit(
                                     storeTransfer.id,
                                 )}
                                 className={'btn btn-sm btn-white'}

@@ -13,6 +13,7 @@ import Pagination from '@/components/Pagination';
 import { format, parse } from 'date-fns';
 import 'react-datetime/css/react-datetime.css';
 import NoData from '@/components/NoData.jsx';
+import attendance from '@/routes/reports/attendance';
 
 const formatTime = (time) => {
     if (!time) {
@@ -43,7 +44,7 @@ const AttendanceReport = () => {
     function doSearch(e) {
         e.preventDefault();
         const query = Object.keys(pickBy(values)).length ? pickBy(values) : {remember: 'forget'};
-        Inertia.get(route('reports.attendance.index'), query, {
+        Inertia.get(attendance.index().url, query, {
             replace: true,
             preserveState: true,
         });
@@ -53,7 +54,7 @@ const AttendanceReport = () => {
         const today = format(new Date(), 'yyyy-MM-dd');
         const resetValues = {worker_name: '', start_date: today, end_date: today};
         setValues(resetValues);
-        Inertia.get(route('reports.attendance.index'), resetValues, {
+        Inertia.get(attendance.index().url, resetValues, {
             replace: true,
             preserveState: true,
         });
@@ -137,7 +138,7 @@ const AttendanceReport = () => {
                                         <td className={'actions'}>
                                             <InertiaLink
                                                 className="btn btn-xs btn-white"
-                                                href={route('reports.attendance.detail', {worker_name, punch_date})}
+                                                href={attendance.detail({query: {worker_name, punch_date}})}
                                             >
                                                 View
                                             </InertiaLink>

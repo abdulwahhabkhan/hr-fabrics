@@ -5,6 +5,7 @@ import {Inertia} from "@/util/Inertia";
 import { Icon } from "@iconify/react";
 import {UNITS} from "@/util/util";
 import {usePage} from "@/util/Inertia";
+import stocks from '@/routes/stocks';
 
 export const InventoryBrandFilter = ({filters}) => {
     const {brands} = usePage().props
@@ -20,7 +21,7 @@ export const InventoryBrandFilter = ({filters}) => {
     const sendRequest = async (data) => {
         const post_data = {...data}
         setProcessing(true)
-        Inertia.get(route('stocks.value-by-brand'), post_data, options)
+        Inertia.get(stocks.valueByBrand().url, post_data, options)
     }
 
     return (

@@ -1,6 +1,7 @@
 import React from 'react';
 import cx from 'classnames';
 import { InertiaLink } from '@/util/Inertia';
+import { dashboard } from '@/routes';
 import logoLight from '@/img/brand/hr-fabrics-logo-horizontal.svg';
 import logoDark from '@/img/brand/hr-fabrics-logo-horizontal-reverse.svg';
 import monogramLight from '@/img/brand/hr-fabrics-monogram.svg';
@@ -16,7 +17,7 @@ export default function SidebarBrand({ tone = 'dark' }) {
     const dark = tone === 'dark';
 
     return (
-        <InertiaLink href={route('dashboard')} className={cx('hf-brand', `hf-brand--${tone}`)} aria-label="HR Fabrics International — Dashboard">
+        <InertiaLink href={dashboard()} className={cx('hf-brand', `hf-brand--${tone}`)} aria-label="HR Fabrics International — Dashboard">
             <img src={dark ? logoDark : logoLight} alt="HR Fabrics International" className="hf-brand-logo" />
             <img src={dark ? monogramDark : monogramLight} alt="" aria-hidden="true" className="hf-brand-monogram" />
         </InertiaLink>

@@ -10,6 +10,7 @@ import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import Select from 'react-select';
 import { FileUpload } from '@/components/File';
 import BackButton from '@/components/button/back';
+import journals from '@/routes/accounts/journals';
 
 const ReceiptForm = () => {
     const { receipt, accounts, fileInfo, errors: serverErrors } = usePage().props;
@@ -40,9 +41,9 @@ const ReceiptForm = () => {
 
         setProcessing(true);
         if (receipt)
-            Inertia.put(route("accounts.receipts.update", receipt["id"]), post_data, options);
+            Inertia.post(journals.store(), post_data, options);
         else
-            Inertia.post(route("accounts.receipts.store"), post_data, options);
+            Inertia.post(journals.store(), post_data, options);
     };
     const updateValue = (item) => {
         const { type } = { ...item };
@@ -62,7 +63,7 @@ const ReceiptForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <BackButton href={route("accounts.receipts.index")} size="xs" />
+                            <BackButton href={journals.index()} size="xs" />
                         </>
                     )} />
                     <PanelBody>
@@ -166,7 +167,7 @@ const ReceiptForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("accounts.receipts.index")} className="btn btn-warning">
+                        <InertiaLink href={journals.index()} className="btn btn-warning">
                             <Icon icon={"solar:close-bold-duotone"} /> Close
                         </InertiaLink>&nbsp;
                         <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>

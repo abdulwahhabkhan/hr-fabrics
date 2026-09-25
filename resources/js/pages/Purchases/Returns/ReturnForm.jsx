@@ -14,19 +14,21 @@ import FormLabel from '@/components/FormLabel.jsx';
 import BackButton from '@/components/button/back';
 import { notifyMessage } from '@/util/util.jsx';
 import NoData from '@/components/NoData.jsx';
+import por from '@/routes/purchases/por';
+import porAjax from '@/routes/ajax/por';
 
 
 const ReturnForm = () => {
     const {
-        por,
+        por: porData,
         errors: serverErrors,
         products
     } = usePage().props;
     const [processing, setProcessing] = useState(false);
-    const [items, setItems] = useState(por.items_with_product ?? []);
+    const [items, setItems] = useState(porData.items_with_product ?? []);
     const [addItem, setAddItem] = useState(false);
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm({ defaultValues: por });
+    const { register, handleSubmit, control, formState: { errors } } = useForm({ defaultValues: porData });
     const options = {
         onError: () => {
             setProcessing(false);
@@ -43,10 +45,10 @@ const ReturnForm = () => {
     };
     const postData = (post_data) => {
         setProcessing(true);
-        if (por.id)
-            Inertia.put(route("purchases.por.update", por.id), post_data, options);
+        if (porData.id)
+            Inertia.put(por.update(porData.id), post_data, options);
         else
-            Inertia.post(route("purchases.por.store"), post_data, options);
+            Inertia.post(por.store(), post_data, options);
     };
 
     const confirmRequest = async (data) => {
@@ -66,7 +68,7 @@ const ReturnForm = () => {
     const deleteItem = (itemId) => {
         axios({
             method: "delete",
-            url: route("ajax.por.item.destroy", { return: por.id, item: itemId })
+            url: porAjax.item.destroy({ return: porData.id, item: itemId }).url
         })
             .then(res => {
                 setItems(res.data.items);
@@ -81,14 +83,14 @@ const ReturnForm = () => {
             <PageHeader title="Fabric Return Update" buttons={
                 <>
 
-                    <BackButton href={route("purchases.por.index")} />
+                    <BackButton href={por.index()} />
                 </>
                                                      } />
             <PageContent>
                 <Panel theme={"default"}>
                     <PanelHeader heading={(
                         <>
-                            Order Information : {por.invoice_no} &nbsp; &nbsp;
+                            Order Information : {porData.invoice_no} &nbsp; &nbsp;
 
                         </>
                     )} buttons={(
@@ -107,7 +109,7 @@ const ReturnForm = () => {
                         <ErrorPanel errors={serverErrors} />
                         <Row>
                             <Col lg={6}>
-                                <FormLabel label="Supplier" value={por.supplier?.name} />
+                                <FormLabel label="Supplier" value={porData.supplier?.name} />
 
                             </Col>
                             <Col lg={2}>

@@ -11,6 +11,10 @@ import { Alert, Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
+import { confirm as passwordConfirm } from '@/routes/password';
+import profileRoutes from '@/routes/profile';
+import passkey from '@/routes/passkey';
+import twoFactor from '@/routes/two-factor';
 
 const isPasswordConfirmException = (httpResponse, onRequired) => {
     if (httpResponse.status === 423) {
@@ -33,7 +37,7 @@ const TwoFactorPanel = ({ initialEnabled }) => {
     const requirePasswordConfirm = () => setNeedsPasswordConfirm(true);
 
     const loadRecoveryCodes = () => {
-        http.get(route('two-factor.recovery-codes'), {
+        http.get(twoFactor.recoveryCodes().url, {
             onSuccess: (response) => setRecoveryCodes(response),
             onHttpException: (r) =>
                 isPasswordConfirmException(r, requirePasswordConfirm),
@@ -41,9 +45,9 @@ const TwoFactorPanel = ({ initialEnabled }) => {
     };
 
     const startSetup = () => {
-        http.post(route('two-factor.enable'), {
+        http.post(twoFactor.enable().url, {
             onSuccess: () => {
-                http.get(route('two-factor.qr-code'), {
+                http.get(twoFactor.qrCode().url, {
                     onSuccess: (response) => {
                         setQr(response);
                         setSetupOpen(true);
@@ -60,7 +64,7 @@ const TwoFactorPanel = ({ initialEnabled }) => {
     const confirm = (e) => {
         e.preventDefault();
 
-        http.post(route('two-factor.confirm'), {
+        http.post(twoFactor.confirm().url, {
             onSuccess: () => {
                 setSetupOpen(false);
                 setEnabled(true);
@@ -74,7 +78,7 @@ const TwoFactorPanel = ({ initialEnabled }) => {
     };
 
     const regenerateRecoveryCodes = () => {
-        http.post(route('two-factor.recovery-codes'), {
+        http.post(twoFactor.regenerateRecoveryCodes().url, {
             onSuccess: loadRecoveryCodes,
             onHttpException: (r) =>
                 isPasswordConfirmException(r, requirePasswordConfirm),
@@ -82,7 +86,7 @@ const TwoFactorPanel = ({ initialEnabled }) => {
     };
 
     const disable = () => {
-        http.delete(route('two-factor.disable'), {
+        http.delete(twoFactor.disable().url, {
             onSuccess: () => {
                 setEnabled(false);
                 setSetupOpen(false);
@@ -101,7 +105,7 @@ const TwoFactorPanel = ({ initialEnabled }) => {
                 {needsPasswordConfirm && (
                     <Alert variant="warning">
                         Please{' '}
-                        <InertiaLink href={route('password.confirm')}>
+                        <InertiaLink href={passwordConfirm()}>
                             confirm your password
                         </InertiaLink>{' '}
                         to manage two-factor authentication.
@@ -238,7 +242,7 @@ const PasskeysPanel = ({ initialPasskeys }) => {
     });
 
     const removePasskey = (id) => {
-        deleteHttp.delete(route('passkey.destroy', id), {
+        deleteHttp.delete(passkey.destroy(id).url, {
             onSuccess: () =>
                 setPasskeys((list) =>
                     list.filter((passkey) => passkey.id !== id),
@@ -257,7 +261,7 @@ const PasskeysPanel = ({ initialPasskeys }) => {
                 {needsPasswordConfirm && (
                     <Alert variant="warning">
                         Please{' '}
-                        <InertiaLink href={route('password.confirm')}>
+                        <InertiaLink href={passwordConfirm()}>
                             confirm your password
                         </InertiaLink>{' '}
                         to manage passkeys.
@@ -359,7 +363,7 @@ const ProfileIndex = () => {
     const sendRequest = async (data) => {
         const post_data = { ...data };
         setProcessing(true);
-        Inertia.put(route('profile.password'), post_data, options);
+        Inertia.put(profileRoutes.password(), post_data, options);
     };
 
     return (

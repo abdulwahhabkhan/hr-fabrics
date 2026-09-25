@@ -10,6 +10,7 @@ import CheckboxTreeComponent from 'checkbox-tree-react-19';
 import PerfectScrollbarComponent from 'react-perfect-scrollbar';
 import 'checkbox-tree-react-19/lib/react-checkbox-tree.css';
 import 'react-perfect-scrollbar/dist/css/styles.css';
+import roles from '@/routes/settings/roles';
 
 let CheckboxTree = CheckboxTreeComponent;
 if (CheckboxTreeComponent && CheckboxTreeComponent.default) {
@@ -56,8 +57,8 @@ const RoleForm = () => {
     } = useForm({ defaultValues: defaultValues });
     const sendRequest = async (data) => {
         setProcessing(true);
-        if (role) Inertia.put(route("settings.roles.update", role["id"]), { ...data, permissions: { ...checked } });
-        else Inertia.post(route("settings.roles.store"), { ...data, permissions: { ...checked } });
+        if (role) Inertia.put(roles.update(role["id"]), { ...data, permissions: { ...checked } });
+        else Inertia.post(roles.store(), { ...data, permissions: { ...checked } });
     };
     const onExpand = (expanded) => {
         setExpanded(expanded);
@@ -73,7 +74,7 @@ const RoleForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <InertiaLink href={route("settings.roles.index")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={roles.index()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:reply-bold-duotone"} /> Roles List
                             </InertiaLink>
                         </>
@@ -172,7 +173,7 @@ const RoleForm = () => {
                         </form>
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("settings.roles.index")} className="btn btn-white">
+                        <InertiaLink href={roles.index()} className="btn btn-white">
                             <Icon icon={"solar:reply-bold-duotone"} />
                         </InertiaLink>
 

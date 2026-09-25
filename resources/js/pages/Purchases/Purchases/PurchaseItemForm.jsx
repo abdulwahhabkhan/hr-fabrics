@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { notifyMessage, serverSideError } from '@/util/util.jsx';
+import poAjax from '@/routes/ajax/po';
 
 export const PurchaseItemForm = ({
     item,
@@ -53,7 +54,7 @@ export const PurchaseItemForm = ({
         setProcessing(true);
         axios({
             method: 'post',
-            url: route('ajax.po.items', receiptId),
+            url: poAjax.items(receiptId).url,
             data: { ...data, order_id: item.order_id, item_id: item.id },
         })
             .then((res) => {

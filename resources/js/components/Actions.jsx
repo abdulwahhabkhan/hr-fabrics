@@ -6,6 +6,13 @@ import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import { Inertia, Link, router } from '@/util/Inertia';
 import { confirmDelete, confirmSwal } from '@/util/swal';
 
+const resolveAction = (action, id) => {
+    if (typeof action === 'function') {
+        return action(id);
+    }
+    return action;
+};
+
 export const ConfirmAction = ({ action, id, icon, tooltip = 'Confirm' }) => {
     const handleClick = async (event) => {
         event.preventDefault();
@@ -13,7 +20,7 @@ export const ConfirmAction = ({ action, id, icon, tooltip = 'Confirm' }) => {
             text: 'You want to proceed with this action!',
         });
         if (isConfirmed) {
-            router.post(route(action, id));
+            router.post(resolveAction(action, id));
         }
     };
     return (
@@ -37,7 +44,7 @@ export const Delete = ({ action, id }) => {
         await confirmDelete({
             onConfirm: () =>
                 new Promise((resolve, reject) => {
-                    router.delete(route(action, id), {
+                    router.delete(resolveAction(action, id), {
                         preserveScroll: true,
                         onSuccess: () => resolve(),
                         onError: () => reject(),
@@ -71,7 +78,7 @@ export const ToggleAction = ({ action, id, message = '', icon = null }) => {
             text: message ? message : 'You are going to toggle this record!',
         });
         if (isConfirmed) {
-            router.delete(route(action, id));
+            router.delete(resolveAction(action, id));
         }
     };
     return (
@@ -96,7 +103,7 @@ export const UnLock = ({ action, id, children }) => {
             confirmButtonStyle: 'danger',
         });
         if (isConfirmed) {
-            Inertia.post(route(action, id));
+            router.post(resolveAction(action, id));
         }
     };
     return (
@@ -132,7 +139,7 @@ export const UnLockDropdownItem = ({ action, id, children }) => {
             confirmButtonStyle: 'danger',
         });
         if (isConfirmed) {
-            Inertia.post(route(action, id));
+            Inertia.post(resolveAction(action, id));
         }
     };
     return (

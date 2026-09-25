@@ -2,6 +2,8 @@ import React from 'react';
 import ValidationErrors from '@/components/ValidationErrors';
 import { Head, Link, setLayoutProps, useForm } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
+import { login } from '@/routes';
+import { email } from '@/routes/password';
 
 export default function ForgotPassword({ status, appName }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -15,7 +17,7 @@ export default function ForgotPassword({ status, appName }) {
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('password.email'));
+        post(email().url);
     };
     setLayoutProps({
         title: 'Forgot Password',
@@ -68,7 +70,7 @@ export default function ForgotPassword({ status, appName }) {
                     </form>
                     <div className="text-center mt-3">
                         <Link
-                            href={route('login')}
+                            href={login()}
                             className="text-decoration-none small text-muted"
                         >
                             Back to Sign In

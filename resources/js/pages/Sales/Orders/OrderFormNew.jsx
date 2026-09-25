@@ -8,6 +8,7 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import ValidationErrors from '@/components/ValidationErrors';
 import BackButton from '@/components/button/back';
+import orders from '@/routes/sales/orders';
 
 const OrderFormNew = () => {
     const { customers, errors: serverSideError } = usePage().props;
@@ -39,7 +40,7 @@ const OrderFormNew = () => {
 
         const post_data = { ...data, customer_id: data.customer.customer_id };
         setProcessing(true);
-        Inertia.post(route("sales.orders.store"), post_data, options);
+        Inertia.post(orders.store(), post_data, options);
     };
 
     const handleCustomerChange = (selectedCustomer, onChange) => {
@@ -55,7 +56,7 @@ const OrderFormNew = () => {
         <>
             <Head title="Create Invoice" />
             <PageHeader title="Create Invoice" buttons={<>
-                <BackButton href={route("sales.orders.index")} />
+                <BackButton href={orders.index()} />
             </>} />
 
             <PageContent>

@@ -8,6 +8,7 @@ import StyledSelect from '@/components/StyledSelect';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import BackButton from '@/components/button/back';
 import { FormSubmitButton } from '@/components/ui/button.tsx';
+import products from '@/routes/catalog/products';
 
 const ProductForm = () => {
     const { product, brands, finishes, vendors, errors: serverErrors } = usePage().props;
@@ -47,8 +48,8 @@ const ProductForm = () => {
                     resolve();
                 },
             };
-            if (product) Inertia.put(route("catalog.products.update", product["id"]), post_data, options);
-            else Inertia.post(route("catalog.products.store"), post_data, options);
+            if (product) Inertia.put(products.update(product["id"]), post_data, options);
+            else Inertia.post(products.store(), post_data, options);
         });
     };
 
@@ -59,7 +60,7 @@ const ProductForm = () => {
                 title={title}
                 buttons={
                     <>
-                        <BackButton href={route("catalog.products.index")} label={"Products List"} size={"sm"} />
+                        <BackButton href={products.index()} label={"Products List"} size={"sm"} />
                     </>
                 }
             />
@@ -209,7 +210,7 @@ const ProductForm = () => {
                         </form>
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <BackButton href={route("catalog.products.index")} />
+                        <BackButton href={products.index()} />
                         <FormSubmitButton form={"productForm"}  type={"submit"} value={"Save Changes"} control={control} />
 
                     </PanelFooter>

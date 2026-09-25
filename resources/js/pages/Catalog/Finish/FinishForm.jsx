@@ -5,6 +5,7 @@ import LoadingButton from '@/components/LoadingButton';
 import { Inertia } from '@/util/Inertia';
 import axios from 'axios';
 import { notifyMessage } from '@/util/util';
+import finish from '@/routes/catalog/finish';
 
 
 export default ({id, show, callback}) => {
@@ -17,12 +18,12 @@ export default ({id, show, callback}) => {
 
         if (id) {
             setLoading(true)
-            axios.get(route('catalog.finish.edit', id))
+            axios.get(finish.edit(id).url)
                 .then(res => {
-                    const {data: {finish}} = res
+                    const {data: {finish: finishData}} = res
                     setLoading(false)
-                    for (let key in finish) {
-                        setValue(key, finish[key])
+                    for (let key in finishData) {
+                        setValue(key, finishData[key])
                     }
                 })
         }
@@ -35,12 +36,12 @@ export default ({id, show, callback}) => {
         const method = id ? "PUT" : 'POST'
         axios({
             method: method,
-            url: route('catalog.finish.store') + (id ? '/' + id : ''),
+            url: id ? finish.update(id).url : finish.store().url,
             data: data
         }).then(res => {
             const {data: {message}} = res
             notifyMessage({title: "Success", type: 'success', message: message})
-            Inertia.visit(route('catalog.finish.index'))
+            Inertia.visit(finish.index().url)
         }).catch(res => {
             console.log('invalid request', res)
         }).finally(data => {

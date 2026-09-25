@@ -7,6 +7,7 @@ import { Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
+import cities from '@/routes/settings/cities';
 
 
 const CityForm = () => {
@@ -24,9 +25,9 @@ const CityForm = () => {
             }
         };
         if (city)
-            Inertia.put(route("settings.cities.update", city.id), { ...data }, options);
+            Inertia.put(cities.update(city.id), { ...data }, options);
         else
-            Inertia.post(route("settings.cities.store"), { ...data }, options);
+            Inertia.post(cities.store(), { ...data }, options);
     };
     useEffect(() => {
         if (!_.isEmpty(serverErrors)) {
@@ -42,7 +43,7 @@ const CityForm = () => {
                 <Panel>
                     <PanelHeader heading={title} buttons={(
                         <>
-                            <InertiaLink href={route("settings.cities.index")} className="btn btn-xs  btn-primary">
+                            <InertiaLink href={cities.index()} className="btn btn-xs  btn-primary">
                                 <Icon icon={"solar:reply-bold-duotone"} /> City List
                             </InertiaLink>
                         </>
@@ -77,7 +78,7 @@ const CityForm = () => {
 
                     </PanelBody>
                     <PanelFooter className={"text-center"}>
-                        <InertiaLink href={route("settings.cities.index")} className={"btn btn-white"}>
+                        <InertiaLink href={cities.index()} className={"btn btn-white"}>
                             <Icon icon={"solar:reply-bold-duotone"} />
                         </InertiaLink>
                         &nbsp;

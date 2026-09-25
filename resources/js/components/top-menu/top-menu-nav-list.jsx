@@ -4,10 +4,23 @@ import { Icon } from '@iconify/react';
 
 const MOBILE_BREAKPOINT = 768;
 
-const matchesCurrentRoute = (name) => {
-    const base = name.replace(/\.(index|show|create|edit|store|update|destroy)$/, "");
+const matchesCurrentRoute = (data, currentUrl) => {
+    if (!data?.path || data.path === '#' || !currentUrl) {
+        return false;
+    }
 
-    return route().current(base + "*");
+    const cleanUrl = currentUrl.split('?')[0].split('#')[0];
+    const cleanPath = typeof data.path === 'string' ? data.path.split('?')[0].split('#')[0] : '';
+
+    if (!cleanPath) {
+        return false;
+    }
+
+    if (cleanPath === '/' || cleanPath === '/dashboard') {
+        return cleanUrl === cleanPath || (cleanPath === '/dashboard' && cleanUrl === '/');
+    }
+
+    return cleanUrl === cleanPath || cleanUrl.startsWith(cleanPath + '/');
 };
 
 const TopMenuNavList = ({ data, expand, active, topLevel = true }) => {
@@ -19,8 +32,9 @@ const TopMenuNavList = ({ data, expand, active, topLevel = true }) => {
     const label = data.label && <span className="menu-label">{data.label}</span>;
     const badge = data.badge && <span className="menu-badge">{data.badge}</span>;
     const title = data.title && <span className="menu-text">{data.title} {label}</span>;
-    const match = matchesCurrentRoute(data.name);
-    const { auth: { permissions } } = usePage().props;
+    const { url, props } = usePage();
+    const permissions = props.auth?.permissions ?? [];
+    const match = matchesCurrentRoute(data, url);
 
     const hasPermission = (name) => {
         return _.indexOf(permissions, name) == -1 ? false : true;

@@ -12,6 +12,7 @@ import {
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import Moment, { MomentFull } from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
+import { upload, view, show, deleteMethod } from '@/routes/file';
 
 const thumbsContainer = {
     display: 'flex',
@@ -72,7 +73,7 @@ export const FileUpload = ({
                 return axios({
                     method: 'post',
                     data: formData,
-                    url: route('file.upload'),
+                    url: upload().url,
                 })
                     .then((res) => {
                         updated(res.data);
@@ -145,14 +146,14 @@ export const ViewFile = ({ file }) => {
             )}
             {!download_url && (
                 <a
-                    href={route('file.view', { path: file_path })}
+                    href={view({ query: { path: file_path } }).url}
                     title={file_name}
                     target={'_blank'}
                 >
                     <Image
                         fluid
                         className={'file-preview'}
-                        src={route('file.view', { path: file_path })}
+                        src={view({ query: { path: file_path } }).url}
                         alt={file_name}
                     />
                 </a>
@@ -181,7 +182,7 @@ export const FileIcon = ({ file, size }) => {
         return (
             <>
                 <a
-                    href={route('file.view', { path: file_path })}
+                    href={view({ query: { path: file_path } }).url}
                     target={'_blank'}
                     className={'height-150 img-thumb'}
                 >
@@ -216,7 +217,7 @@ export const FileIcon = ({ file, size }) => {
         );
 };
 const deleteFile = async (id) => {
-    await axios.delete(route('file.delete', id));
+    await axios.delete(deleteMethod(id).url);
     /*setAttachments((current) => current.filter((a) => a.id !== id));
     if (file && file.id === id) {
         setFile(null);
@@ -253,7 +254,7 @@ export const FileDetail = ({ file, fnDelete = undefined }) => {
                                 className={
                                     'btn btn-sm btn-outline-cyan flex-fill'
                                 }
-                                href={route('file.show', file.id)}
+                                href={show(file.id).url}
                                 target={'_blank'}
                                 rel={'noopener noreferrer'}
                                 title={'Download file'}
@@ -311,7 +312,7 @@ export const FileRow = ({ file, fnDelete = undefined }) => {
                         <div className="btn-group btn-group-sm mt-1">
                             <a
                                 className={'btn btn-white btn-xs'}
-                                href={route('file.show', file.id)}
+                                href={show(file.id).url}
                                 target={'_blank'}
                                 rel={'noopener noreferrer'}
                                 title={'Download file'}
@@ -340,7 +341,7 @@ const FileDetails = ({ file }) => {
     return (
         <>
             <div className="file-preview">
-                <a href={route('file.show', file.id)} target={'_blank'}>
+                <a href={show(file.id).url} target={'_blank'}>
                     <img
                         src={file.thumbnail}
                         alt={file.name}
@@ -351,7 +352,7 @@ const FileDetails = ({ file }) => {
             <div className="file-content">
                 <div className="file-content-main">
                     <div className="file-name">
-                        <a href={route('file.show', file.id)} target={'_blank'}>
+                        <a href={show(file.id).url} target={'_blank'}>
                             {file.name}
                         </a>
                     </div>
@@ -421,7 +422,7 @@ export const AttachFiles = ({
                 return axios({
                     method: 'post',
                     data: formData,
-                    url: route('file.upload'),
+                    url: upload().url,
                 })
                     .then((res) => {
                         updateFile(res.data);
@@ -443,7 +444,7 @@ export const AttachFiles = ({
     }, [files]);
 
     const deleteAttachment = async (id) => {
-        await axios.delete(route('file.delete', id));
+        await axios.delete(deleteMethod(id).url);
         setAttachments((current) => current.filter((a) => a.id !== id));
     };
 
@@ -505,7 +506,7 @@ export const AttachFile = ({
                 return axios({
                     method: 'post',
                     data: formData,
-                    url: route('file.upload'),
+                    url: upload().url,
                 })
                     .then((res) => {
                         updateFile(res.data);
