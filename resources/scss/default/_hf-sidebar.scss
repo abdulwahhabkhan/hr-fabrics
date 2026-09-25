@@ -435,10 +435,22 @@
       }
     }
 
-    .hf-nav-item:hover > .hf-flyout,
-    .hf-nav-item:focus-within > .hf-flyout {
+    .hf-nav-item:hover {
+      z-index: 1045;
+    }
+
+    .hf-nav-item:not(.is-hover-disabled):hover > .hf-flyout,
+    .hf-nav-item:not(.is-hover-disabled):focus-within > .hf-flyout,
+    .hf-nav-item.is-flyout-open > .hf-flyout {
       display: block;
       animation: hf-subnav-in .14s var(--hf-ease);
+    }
+
+    .hf-nav-item.is-flyout-open > .hf-nav-link {
+      background: var(--hf-sidebar-active);
+      color: var(--hf-sidebar-text-strong);
+
+      .hf-nav-icon { color: var(--hf-gold); }
     }
 
     // Items without children: flyout is just a label (acts as tooltip)

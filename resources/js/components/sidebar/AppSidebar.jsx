@@ -33,7 +33,7 @@ export default function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileCl
 
                 <div className="hf-sidebar-label">Workspace</div>
                 <div className="hf-sidebar-body">
-                    <SidebarNav />
+                    <SidebarNav collapsed={collapsed} />
                 </div>
 
                 <div className="hf-sidebar-foot">
