@@ -1,19 +1,24 @@
 import React from 'react';
+import cx from 'classnames';
 import { InertiaLink } from '@/util/Inertia';
+import logoLight from '@/img/brand/hr-fabrics-logo-horizontal.svg';
+import logoDark from '@/img/brand/hr-fabrics-logo-horizontal-reverse.svg';
+import monogramLight from '@/img/brand/hr-fabrics-monogram.svg';
+import monogramDark from '@/img/brand/hr-fabrics-monogram-reverse.svg';
 
-/** HR Fabrics lockup: H|R monogram + wordmark (wordmark hides when collapsed). */
-export default function SidebarBrand() {
+/**
+ * HR Fabrics brand mark (vector SVGs in img/brand, no web-font dependency).
+ * tone="dark"  → for navy backgrounds (sidebar)
+ * tone="light" → for light backgrounds (mobile bar)
+ * The full lockup swaps to the H|R monogram when the sidebar is collapsed (CSS).
+ */
+export default function SidebarBrand({ tone = 'dark' }) {
+    const dark = tone === 'dark';
+
     return (
-        <InertiaLink href={route('dashboard')} className="hf-brand" aria-label="HR Fabrics — Dashboard">
-            <span className="hf-monogram" aria-hidden="true">
-                <span>H</span>
-                <i />
-                <span className="hf-monogram-accent">R</span>
-            </span>
-            <span className="hf-wordmark">
-                <span className="hf-wordmark-name">HR Fabrics</span>
-                <span className="hf-wordmark-tag">International</span>
-            </span>
+        <InertiaLink href={route('dashboard')} className={cx('hf-brand', `hf-brand--${tone}`)} aria-label="HR Fabrics International — Dashboard">
+            <img src={dark ? logoDark : logoLight} alt="HR Fabrics International" className="hf-brand-logo" />
+            <img src={dark ? monogramDark : monogramLight} alt="" aria-hidden="true" className="hf-brand-monogram" />
         </InertiaLink>
     );
 }

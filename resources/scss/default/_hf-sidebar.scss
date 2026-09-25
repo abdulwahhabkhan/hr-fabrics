@@ -90,66 +90,14 @@
   border-bottom: 1px solid var(--hf-sidebar-divider);
 }
 
-// Brand lockup ---------------------------------------------------------------
+// Brand (SVG logo files in resources/js/img/brand) ------------------------------
 .hf-brand {
   display: flex;
   align-items: center;
-  gap: .75rem;
   min-width: 0;
-  color: #fff;
 }
-
-.hf-monogram {
-  display: inline-flex;
-  align-items: center;
-  gap: .22em;
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1;
-  color: #fff;
-
-  i {
-    display: block;
-    width: 1px;
-    height: 1.15em;
-    background: var(--hf-gold);
-  }
-}
-.hf-monogram-accent { color: var(--hf-gold); }
-
-.hf-wordmark {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-  white-space: nowrap;
-}
-.hf-wordmark-name {
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: .9rem;
-  font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-.hf-wordmark-tag {
-  display: flex;
-  align-items: center;
-  gap: .375rem;
-  margin-top: .3rem;
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: .5rem;
-  letter-spacing: .34em;
-  text-transform: uppercase;
-  color: var(--hf-gold);
-
-  &::before, &::after {
-    content: '';
-    width: .6rem;
-    height: 1px;
-    background: currentColor;
-    opacity: .8;
-  }
-}
+.hf-brand-logo { display: block; height: 36px; width: auto; max-width: 100%; }
+.hf-brand-monogram { display: none; height: 34px; width: auto; }
 
 // Collapse toggle --------------------------------------------------------------
 .hf-sidebar-toggle {
@@ -230,11 +178,10 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-
-  svg { width: 20px; height: 20px; }
-
   color: var(--hf-sidebar-muted);
   transition: color .15s var(--hf-ease);
+
+  svg { width: 20px; height: 20px; }
 }
 .hf-nav-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hf-nav-caret { flex: none; color: var(--hf-sidebar-muted); transition: transform .2s var(--hf-ease); }
@@ -383,7 +330,10 @@
     .hf-sidebar { width: var(--hf-sidebar-w-collapsed); }
 
     .hf-sidebar-head { justify-content: center; padding-inline: 0; }
-    .hf-wordmark,
+    .hf-brand-logo { display: none; }
+    .hf-brand-monogram { display: block; height: auto; width: 46px; }
+    .hf-sidebar-toggle { top: 4.25rem; }
+
     .hf-nav-text,
     .hf-nav-caret,
     .hf-subnav,
@@ -521,8 +471,7 @@
     background: var(--hf-surface);
     border-bottom: 1px solid var(--hf-border);
 
-    .hf-brand, .hf-monogram { color: var(--hf-navy); }
-    .hf-wordmark-name { color: var(--hf-navy); }
+    .hf-brand-logo { height: 30px; }
   }
 
   .hf-mobile-toggle {

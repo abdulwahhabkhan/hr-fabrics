@@ -30,7 +30,7 @@ export default function AppSidebarLayout({ header, children }) {
                     <button type="button" className="hf-mobile-toggle" onClick={() => setMobileOpen(true)} aria-label="Open menu">
                         <SidebarGlyph name="menu" size={20} />
                     </button>
-                    <SidebarBrand />
+                    <SidebarBrand tone="light" />
                 </div>
 
                 <main id="content" className="app-content animate-fade-up">

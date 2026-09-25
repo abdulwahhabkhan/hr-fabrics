@@ -13,9 +13,15 @@
             }
         } catch (e) {}
     </script>
+    <!-- Favicons (resources/favicon, bundled by Vite via app.tsx) -->
+    <link rel="icon" href="{{ Vite::asset('resources/favicon/favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ Vite::asset('resources/favicon/favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ Vite::asset('resources/favicon/apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#0d1e45">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 
     <!-- Styles -->
     @vite('resources/scss/default/styles.scss')

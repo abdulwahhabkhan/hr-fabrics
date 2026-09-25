@@ -419,9 +419,10 @@ body {
 .form-control-sm, .form-select-sm { min-height: 30px; padding-block: .25rem; font-size: .75rem; }
 
 .input-group {
-  > .form-control, > .form-select { box-shadow: none; }
   box-shadow: var(--hf-shadow-xs);
   border-radius: var(--hf-radius);
+
+  > .form-control, > .form-select { box-shadow: none; }
 
   > .form-control:focus, > .form-select:focus { z-index: 3; box-shadow: var(--hf-ring); }
 }
