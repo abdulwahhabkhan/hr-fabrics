@@ -10,6 +10,7 @@ use App\Models\Purchase\PurchaseReturn;
 use App\Models\Sales\Order;
 use App\Models\Sales\SalesReturn;
 use App\Services\AccountService;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -17,38 +18,71 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * @property-read float $total_dr
  * @property-read float $total_cr
- * @property-read float $debit
- * @property-read float $credit
+ * @property float $debit
+ * @property float $credit
+ * @property float $opening_balance
+ * @property float $closing_balance
+ * @property float $balance
+ * @property float $balance_150_days
+ * @property string $url
+ * @property string $detail
+ * @property-read int $account_id
+ * @property-read string $account
+ * @property-read string $head
+ * @property-read CarbonImmutable $posted_at
+ * @property-read float $dr
+ * @property-read float $cr
+ * @property-read float $total_in
+ * @property-read float $total_out
+ * @property-read int $credit_limit
+ * @property-read int $is_suspended
+ * @property-read string $name
+ * @property-read string $city
+ * @property-read string $type
+ * @property-read int $resource_id
+ * @property-read string $resource_type
  */
 class JournalLedger extends Model
 {
     protected $table = 'journal_ledgers'; // view
 
     protected $casts = [
-        'posted_at' => 'datetime',
+        'posted_at' => 'date:Y-m-d',
         'total_dr' => 'float',
         'total_cr' => 'float',
         'credit_limit' => 'int',
         'is_suspended' => 'int',
     ];
 
+    /**
+     * @return HasOne<self, $this>
+     */
     public function agentInfo(): HasOne
     {
         return $this->hasOne(self::class, 'id', 'id')
             ->where('type', AccountType::Agent->value);
     }
 
+    /**
+     * @return HasOne<JournalDetail, $this>
+     */
     public function customerPayment(): HasOne
     {
         return $this->hasOne(JournalDetail::class, 'account_id', 'account_id')
             ->where('dr', '>', '0');
     }
 
+    /**
+     * @return HasOne<self, $this>
+     */
     public function latestDebit(): HasOne
     {
         return $this->hasOne(self::class, 'id', 'last_debit_id')->where('dr', '>', 0);
     }
 
+    /**
+     * @return HasOne<self, $this>
+     */
     public function latestCredit(): HasOne
     {
         return $this->hasOne(self::class, 'id', 'last_credit_id')->where('cr', '>', 0);

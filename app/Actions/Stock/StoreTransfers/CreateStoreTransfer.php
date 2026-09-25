@@ -13,7 +13,7 @@ class CreateStoreTransfer
     {
         $transfer_sr = StoreTransfer::query()->max('transfer_sr');
         $transfer_sr++;
-        $transfer_no = date('ym').mb_str_pad($transfer_sr, 3, '0', STR_PAD_LEFT);
+        $transfer_no = date('ym').mb_str_pad((string) $transfer_sr, 3, '0', STR_PAD_LEFT);
         $type = $data['type'] ?? StoreTransferType::Store->value;
         if ($type === StoreTransferType::Store->value) {
             $transfer_no = 'ST-'.$transfer_no;

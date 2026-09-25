@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property-read int $total_dr
  * @property-read int $total_cr
+ * @property-read int $total_debit
+ * @property-read int $total_credit
+ * @property-read int $balance
  */
 class JournalDetail extends Model
 {
@@ -27,6 +30,9 @@ class JournalDetail extends Model
         'account_id' => 'int',
     ];
 
+    /**
+     * @return BelongsTo<Journal, $this>
+     */
     public function journal(): BelongsTo
     {
         return $this->belongsTo(Journal::class);

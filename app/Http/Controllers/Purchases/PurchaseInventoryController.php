@@ -23,8 +23,8 @@ class PurchaseInventoryController extends Controller
         return Inertia::render('Inventory/StockInventoryView', [
             'back_url' => $returnUrl,
             'inventories' => $inventories->each(function ($r) use ($receipt) {
-                $r->reference_no = $receipt->invoice_no;
-                $r->lot_no = $receipt->lot_no;
+                $r->setAttribute('reference_no', $receipt->invoice_no);
+                $r->setAttribute('lot_no', $receipt->lot_no);
 
                 return $r;
             }),

@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read string $city
  * @property-read int $debit
  * @property-read int $credit
+ * @property array<string, mixed>|null $file
  */
 final class Journal extends Model implements Fileable, Logable
 {
@@ -32,32 +33,27 @@ final class Journal extends Model implements Fileable, Logable
     protected $guarded = ['id'];
 
     protected $casts = [
-        'posted_at' => 'datetime',
+        'posted_at' => 'date:Y-m-d',
         'resource_id' => 'integer',
         'user_id' => 'integer',
         'has_file' => 'boolean',
         'source_info' => AsCollection::class,
     ];
 
+    /**
+     * @return HasMany<JournalDetail, $this>
+     */
     public function transactions(): HasMany
     {
         return $this->hasMany(JournalDetail::class);
     }
 
+    /**
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function resource(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    protected function sourceInfo(): Attribute
-    {
-        return Attribute::get(fn () => $this->detail->map(fn ($item, $key) => [
-            'key' => str($key)
-                ->replace('_', ' ')
-                ->title()
-                ->toString(),
-            'value' => $item,
-        ])->values());
     }
 
     protected function fileDownloadLink(): Attribute

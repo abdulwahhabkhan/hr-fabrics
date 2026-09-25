@@ -54,7 +54,7 @@ class ConfirmSaleReturn
             $inventory->unit = $item->unit;
             $inventory->size = $item->size;
             $inventory->meters = $item->total_qty;
-            $inventory->qty = $item->qty;
+            $inventory->qty = (int) round($item->qty);
             $inventory->info = $info;
             $inventory->transaction_date = $return->transaction_date;
             $inventories[] = $inventory;

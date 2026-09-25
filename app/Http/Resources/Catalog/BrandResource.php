@@ -3,9 +3,11 @@
 namespace App\Http\Resources\Catalog;
 
 use App\Http\Resources\UserResource;
+use App\Models\Catalog\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Brand */
 class BrandResource extends JsonResource
 {
     /**

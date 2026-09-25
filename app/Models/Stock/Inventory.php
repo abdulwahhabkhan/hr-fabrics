@@ -18,6 +18,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property-read float|null $stock_value
+ * @property-read float|null $total_qty
+ * @property-read float|null $total_meters
+ */
 final class Inventory extends Model
 {
     use BelongsToAccount;
@@ -43,16 +48,25 @@ final class Inventory extends Model
         self::query()->where('ref_no', $refNo)->where('type', $type)->delete();
     }
 
+    /**
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function stockable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function outbound(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return BelongsTo<FabricReceiving, $this>
+     */
     public function purchase(): BelongsTo
     {
         return $this->belongsTo(FabricReceiving::class, 'stockable_id', 'id')
@@ -61,6 +75,9 @@ final class Inventory extends Model
             ]);
     }
 
+    /**
+     * @return BelongsTo<PurchaseReturn, $this>
+     */
     public function purchaseReturn(): BelongsTo
     {
         return $this->belongsTo(PurchaseReturn::class, 'outbound_id', 'id')
@@ -69,6 +86,9 @@ final class Inventory extends Model
             ]);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function sale(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'outbound_id', 'id')
@@ -77,6 +97,9 @@ final class Inventory extends Model
             ]);
     }
 
+    /**
+     * @return BelongsTo<SalesReturn, $this>
+     */
     public function saleReturn(): BelongsTo
     {
         return $this->belongsTo(SalesReturn::class, 'stockable_id', 'id')
@@ -106,6 +129,10 @@ final class Inventory extends Model
         return $query->selectRaw($expression);
     }
 
+    /**
+     * @param  Builder<Inventory>  $query
+     * @return Builder<Inventory>
+     */
     #[Scope]
     protected function availableBefore(Builder $query, CarbonInterface $date): Builder
     {
@@ -118,6 +145,10 @@ final class Inventory extends Model
             ->available();
     }
 
+    /**
+     * @param  Builder<Inventory>  $query
+     * @return Builder<Inventory>
+     */
     #[Scope]
     protected function availableAfter(Builder $query, CarbonInterface $date): Builder
     {

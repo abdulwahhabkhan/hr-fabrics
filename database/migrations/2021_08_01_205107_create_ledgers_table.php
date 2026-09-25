@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('record_id')->nullable(false)->index();
             $table->unsignedBigInteger('account_id')->index();
-            $table->string('module', '30')->index();
-            $table->string('type', '30')->index();
+            $table->string('module', 30)->index();
+            $table->string('type', 30)->index();
             $table->json('detail');
             $table->float('dr')->default(0);
             $table->float('cr')->default(0);

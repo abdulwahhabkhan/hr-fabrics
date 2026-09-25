@@ -283,3 +283,71 @@ test('get account balance', function () {
         'credit' => $total_credit,
     ]);
 });
+
+test('store journal single entry keeps karachi date when posted as utc datetime', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $account = Account::factory()->customer()->create();
+    Account::factory()->cash()->create();
+    $data = [
+        'account' => $account,
+        'amount' => 500,
+        'date' => '2026-09-23T20:30:00.000Z',
+        'type' => 'debit',
+        'detail' => 'Early morning entry',
+    ];
+
+    // Act
+    $response = $this->actingAs($user)->post(route('accounts.journals.single-store'), $data);
+
+    // Assert
+    $response->assertSessionHasNoErrors();
+    $this->assertDatabaseHas(Journal::class, [
+        'posted_at' => '2026-09-24',
+        'detail' => 'Early morning entry',
+    ]);
+});
+
+test('store journal double entry keeps karachi date when posted as utc datetime', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $fromAccount = Account::factory()->customer()->create();
+    $toAccount = Account::factory()->cash()->create();
+    $data = [
+        'from_account' => $fromAccount,
+        'to_account' => $toAccount,
+        'amount' => 500,
+        'date' => '2026-09-23T20:30:00.000Z',
+        'detail' => 'Early morning entry',
+    ];
+
+    // Act
+    $response = $this->actingAs($user)->post(route('accounts.journals.store'), $data);
+
+    // Assert
+    $response->assertSessionHasNoErrors();
+    $this->assertDatabaseHas(Journal::class, [
+        'posted_at' => '2026-09-24',
+        'detail' => 'Early morning entry',
+    ]);
+});
+
+test('journal index and view return posted date without time', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $journal = Journal::factory()
+        ->has(JournalDetail::factory()->count(2), 'transactions')
+        ->create(['user_id' => $user->id, 'posted_at' => '2026-09-24']);
+
+    // Act
+    $indexResponse = $this->actingAs($user)->get(route('accounts.journals.index'));
+    $showResponse = $this->actingAs($user)->get(route('accounts.journals.show', $journal->id));
+
+    // Assert
+    $indexResponse->assertInertia(fn (Assert $page) => $page
+        ->where('vouchers.data.0.date', '2026-09-24')
+    );
+    $showResponse->assertInertia(fn (Assert $page) => $page
+        ->where('journal.posted_at', '2026-09-24')
+    );
+});

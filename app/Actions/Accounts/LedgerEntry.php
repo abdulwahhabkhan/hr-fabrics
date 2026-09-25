@@ -8,6 +8,7 @@ use App\Models\Accounts\Journal;
 use App\Models\File;
 use App\Models\Model;
 use App\Models\User;
+use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Exception;
 use Illuminate\Support\Traits\Conditionable;
@@ -84,9 +85,15 @@ final class LedgerEntry
         return $this;
     }
 
+    /**
+     * Normalize to the start of day in the application timezone, so UTC
+     * datetimes (e.g. JS `Date` values) never shift the posted date.
+     */
     public function setTransactionDate(CarbonInterface $transactionDate): self
     {
-        $this->transactionDate = $transactionDate;
+        $this->transactionDate = Carbon::instance($transactionDate)
+            ->setTimezone(config('app.timezone'))
+            ->startOfDay();
 
         return $this;
     }
@@ -115,7 +122,7 @@ final class LedgerEntry
             user: $this->user,
             action: $this->logAction,
             log: [
-                'date' => $this->transactionDate,
+                'date' => $this->transactionDate->toDateString(),
                 'detail' => $this->morph?->journalDetail() ?? $this->detail,
                 'head' => $this->head,
             ]
@@ -126,11 +133,11 @@ final class LedgerEntry
     {
         $journal = new Journal();
         $id = (int) Journal::query()->max('id');
-        $reference_no = str($id + 1)->padLeft(5, '0')->prepend('JV-');
+        $reference_no = str((string) ($id + 1))->padLeft(5, '0')->prepend('JV-');
         $journal->reference_no = $reference_no;
         $journal->user_id = $this->user->id;
-        $journal->head = $this->head;
-        $journal->posted_at = $this->transactionDate;
+        $journal->head = $this->head->value;
+        $journal->posted_at = $this->transactionDate->toImmutable()->startOfDay();
         if ($this->morph) {
             $journal->detail = $this->morph->journalDetail();
             $journal->resource()->associate($this->morph);

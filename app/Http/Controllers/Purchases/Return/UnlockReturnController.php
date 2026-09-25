@@ -6,7 +6,6 @@ use App\Actions\Inbound\Return\UnlockReturn;
 use App\Enums\ReturnStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase\PurchaseReturn;
-use Auth;
 use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,10 +19,10 @@ class UnlockReturnController extends Controller
      */
     public function __invoke(PurchaseReturn $return, Request $request): RedirectResponse
     {
-        DB::transaction(function () use ($return) {
+        DB::transaction(function () use ($return, $request) {
             $return->status = ReturnStatus::Open;
             $return->save();
-            resolve(UnlockReturn::class)->handle($return, Auth::user());
+            resolve(UnlockReturn::class)->handle($return, $request->user());
 
         });
 

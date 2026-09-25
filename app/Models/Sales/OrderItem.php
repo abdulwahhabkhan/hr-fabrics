@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read float $total
+ * @property float $amount
+ * @property float $meter
+ * @property float $suit
+ * @property float $avg_suit
+ * @property float $avg_meter
+ * @property int $orders
+ * @property float $per_trans
  */
 class OrderItem extends Model
 {
@@ -34,16 +41,25 @@ class OrderItem extends Model
         'unit' => PackingType::class,
     ];
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return HasMany<Inventory, $this>
+     */
     public function inventory(): HasMany
     {
         return $this->hasMany(Inventory::class, 'outbound_item_id')

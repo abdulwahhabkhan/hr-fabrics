@@ -8,6 +8,9 @@ use App\Models\Sales\SalesReturn;
 use App\Models\Sales\SalesReturnItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<SalesReturnItem>
+ */
 class SalesReturnItemFactory extends Factory
 {
     protected $model = SalesReturnItem::class;

@@ -193,7 +193,7 @@ class AccountService
         ];
 
         return [
-            'filters' => ['start_date' => $date],
+            'filters' => ['start_date' => $date->toDateString()],
             'rows' => $banks,
             'totals' => $totals,
         ];

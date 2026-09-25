@@ -29,7 +29,7 @@ class CustomerResource extends JsonResource
             'discount' => $this->discount,
             'suspended' => $this->suspended,
             'discount_type' => $this->discount_type->value,
-            'discount_label' => $this->discount_type?->valueLabel($this->discount),
+            'discount_label' => $this->discount_type->valueLabel($this->discount),
             'agent_name' => $agent ? $agent->name : '',
             'address' => $this->address,
             'updated_at' => $this->updated_at,

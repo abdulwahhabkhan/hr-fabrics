@@ -34,6 +34,9 @@ class TransactionBook
         ];
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function categoryQuery(string $category): Builder
     {
         return match ($category) {
@@ -51,6 +54,9 @@ class TransactionBook
         };
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function advancesQuery(): Builder
     {
         return JournalLedger::query()
@@ -66,6 +72,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function drawingsQuery(): Builder
     {
         return JournalLedger::query()
@@ -81,6 +90,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function charityQuery(): Builder
     {
         return JournalLedger::query()
@@ -96,6 +108,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function commissionQuery(): Builder
     {
         return JournalLedger::query()
@@ -112,6 +127,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function expensesQuery(): Builder
     {
         return JournalLedger::query()
@@ -127,6 +145,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function suppliersQuery(): Builder
     {
         return JournalLedger::query()
@@ -142,6 +163,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function payablesQuery(): Builder
     {
         return JournalLedger::query()
@@ -157,6 +181,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function otherReceivablesQuery(): Builder
     {
         return JournalLedger::query()
@@ -172,6 +199,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function customersQuery(): Builder
     {
         return JournalLedger::query()
@@ -187,6 +217,9 @@ class TransactionBook
             ->first();
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function cashSalesQuery(): Builder
     {
         return JournalLedger::query()
@@ -195,6 +228,9 @@ class TransactionBook
             ->whereBetween('posted_at', [$this->startDate?->toDateString(), $this->endDate?->toDateString()]);
     }
 
+    /**
+     * @return Builder<JournalLedger>
+     */
     public function liabilityQuery(): Builder
     {
         return JournalLedger::query()

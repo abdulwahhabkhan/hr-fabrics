@@ -24,11 +24,17 @@ class SalesReturnItem extends Model
         'total_cost' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<SalesReturn, $this>
+     */
     public function salesReturn(): BelongsTo
     {
         return $this->belongsTo(SalesReturn::class);
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

@@ -11,7 +11,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-
 test('unlock closed sale return order', function () {
     $this->withoutExceptionHandling();
     // Arrange

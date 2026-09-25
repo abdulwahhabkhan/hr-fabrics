@@ -2,17 +2,26 @@
 
 namespace App\Http\Resources\Reports;
 
-use Illuminate\Contracts\Support\Arrayable;
+use App\Models\Purchase\FabricReceiving;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use JsonSerializable;
 
+/**
+ * @mixin FabricReceiving
+ *
+ * @property-read int $product_id
+ * @property-read string $product_name
+ * @property-read string $finish
+ * @property-read string $unit
+ * @property-read float $size
+ * @property-read int $qty
+ */
 class PurchasesResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @return array|Arrayable|JsonSerializable
+     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {

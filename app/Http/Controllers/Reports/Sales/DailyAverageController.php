@@ -43,14 +43,17 @@ class DailyAverageController extends Controller
         $total_amount = $sales->total_sales ?? 0;
         $total_meters = $sales->total_meters ?? 0;
 
-        $total_amount -= $returns['sale']?->total_returns ?? 0;
+        $total_amount -= $returns['sale']->total_returns ?? 0;
 
         $fridays = $offDays->filter(fn ($d) => $d->isFriday());
         $holidays = $offDays->filter(fn ($d) => ! $d->isFriday());
         $workingDays = count($activityDays);
 
         return Inertia::render('Reports/Sales/DailyAverage', [
-            'filters' => $filters,
+            'filters' => [
+                'start_date' => $filters['start_date']->toDateString(),
+                'end_date' => $filters['end_date']->toDateString(),
+            ],
             'sale_summary' => [],
             'returns' => $returns,
             'sales' => [
@@ -67,7 +70,7 @@ class DailyAverageController extends Controller
     }
 
     /**
-     * @return array{sale: array}
+     * @return array{sale: SalesReturn|null}
      */
     protected function getReturnTotal(array $dates): array
     {

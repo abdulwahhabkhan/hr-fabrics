@@ -17,6 +17,9 @@ class Attendance extends Model
         'status' => AttendanceStatus::class,
     ];
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'worker_id');

@@ -27,14 +27,4 @@ enum AttendanceStatus: int
             self::HalfDay => 'Half Day',
         };
     }
-
-    public function rawVerify(): string
-    {
-        return match ($this) {
-            self::Face => '15',
-            self::FingerPrint => '1',
-            self::Card => '4',
-            self::Password => '3',
-        };
-    }
 }

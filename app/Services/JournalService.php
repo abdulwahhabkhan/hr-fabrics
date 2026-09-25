@@ -18,7 +18,7 @@ class JournalService
                 DB::raw('SUM(cr) as credit'),
             ])->first();
 
-        return $total->debit - $total->credit;
+        return (int) ($total->debit - $total->credit);
     }
 
     public function getCashClosingBalance(CarbonInterface $date): int
@@ -31,7 +31,7 @@ class JournalService
                 DB::raw('SUM(cr) as credit'),
             ])->first();
 
-        return $total->debit - $total->credit;
+        return (int) ($total->debit - $total->credit);
     }
 
     public function getCashSales(CarbonInterface $date): int

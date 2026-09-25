@@ -17,18 +17,6 @@ final class PurchaseResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            /*'id' => $this->id,
-            'invoice_no' => $this->invoice_no,
-            'bill_no' => $this->bill_no,
-            'bilti_no' => $this->bilti_no,
-            'lot_no' => $this->lot_no,
-            'total' => $this->total,
-            'discount' => $this->discount,
-            'total_qty' => $this->total_qty,
-            'status' => $this->status,
-            'created_at' => $this->created_at,
-            'supplier_name' => $this->supplier_name,
-            'supplier_id' => $this->supplier_id,*/
             'can' => [
                 'view' => $request->user()->can('view', $this->resource),
                 'edit' => $request->user()->can('update', $this->resource),

@@ -6,12 +6,15 @@ use App\Models\Catalog\Brand;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Brand>
+ */
 class BrandFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Brand>
      */
     protected $model = Brand::class;
 

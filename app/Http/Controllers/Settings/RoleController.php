@@ -62,16 +62,6 @@ class RoleController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function show(int $id)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(int $id): Response
@@ -104,13 +94,5 @@ class RoleController extends Controller
         $role->permissions()->sync($permissions['permissions']);
 
         return Redirect::route('settings.roles.index')->with(['success' => 'Role updated successfully']);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(int $id)
-    {
-        //
     }
 }

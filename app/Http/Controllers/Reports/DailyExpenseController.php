@@ -13,8 +13,8 @@ class DailyExpenseController extends Controller
     public function __invoke(Request $request)
     {
         $filters = [
-            'start_date' => Carbon::now(),
-            'end_date' => Carbon::now(),
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
             'account' => '',
             'group_by' => '',
         ];
@@ -43,7 +43,7 @@ class DailyExpenseController extends Controller
                     'account_id' => $summary->account_id,
                     'name' => $summary->name,
                     'detail' => '',
-                    'posted_at' => $summary->posted_at,
+                    'posted_at' => $summary->posted_at?->toDateString(),
                     'city' => $summary->city,
                     'expenses' => $expenses,
                     'cr' => $cr,

@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property string $customer_name
+ * @property-read string $account
+ * @property-read int|null $total_returns
  */
 class SalesReturn extends Model implements Journalable, Logable
 {
@@ -38,7 +40,7 @@ class SalesReturn extends Model implements Journalable, Logable
         'info' => AsCollection::class,
         'agent_rate' => AsCollection::class,
         'status' => ReturnStatus::class,
-        'transaction_date' => 'date',
+        'transaction_date' => 'date:Y-m-d',
         'total_qty' => 'float',
         'amount' => 'integer',
         'discount' => 'integer',
@@ -63,21 +65,33 @@ class SalesReturn extends Model implements Journalable, Logable
         ];
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'customer_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return MorphMany<Inventory, $this>
+     */
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'stockable');
     }
 
+    /**
+     * @return HasMany<SalesReturnItem, $this>
+     */
     public function returnItems(): HasMany
     {
         return $this->hasMany(SalesReturnItem::class);
@@ -97,7 +111,7 @@ class SalesReturn extends Model implements Journalable, Logable
     }
 
     #[Scope]
-    public function confirmed(Builder $query): Builder
+    protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', ReturnStatus::Closed);
     }

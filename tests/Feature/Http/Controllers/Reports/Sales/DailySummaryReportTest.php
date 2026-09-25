@@ -15,7 +15,8 @@ it('shows the Daily Summary Report page', function (): void {
 
     $response->assertInertia(function (Assert $page): void {
         $page->component('Reports/Daily/DailySummaryReport')
-            ->has('filters')
+            ->where('filters.start_date', today()->toDateString())
+            ->where('filters.end_date', today()->toDateString())
             ->has('rows')
             ->has('total_sales')
             ->has('total_receipts')

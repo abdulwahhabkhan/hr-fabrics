@@ -5,12 +5,15 @@ namespace Database\Factories\Action;
 use App\Models\Action\Log;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Log>
+ */
 final class LogFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Log>
      */
     protected $model = Log::class;
 

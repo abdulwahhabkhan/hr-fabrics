@@ -8,12 +8,15 @@ use App\Models\Purchase\FabricReceiving;
 use App\Models\Stock\Inventory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Inventory>
+ */
 class InventoryFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Inventory>
      */
     protected $model = Inventory::class;
 

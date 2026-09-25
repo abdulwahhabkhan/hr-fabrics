@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property-read int supplier_id
- * @property-read string supplier_name
+ * @property-read int $supplier_id
+ * @property-read string $supplier_name
  *
  * @method static ReceiptAccounts()
  */
@@ -42,7 +42,7 @@ class Account extends Model implements Fileable
         'limit' => 'float',
         'expense_account' => 'integer',
         'credit' => 'boolean',
-        'balance_date' => 'date',
+        'balance_date' => 'date:Y-m-d',
         'suspended' => 'boolean',
         'suspended_at' => 'datetime',
         'discount_type' => DiscountType::class,
@@ -53,18 +53,27 @@ class Account extends Model implements Fileable
         return self::query()->orderBy('name', 'asc')->get();
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by')
             ->withDefault();
     }
 
+    /**
+     * @return BelongsTo<self, $this>
+     */
     public function agent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'agent_id')
             ->withDefault();
     }
 
+    /**
+     * @return HasMany<Ledger, $this>
+     */
     public function ledger(): HasMany
     {
         return $this->hasMany(Ledger::class);
@@ -172,7 +181,7 @@ class Account extends Model implements Fileable
         return $query->select([
             'id',
             'name',
-        ])->orderBy('name', 'ASC');
+        ])->orderBy('name', 'asc');
     }
 
     #[Scope]

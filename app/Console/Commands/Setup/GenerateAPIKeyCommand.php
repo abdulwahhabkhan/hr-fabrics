@@ -15,13 +15,15 @@ class GenerateAPIKeyCommand extends Command
 
     protected $description = 'Command description';
 
-    public function handle()
+    public function handle(): void
     {
 
         $key = $this->generateRandomKey();
 
         if ($this->option('show')) {
-            return $this->line('<comment>'.$key.'</comment>');
+            $this->line('<comment>'.$key.'</comment>');
+
+            return;
         }
 
         if (! $this->setKeyInEnvironmentFile($key)) {

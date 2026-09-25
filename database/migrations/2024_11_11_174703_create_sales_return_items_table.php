@@ -16,7 +16,6 @@ return new class extends Migration
     public function up(): void
     {
         $this->down();
-        // DB::statement($this->createView());
         Schema::create('sales_return_items', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(SalesReturn::class)->index();
@@ -39,36 +38,5 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("DROP VIEW IF EXISTS {$this->view};");
-    }
-
-    private function createView(): string
-    {
-
-        $sql = "
-SELECT  srtn.id as sales_return_id,
- ri.product_id,
- ri.product_name,
- ri.finish,
- ri.unit,
- ri.size,
- ri.rate,
- ri.qty,
- ri.total_qty
-FROM sales_returns srtn,
-     JSON_TABLE(srtn.items, '$[*]' COLUMNS (
-                product_id VARCHAR(200)  PATH '$.product.product_id',
-                product_name VARCHAR(200)  PATH '$.name',
-                finish VARCHAR(100) PATH '$.product.finish',
-                unit VARCHAR(30) PATH '$.unit',
-                size double PATH '$.size',
-                rate double PATH '$.rate',
-                qty double PATH '$.qty',
-                total_qty double PATH '$.total_qty')
-     ) ri";
-
-        return <<<EOD
-        CREATE VIEW {$this->view} AS
-            $sql
-        EOD;
     }
 };

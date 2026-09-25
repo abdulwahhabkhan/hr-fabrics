@@ -817,18 +817,6 @@ test('sale order edit is blocked for a closed order', function () {
     $response->assertSessionHas('error');
 });
 
-test('sale order can be deleted', function () {
-    // Arrange
-    Permission::fake(['sales.orders.destroy' => true]);
-    $order = Order::factory()->create();
-
-    // Act
-    $response = $this->delete(route('sales.orders.destroy', $order->id));
-
-    // Assert
-    $response->assertOk();
-});
-
 test('order items ajax endpoint returns items', function () {
     // Arrange
     $order = Order::factory()

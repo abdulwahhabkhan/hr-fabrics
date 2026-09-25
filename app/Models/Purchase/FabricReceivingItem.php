@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string product_name
- * @property-read float total_meters
+ * @property-read string $product_name
+ * @property-read float $total_meters
  */
 final class FabricReceivingItem extends Model
 {
@@ -27,16 +27,25 @@ final class FabricReceivingItem extends Model
         'size' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsTo<FabricReceiving, $this>
+     */
     public function fabricReceiving(): BelongsTo
     {
         return $this->belongsTo(FabricReceiving::class);
     }
 
+    /**
+     * @return HasMany<Inventory, $this>
+     */
     public function inventory(): HasMany
     {
         return $this->hasMany(Inventory::class, 'stockable_item_id', 'id')

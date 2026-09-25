@@ -9,12 +9,15 @@ use App\Models\Purchase\PurchaseItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @extends Factory<Purchase>
+ */
 class PurchaseFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Purchase>
      */
     protected $model = Purchase::class;
 

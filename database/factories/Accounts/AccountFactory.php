@@ -8,12 +8,15 @@ use App\Models\Accounts\Account;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Account>
+ */
 class AccountFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Account>
      */
     protected $model = Account::class;
 

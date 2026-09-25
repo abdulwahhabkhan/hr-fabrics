@@ -8,12 +8,15 @@ use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<PurchaseItem>
+ */
 class PurchaseItemFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<PurchaseItem>
      */
     protected $model = PurchaseItem::class;
 

@@ -20,7 +20,7 @@ final class AddFabricReceivingItem
         ['unit' => $unit, 'qty' => $qty] = $data;
 
         if (mb_strtolower($unit) !== mb_strtolower(PackingType::Thaan->value)) {
-            $data['total_qty'] = $qty * $data['size'] ?? 1;
+            $data['total_qty'] = $qty * ($data['size'] ?? 1);
         } else {
             $data['size'] = 0;
         }

@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Exception;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class InsufficientStockException extends Exception
 {
     public static function insufficientStock(string $productName, int $quantity, int $availableStock): static

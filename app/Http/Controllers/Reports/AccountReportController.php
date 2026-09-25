@@ -26,7 +26,7 @@ class AccountReportController extends Controller
     public function index(Request $request): Response
     {
         $filters = $this->filterSession($request, ['name', 'city', 'type', 'date']);
-        if (empty($filters['date']) ?? true) {
+        if (empty($filters['date'])) {
             $filters['date'] = today()->toDateString();
         }
 
@@ -50,8 +50,6 @@ class AccountReportController extends Controller
                 'rows' => AccountsResource::collection($rows),
             ]);
     }
-
-    public function view(Request $request) {}
 
     public function receivablesByCity(Request $request)
     {
@@ -102,7 +100,7 @@ class AccountReportController extends Controller
             'total_balance' => $total_balance,
             'cities' => $cities,
             'rows' => $receivables,
-            'today' => today(),
+            'today' => today()->toDateString(),
         ]);
     }
 

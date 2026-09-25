@@ -26,7 +26,7 @@ class User extends Authenticatable implements PasskeyUser
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -38,7 +38,7 @@ class User extends Authenticatable implements PasskeyUser
     /**
      * The attributes that should be hidden for arrays.
      *
-     * @var array
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -58,17 +58,26 @@ class User extends Authenticatable implements PasskeyUser
         return self::query()->where('name', 'script')->first();
     }
 
+    /**
+     * @return BelongsTo<Role, $this>
+     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class)
             ->withDefault();
     }
 
+    /**
+     * @return HasMany<LoginActivity, $this>
+     */
     public function loginActivity(): HasMany
     {
         return $this->hasMany(LoginActivity::class, 'user_id', 'id');
     }
 
+    /**
+     * @return HasMany<PasswordHistory, $this>
+     */
     public function passwordHistories(): HasMany
     {
         return $this->hasMany(PasswordHistory::class);

@@ -5,6 +5,7 @@ use App\Models\Catalog\Brand;
 use App\Models\Catalog\Product;
 use App\Models\Stock\Inventory;
 use App\Models\User;
+
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {

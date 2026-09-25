@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum TransactionType: string
+use App\Contracts\HasLabel;
+
+enum TransactionType: string implements HasLabel
 {
     use HasOptions;
 

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Traits;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/** @mixin Controller */
 trait HandlesIndexFilters
 {
     /**
@@ -12,9 +14,9 @@ trait HandlesIndexFilters
      * @param  array<int, string>|string  $keys
      * @return array<string, mixed>
      */
-    protected function filterSession(Request $request, array|string $keys = [], ?string $sessionKey = null): array
+    protected function filterSession(Request $request, array|string $keys = []): array
     {
-        $sessionKey ??= $this->sessionKey ?? $this->session_key ?? null;
+        $sessionKey = $this->sessionKey ?? null;
 
         if ($request->has('remember') && $request->input('remember') === 'forget') {
             if ($sessionKey) {

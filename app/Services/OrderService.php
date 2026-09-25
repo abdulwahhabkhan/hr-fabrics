@@ -13,8 +13,8 @@ class OrderService
             return 0;
         }
 
-        if (str_contains($commission_rate, '%')) { // is percentage?
-            $rate = str_replace('%', '', $commission_rate);
+        if (str_contains((string) $commission_rate, '%')) { // is percentage?
+            $rate = (float) str_replace('%', '', (string) $commission_rate);
             $total_commission = (float) (($data['total_amount']) * ($rate / 100));
         } else {
             $total_commission = (float) $data['total_qty'] * (float) $commission_rate;

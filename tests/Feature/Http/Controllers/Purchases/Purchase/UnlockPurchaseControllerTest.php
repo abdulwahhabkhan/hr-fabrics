@@ -3,13 +3,12 @@
 use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Models\Accounts\Journal;
 use App\Models\Accounts\JournalDetail;
+use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
-use App\Models\Purchase\FabricReceiving;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
-
 
 test('unlock receipt', function () {
     // Arrange

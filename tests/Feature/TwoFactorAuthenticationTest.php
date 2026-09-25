@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Fortify;
 use PragmaRX\Google2FA\Google2FA;
@@ -43,7 +44,7 @@ test('a valid two factor code completes the login', function () {
     ]);
 
     $this->assertAuthenticatedAs($user);
-    $response->assertRedirect(App\Providers\AppServiceProvider::HOME);
+    $response->assertRedirect(AppServiceProvider::HOME);
 });
 
 test('an invalid two factor code does not complete the login', function () {

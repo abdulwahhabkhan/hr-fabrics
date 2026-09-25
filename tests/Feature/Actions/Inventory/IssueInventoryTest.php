@@ -6,9 +6,9 @@ use App\Actions\Inventory\IssueInventory;
 use App\Enums\PackingType;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Models\Catalog\Product;
+use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\PurchaseReturn;
 use App\Models\Purchase\PurchaseReturnItem;
-use App\Models\Purchase\FabricReceiving;
 use App\Models\Stock\Inventory;
 use Illuminate\Validation\ValidationException;
 

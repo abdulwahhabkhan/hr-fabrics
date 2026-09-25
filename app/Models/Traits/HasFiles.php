@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  */
 trait HasFiles
 {
+    /**
+     * @return MorphMany<File, $this>
+     */
     public function files(): MorphMany
     {
         return $this->morphMany(File::class, 'fileable');

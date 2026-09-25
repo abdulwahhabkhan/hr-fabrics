@@ -3,6 +3,7 @@
 namespace App\Actions\Inbound\FabricReceiving;
 
 use App\Enums\Module;
+use App\Enums\PackingType;
 use App\Enums\TransactionType;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Stock\Inventory;
@@ -35,7 +36,7 @@ final class FabricReceivingConfirmed
                 $inventory->stockable_item_id = $item->id;
                 $inventory->product_id = $item->product_id;
                 $inventory->size = $item->size;
-                $inventory->unit = $item->unit;
+                $inventory->unit = PackingType::from($item->unit);
                 $inventory->qty = $item->qty;
                 $inventory->meters = $item->total_qty;
                 $inventory->info = $info;

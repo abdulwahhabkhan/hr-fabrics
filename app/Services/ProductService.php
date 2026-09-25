@@ -19,7 +19,7 @@ class ProductService
             $products = Product::query()
                 ->select(['products.*'])
                 ->selectRaw('brands.name as brand_name')
-                ->orderBy('products.name', 'ASC')
+                ->orderBy('products.name', 'asc')
                 ->joinRelation('brand')
                 ->get();
             Cache::put(Product::class, $products, 2 * 60 * 60);
@@ -43,7 +43,7 @@ class ProductService
                     ->limit(1),
 
             ])
-            ->orderBy('name', 'ASC')->get();
+            ->orderBy('name', 'asc')->get();
     }
 
     public function availableProducts()
@@ -55,7 +55,7 @@ class ProductService
                 ->available()
                 ->select(['products.*'])
                 ->selectRaw('brands.name as brand_name')
-                ->orderBy('products.name', 'ASC')->get();
+                ->orderBy('products.name', 'asc')->get();
             Cache::put(Product::$availableCacheKey, $products, 60);
         }
 

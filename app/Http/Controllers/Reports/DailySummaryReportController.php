@@ -18,7 +18,7 @@ class DailySummaryReportController extends Controller
 {
     public function dailySales(Request $request): Response
     {
-        $filters = ['type' => 'city', 'account' => '', 'start_date' => today(), 'end_date' => today()];
+        $filters = ['type' => 'city', 'account' => '', 'start_date' => today()->toDateString(), 'end_date' => today()->toDateString()];
         $query_string = $request->only(['start_date', 'end_date', 'type', 'account']);
         if ($query_string) {
             $filters['start_date'] = $request->start_date;
@@ -36,6 +36,8 @@ class DailySummaryReportController extends Controller
         }
         $start_date = Carbon::create($filters['start_date'])->startOfDay();
         $end_date = Carbon::create($filters['end_date'])->endOfDay();
+        $filters['start_date'] = $start_date->toDateString();
+        $filters['end_date'] = $end_date->toDateString();
         $sales = Order::query()
             ->select([
                 Account::qCol($sale_column.' as account', false),

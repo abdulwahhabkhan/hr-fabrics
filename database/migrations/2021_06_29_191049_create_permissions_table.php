@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
-            $table->char('section', '255')->index()->nullable();
-            $table->char('module', '255')->index()->nullable();
-            $table->char('name', '200')->index();
-            $table->char('action', '255')->index();
+            $table->char('section', 255)->index()->nullable();
+            $table->char('module', 255)->index()->nullable();
+            $table->char('name', 200)->index();
+            $table->char('action', 255)->index();
             $table->timestamps();
         });
     }

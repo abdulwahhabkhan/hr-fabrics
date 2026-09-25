@@ -13,7 +13,7 @@ it('shows daily average report without filters', function (): void {
     $response->assertSuccessful()
         ->assertInertia(function (AssertableInertia $page): void {
             $page->component('Reports/Sales/DailyAverage')
-                ->has('filters')
+                ->where('filters.end_date', today()->toDateString())
                 ->has('sale_summary')
                 ->has('returns')
                 ->has('sales')

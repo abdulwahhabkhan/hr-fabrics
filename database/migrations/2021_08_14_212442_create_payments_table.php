@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('ref_no', 30)->index();
             $table->unsignedInteger('created_by')->index();
             $table->unsignedInteger('account_id')->index();
-            $table->string('type', '30')->index();
+            $table->string('type', 30)->index();
             $table->string('reason');
             $table->json('payment_info');
             $table->float('amount');

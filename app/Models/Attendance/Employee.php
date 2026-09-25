@@ -24,6 +24,9 @@ class Employee extends Model
         'info' => 'array',
     ];
 
+    /**
+     * @return HasMany<Attendance, $this>
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'worker_id');

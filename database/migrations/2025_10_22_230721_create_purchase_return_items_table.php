@@ -15,11 +15,11 @@ return new class extends Migration
             $table->foreignIdFor(PurchaseReturn::class)->index();
             $table->foreignIdFor(Product::class)->index();
             $table->string('unit', 30);
-            $table->float('size', 7, 2);
+            $table->float('size', 7);
             $table->integer('qty');
             $table->float('total_qty');
             $table->double('rate');
-            $table->float('total_amount', 10, 2);
+            $table->float('total_amount', 10);
             $table->timestamps();
         });
     }

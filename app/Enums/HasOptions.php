@@ -2,22 +2,21 @@
 
 namespace App\Enums;
 
+use App\Contracts\HasLabel;
+use BackedEnum;
 use Illuminate\Support\Collection;
+use UnitEnum;
 
 trait HasOptions
 {
-    public static function toOptions($all = true): Collection
+    public static function toOptions(bool $all = true): Collection
     {
         return collect(self::cases())
-            ->when(! $all, function () {})
-            ->map(function ($row) {
-                $name = $row->name;
-                if (method_exists($row, 'label')) {
-                    $name = $row->label();
-                }
+            ->map(function (UnitEnum $row): array {
+                $name = $row instanceof HasLabel ? $row->label() : $row->name;
 
                 return [
-                    'id' => $row->value ?? $row->name,
+                    'id' => $row instanceof BackedEnum ? $row->value : $row->name,
                     'name' => $name,
                 ];
             });

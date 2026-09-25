@@ -24,7 +24,7 @@ enum DiscountType: string
         };
     }
 
-    public function valueLabel(int $value): string
+    public function valueLabel(int|float $value): string
     {
         return match ($this) {
             self::PercentageOnTotal => "{$value}% total",
@@ -32,7 +32,7 @@ enum DiscountType: string
         };
     }
 
-    public function valueLabelShort(int $value): string
+    public function valueLabelShort(int|float $value): string
     {
         return match ($this) {
             self::PercentageOnTotal => "Discount {$value}%",

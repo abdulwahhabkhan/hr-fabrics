@@ -8,7 +8,6 @@ use App\Models\Catalog\Product;
 use App\Models\Model;
 use App\Models\Stock\Inventory;
 use Carbon\CarbonInterface;
-use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
@@ -127,7 +126,7 @@ class IssueInventory
             $stockUsed = $this->splitLine($stock, $remQty, $remMeters);
             $stockUsed->outbound()->associate($this->outbound);
             $stockUsed->outbound_item_id = $this->outboundItemId;
-            $stockUsed->outbound_on = $this->transactionDate;
+            $stockUsed->outbound_on = $this->transactionDate->toImmutable();
             if ($stockUsed->size !== $this->size) {
                 $stockUsed->size = $this->size;
             }
@@ -162,7 +161,7 @@ class IssueInventory
         return $new;
     }
 
-    private function productInfo(): Product|Closure
+    private function productInfo(): ?Product
     {
         return once(fn () => Product::find($this->productId));
     }

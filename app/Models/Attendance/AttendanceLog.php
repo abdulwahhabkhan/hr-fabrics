@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @property-read string $first_punch
+ * @property-read string|null $last_punch
+ * @property-read int $punch_count
+ */
 class AttendanceLog extends Model
 {
     use HasFactory;
@@ -14,7 +19,7 @@ class AttendanceLog extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'punch_date' => 'date',
+        'punch_date' => 'date:Y-m-d',
         'info' => 'array',
     ];
 

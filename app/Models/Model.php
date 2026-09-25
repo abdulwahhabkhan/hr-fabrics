@@ -9,8 +9,10 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 
 /**
- * @method MorphMany<int, Log> logs()
+ * @method MorphMany<Log, $this> logs()
  * @method string journalDetail()
+ *
+ * @phpstan-consistent-constructor
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {

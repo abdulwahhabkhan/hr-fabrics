@@ -60,11 +60,10 @@ class PermissionGeneratorCommand extends Command
             $module = explode('.', $name)[1];
             $section = $route->getAction('prefix');
             $section ??= $module;
-            $module ??= 'Modules';
+
             $module = $module === 'accounts' ? 'account' : $module;
             $section = str_replace(['/'], '', $section);
 
-            $this->info($action.'---'.$module.'---'.$name.'---'.$section.'--'.$middleware);
             if (! $name) {
                 continue;
             }

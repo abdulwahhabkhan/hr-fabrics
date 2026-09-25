@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Purchases;
 use App\Actions\Inbound\Purchase\AddPurchaseItem;
 use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Actions\Inbound\Purchase\CreatePurchase;
-use App\Actions\Inbound\Purchase\ReturnPurchaseItem;
 use App\Actions\Inbound\Purchase\UpdatePurchaseTotal;
 use App\Actions\LogAction\RecordAction;
 use App\Enums\StatusText;
@@ -20,7 +19,6 @@ use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
 use App\Services\ProductService;
-use Auth;
 use DB;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -132,7 +130,7 @@ final class PurchaseController extends Controller
             'Purchases/Purchases/PurchaseView',
             [
                 'receipt' => $data,
-                'transaction_date' => $data->transaction_display_date,
+                'transaction_date' => $data->transaction_display_date->toDateString(),
                 'total_summary' => $total_summary,
             ]
         );
@@ -180,7 +178,7 @@ final class PurchaseController extends Controller
             $po->save();
             resolve(UpdatePurchaseTotal::class)->handle($po);
             if ($po->isClosed()) {
-                resolve(ConfirmPurchaseActions::class)->handle($po, Auth::user());
+                resolve(ConfirmPurchaseActions::class)->handle($po, $request->user());
             }
         });
 
@@ -197,13 +195,13 @@ final class PurchaseController extends Controller
     public function destroy(Purchase $po, Request $request): RedirectResponse
     {
         $this->authorize('delete', $po);
-        DB::transaction(function () use ($po) {
+        DB::transaction(function () use ($po, $request) {
             FabricReceiving::query()
                 ->whereIn('id', str($po->stock_ids)->explode(','))
                 ->update(['invoiced' => false]);
             $po->items()->delete();
             $po->delete();
-            resolve(RecordAction::class)->handle($po, Auth::user(), 'Receipt Deleted');
+            resolve(RecordAction::class)->handle($po, $request->user(), 'Receipt Deleted');
         });
 
         return Redirect::route('purchases.pos.index')
@@ -260,38 +258,5 @@ final class PurchaseController extends Controller
         return response()->json([
             'items' => PurchaseItemResource::collection($items),
         ]);
-    }
-
-    /**
-     * Return PO item
-     */
-    public function itemReturn(Request $request): RedirectResponse
-    {
-        $id = $request->input('purchase_id');
-        $validate = $request->validate([
-            'purchase_id' => 'required',
-            'id' => [
-                'required',
-                'exists:purchase_items',
-            ],
-            'product_id' => 'required',
-            'name' => 'required',
-            'unit' => 'required',
-            'size' => 'required',
-            'qty' => 'required',
-            'price' => 'required',
-        ]);
-
-        if ($validate) {
-            $payload = $validate + $request->only('remarks');
-            resolve(ReturnPurchaseItem::class)->handle($payload, $request->user());
-
-            return Redirect::route('purchases.pos.show', $id)
-                ->with(['success' => 'Voucher item returned successfully']);
-        }
-
-        return Redirect::route('purchases.pos.show', $id)
-            ->with(['error' => 'Voucher item returned successfully']);
-
     }
 }

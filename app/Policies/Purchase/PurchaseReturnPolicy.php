@@ -34,7 +34,7 @@ class PurchaseReturnPolicy
             return false;
         }
 
-        return $purchaseReturn->status === ReturnStatus::Closed && $purchaseReturn->updated_at->isSameDay(now());
+        return $purchaseReturn->updated_at->isSameDay(now());
     }
 
     public function ledger(User $user, PurchaseReturn $purchaseReturn): bool

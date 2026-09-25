@@ -21,8 +21,6 @@ final class FabricReceivingItemResource extends JsonResource
             'product_id' => $this->product_id,
             'fabric_receiving_id' => $this->fabric_receiving_id,
             'voucher_no' => $this->voucher_no,
-            // 'sku' => $this->sku,
-            // 'product_sku' => $this->product_sku,
             'unit' => $this->unit,
             'product_name' => $this->product_name,
             'qty' => $this->qty,

@@ -83,7 +83,7 @@ class SalesReturnController extends Controller
         unset($data['customer']);
         $invoice_sr = SalesReturn::query()->max('sr');
         $invoice_sr++;
-        $invoice_no = 'SOR-'.date('ym').mb_str_pad($invoice_sr, 3, '0', STR_PAD_LEFT);
+        $invoice_no = 'SOR-'.date('ym').mb_str_pad((string) $invoice_sr, 3, '0', STR_PAD_LEFT);
         $created_by = auth()->user()->id;
         $data['created_by'] = $created_by;
         $data['customer_id'] = $customer['customer_id'];

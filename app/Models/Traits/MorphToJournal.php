@@ -6,6 +6,7 @@ namespace App\Models\Traits;
 
 use App\Models\Accounts\Journal;
 use App\Models\Model;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,13 +18,20 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 trait MorphToJournal
 {
+    /**
+     * @return MorphOne<Journal, $this>
+     */
     public function journal(): MorphOne
     {
         return $this->morphOne(Journal::class, 'resource');
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     #[Scope]
-    public function confirmedBefore(Builder $query, $date): Builder
+    protected function confirmedBefore(Builder $query, $date): Builder
     {
         $query->confirmed();
         if ($date instanceof CarbonInterface) {
@@ -34,8 +42,12 @@ trait MorphToJournal
 
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     #[Scope]
-    public function confirmedAfter(Builder $query, $date): Builder
+    protected function confirmedAfter(Builder $query, CarbonInterface|string $date): Builder
     {
         $query->confirmed();
         if ($date instanceof CarbonInterface) {
@@ -45,15 +57,22 @@ trait MorphToJournal
         return $query->where('transaction_date', '>', $date);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     #[Scope]
-    public function confirmedBetween(Builder $query, $startDate, $endDate): Builder
-    {
+    protected function confirmedBetween(
+        Builder $query,
+        CarbonInterface|string $startDate,
+        CarbonInterface|string $endDate
+    ): Builder {
         $query->confirmed();
         if ($startDate instanceof CarbonInterface) {
-            $startDate = $startDate;
+            $startDate = $startDate->toDateString();
         }
         if ($endDate instanceof CarbonInterface) {
-            $endDate = $endDate;
+            $endDate = $endDate->toDateString();
         }
 
         return $query->where(function (Builder $query) use ($endDate, $startDate) {
@@ -61,8 +80,12 @@ trait MorphToJournal
         });
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     #[Scope]
-    public function confirmedOn(Builder $query, $date): Builder
+    protected function confirmedOn(Builder $query, $date): Builder
     {
         $query->confirmed();
         if ($date instanceof CarbonInterface) {
@@ -72,6 +95,9 @@ trait MorphToJournal
         return $query->where('transaction_date', '=', $date);
     }
 
+    /**
+     * @return Attribute<CarbonImmutable|null, never>
+     */
     protected function transactionDisplayDate(): Attribute
     {
         return Attribute::get(function () {

@@ -18,6 +18,7 @@ use App\Models\Traits\HasFiles;
 use App\Models\Traits\MorphManayToLog;
 use App\Models\Traits\MorphToJournal;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
@@ -28,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read string|null $discount_label
+ */
 class Order extends Model implements Fileable, Journalable, Logable
 {
     use BelongsToCustomer;
@@ -48,7 +52,7 @@ class Order extends Model implements Fileable, Journalable, Logable
         'discount' => 'integer',
         'commission' => 'integer',
         'customer_discount' => 'float',
-        'confirmed_at' => 'date',
+        'confirmed_at' => 'date:Y-m-d',
         'total_cost' => 'float',
         'discount_rate' => 'float',
         'discount_type' => DiscountType::class,
@@ -56,24 +60,36 @@ class Order extends Model implements Fileable, Journalable, Logable
         'payment_mode' => 'string',
         'shipped' => 'integer',
         'status' => OrderStatus::class,
-        'transaction_date' => 'date',
+        'transaction_date' => 'date:Y-m-d',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<OrderItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * @return MorphMany<Inventory, $this>
+     */
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'outbound');
     }
 
+    /**
+     * @return HasMany<OrderItem, $this>
+     */
     public function itemsWithProduct(): HasMany
     {
         return $this->items()
@@ -85,6 +101,9 @@ class Order extends Model implements Fileable, Journalable, Logable
                 Product::qCol('id'));
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function agent(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'agent_id');
@@ -109,7 +128,7 @@ class Order extends Model implements Fileable, Journalable, Logable
     }
 
     #[Scope]
-    public function confirmed(Builder $query): Builder
+    protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', OrderStatus::Close);
     }
@@ -119,6 +138,9 @@ class Order extends Model implements Fileable, Journalable, Logable
         return $this->net_total + $this->balance;
     }
 
+    /**
+     * @return Attribute<CarbonImmutable|null, never>
+     */
     protected function transactionDisplayDate(): Attribute
     {
         return Attribute::get(function () {
@@ -130,18 +152,27 @@ class Order extends Model implements Fileable, Journalable, Logable
         });
     }
 
+    /**
+     * @return Attribute<bool, never>
+     */
     protected function hasBilti(): Attribute
     {
         return Attribute::get(fn () => $this->files()->orderBilti()->exists());
     }
 
+    /**
+     * @return Attribute<bool, never>
+     */
     protected function fromShop(): Attribute
     {
         return Attribute::get(fn () => str($this->purchase_type)->lower()->exactly('online'));
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function discountLabel(): Attribute
     {
-        return Attribute::get(fn () => $this->discount_type?->valueLabelShort($this->discount_rate));
+        return Attribute::get(fn () => $this->discount_type->valueLabelShort($this->discount_rate));
     }
 }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('worker_name')->index();
             $table->string('worker_id', 50)
                 ->collation('utf8mb4_unicode_ci')
-                ->virtualAsJson('info->worker->id')
+                ->virtualAsJson('info->worker->id') // @phpstan-ignore method.notFound (Fluent modifier, compiled by MySqlGrammar::modifyVirtualAs)
                 ->nullable();
             $table->date('punch_date')->index();
             $table->time('punch_time');

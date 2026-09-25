@@ -74,20 +74,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::prefix('catalog')->middleware(['auth', 'verified', 'auth.role'])->name('catalog.')
     ->group(function () {
-        Route::resource('brands', BrandController::class)->only([
-            'index',
-            'edit',
-            'update',
-            'store',
-            'destroy',
-        ]);
-        Route::resource('finish', FinishController::class)->only([
-            'index',
-            'edit',
-            'update',
-            'store',
-            'destroy',
-        ]);
+        Route::resource('brands', BrandController::class)->except(['show', 'create']);
+        Route::resource('finish', FinishController::class)->except(['show', 'create']);
         Route::resource('products', ProductController::class)->except('show');
     });
 
@@ -100,7 +88,7 @@ Route::prefix('sales')->middleware(['auth', 'verified', 'auth.role'])->as('sales
             ->name('customers.suspend')->withoutMiddleware(['auth.role']);
         Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])
             ->name('customers.activate')->withoutMiddleware(['auth.role']);
-        Route::resource('orders', OrderController::class);
+        Route::resource('orders', OrderController::class)->except('destroy');
         Route::get('orders/{order}/gate-pass', [OrderController::class, 'gatePass'])
             ->name('orders.gate-pass');
         Route::get('orders/{order}/ledger', OrderLedgerController::class)
@@ -161,7 +149,7 @@ Route::prefix('purchases')->as('purchases.')->middleware([
 /* Purchase Routes */
 Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stocks.')
     ->group(function () {
-        Route::resource('store-transfers', StoreTransferController::class);
+        Route::resource('store-transfers', StoreTransferController::class)->except('destroy');
         Route::get('store-transfers/{store_transfer}/ledger', StoreTransferLedgerController::class)
             ->name('store-transfers.ledger');
         Route::get('store-transfers/{store_transfer}/inventory', StoreTransferInventoryController::class)
@@ -200,13 +188,13 @@ Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stoc
                 //
             });
         Route::resource('conversions', ConversionController::class)
-            ->except('edit', 'update');
-        Route::resource('inventories', InventoryController::class)->only('index', 'show');
+            ->except('show', 'edit', 'update');
+        Route::resource('inventories', InventoryController::class)->only('index');
         Route::get('value-by-brand', BrandValuationController::class)
             ->name('value-by-brand');
         Route::get('product-history', ProductHistoryController::class)
             ->name('product-history');
-        Route::resource('value-addition', ValueAdditionController::class);
+        Route::resource('value-addition', ValueAdditionController::class)->only('index', 'create');
     });
 
 /* Account Routes */
@@ -224,7 +212,7 @@ Route::prefix('accounts')->middleware(['auth', 'verified', 'auth.role'])
         Route::get('ledgers', [LedgerController::class, 'index'])->name('ledgers.index');
         Route::get('ledgers/{account}', [LedgerController::class, 'show'])
             ->name('ledgers.show')->where(['account' => '[0-9]+']);
-        Route::resource('accounts', AccountController::class);
+        Route::resource('accounts', AccountController::class)->except('show');
         Route::get('income-statement', [IncomeStatementController::class, 'index'])
             ->name('income-statement');
         Route::get('income-statement/detail', [IncomeStatementController::class, 'detail'])
@@ -257,12 +245,12 @@ Route::prefix('accounts')->middleware(['auth', 'verified', 'auth.role'])
 // Setting Routes
 Route::prefix('settings')->middleware(['auth', 'verified', 'auth.role'])
     ->name('settings.')->group(function () {
-        Route::resource('roles', RoleController::class, ['module' => 'Role']);
-        Route::resource('users', UserController::class, ['module' => 'User']);
+        Route::resource('roles', RoleController::class, ['module' => 'Role'])->except(['show', 'destroy']);
+        Route::resource('users', UserController::class, ['module' => 'User'])->except('show');
         Route::get('jobs', [JobController::class, 'index'])->name('jobs.index');
         Route::get('jobs/{id}', [JobController::class, 'index'])->name('jobs.show');
 
-        Route::resource('cities', CityController::class, ['module' => 'City']);
+        Route::resource('cities', CityController::class, ['module' => 'City'])->except('show');
         Route::resource('employees', EmployeeController::class, ['module' => 'Employee'])
             ->only(['index', 'destroy']);
     });

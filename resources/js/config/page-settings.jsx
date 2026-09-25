@@ -11,3 +11,4 @@ export const settings = {
 };
 
 export const AppName = 'H.M. Amin Group';
+export const AppSubName = import.meta.env.VITE_APP_NAME || 'HR Fabrics';

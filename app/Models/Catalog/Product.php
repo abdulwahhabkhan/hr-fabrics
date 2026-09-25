@@ -14,9 +14,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * @property string brand_name
- * @property-read string purchased_price
- * @property int product_id
+ * @property string $brand_name
+ * @property-read string $purchased_price
+ * @property int $product_id
+ * @property-read string $unit
+ * @property-read float $price
+ * @property-read float $qty
+ * @property-read float $total_qty
+ * @property-read float $total_meters
+ * @property-read float|null $closing_qty
+ * @property-read float|null $closing_price
  *
  * @method static Builder inRandomOrder()
  */
@@ -36,26 +43,25 @@ final class Product extends Model
         'is_available' => 'boolean',
     ];
 
-    public function getProductNameAttribute(): string
-    {
-        return "{$this->code} {$this->name}";
-    }
-
-    public function setCodeAttribute($value)
-    {
-        $this->attributes['code'] = mb_strtoupper($value);
-    }
-
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return BelongsTo<Brand, $this>
+     */
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'vendor_id');
@@ -71,12 +77,6 @@ final class Product extends Model
             Cache::forget(self::$availableCacheKey);
             Cache::forget(self::class);
         });
-    }
-
-    #[Scope]
-    protected function lastPurchaseDate(Builder $query): Builder
-    {
-        return $query->where();
     }
 
     #[Scope]

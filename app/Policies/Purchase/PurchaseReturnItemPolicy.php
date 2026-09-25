@@ -10,17 +10,38 @@ class PurchaseReturnItemPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool {}
+    public function viewAny(User $user): bool
+    {
+        return false;
+    }
 
-    public function view(User $user, PurchaseReturnItem $purchaseReturnItem): bool {}
+    public function view(User $user, PurchaseReturnItem $purchaseReturnItem): bool
+    {
+        return false;
+    }
 
-    public function create(User $user): bool {}
+    public function create(User $user): bool
+    {
+        return false;
+    }
 
-    public function update(User $user, PurchaseReturnItem $purchaseReturnItem): bool {}
+    public function update(User $user, PurchaseReturnItem $purchaseReturnItem): bool
+    {
+        return false;
+    }
 
-    public function delete(User $user, PurchaseReturnItem $purchaseReturnItem): bool {}
+    public function delete(User $user, PurchaseReturnItem $purchaseReturnItem): bool
+    {
+        return false;
+    }
 
-    public function restore(User $user, PurchaseReturnItem $purchaseReturnItem): bool {}
+    public function restore(User $user, PurchaseReturnItem $purchaseReturnItem): bool
+    {
+        return false;
+    }
 
-    public function forceDelete(User $user, PurchaseReturnItem $purchaseReturnItem): bool {}
+    public function forceDelete(User $user, PurchaseReturnItem $purchaseReturnItem): bool
+    {
+        return false;
+    }
 }

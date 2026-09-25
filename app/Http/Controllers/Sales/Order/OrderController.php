@@ -217,16 +217,6 @@ class OrderController extends Controller
             ->with(['success' => 'Order updated successfully']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @return void
-     */
-    public function destroy(Order $order)
-    {
-        //
-    }
-
     public function orderItems(Order $order): JsonResponse
     {
         $items = $order->itemsWithProduct()->get();

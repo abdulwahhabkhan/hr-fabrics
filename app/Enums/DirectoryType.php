@@ -9,13 +9,12 @@ enum DirectoryType: string
 
     case Vouchers = 'vouchers';
 
-    public function folderPath(): ?string
+    public function folderPath(): string
     {
         return match ($this) {
             self::SalesBilties => 'sales/bilties/',
             self::FabricsReceivings => 'inbound/fabric-receivings/',
             self::Vouchers => 'vouchers/',
-            default => null,
         };
     }
 }

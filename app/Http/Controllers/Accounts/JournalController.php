@@ -98,6 +98,7 @@ class JournalController extends Controller
             [
                 'accounts' => $accounts, 'morph_class' => Account::morphClass(),
                 'directory' => DirectoryType::Vouchers->value,
+                'date' => today()->formDate(),
             ]
         );
     }

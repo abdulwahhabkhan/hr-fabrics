@@ -38,13 +38,6 @@ class BrandController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return void
-     */
-    public function create() {}
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(BrandRequest $request): JsonResponse
@@ -56,16 +49,6 @@ class BrandController extends Controller
         return response()->json([
             'message' => 'The new brand created successfully',
         ], ResponseStatus::HTTP_CREATED);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @return void
-     */
-    public function show(Brand $brand)
-    {
-        //
     }
 
     /**

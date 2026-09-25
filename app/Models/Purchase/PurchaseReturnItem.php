@@ -25,6 +25,9 @@ class PurchaseReturnItem extends Model
         'unit' => PackingType::class,
     ];
 
+    /**
+     * @return BelongsTo<PurchaseReturn, $this>
+     */
     public function purchaseReturn(): BelongsTo
     {
         return $this->belongsTo(PurchaseReturn::class);

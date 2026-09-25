@@ -11,11 +11,13 @@ parameters:
         - database/
         - routes/
 
-    level: 1
+    level: 5
 
     excludePaths:
-          - ./app/Actions/CutPiece (?)
-          - ./app/Concerns (?)
-          - ./app/Enums/HasOptions.php
           - ./database/seeders/ (?)
-          - ./app/Policies (?)
+
+    ignoreErrors:
+        -
+            # Trait is also used outside Controller, where $sessionKey is not declared.
+            identifier: nullCoalesce.property
+            path: app/Http/Controllers/Traits/HandlesIndexFilters.php

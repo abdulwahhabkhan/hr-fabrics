@@ -13,7 +13,7 @@ final class CreateInbound
         $supplier = $request->input('supplier');
         $invoice_sr = FabricReceiving::query()->max('id');
         $invoice_sr++;
-        $invoice_no = 'ASN-'.date('ym').str($invoice_sr)->padLeft(3, '0');
+        $invoice_no = 'ASN-'.date('ym').str((string) $invoice_sr)->padLeft(3, '0');
         $created_by = $request->user()->id;
 
         return FabricReceiving::query()->create([

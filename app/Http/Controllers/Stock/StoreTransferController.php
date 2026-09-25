@@ -167,14 +167,6 @@ class StoreTransferController extends Controller
             ->with(['success' => 'Store transfer updated successfully']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(StoreTransfer $storeTransfer): void
-    {
-        //
-    }
-
     public function storeTransferItems(StoreTransfer $storeTransfer): JsonResponse
     {
         $items = StoreTransferItem::getItems($storeTransfer->id);

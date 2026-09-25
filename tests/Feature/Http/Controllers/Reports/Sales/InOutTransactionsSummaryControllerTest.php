@@ -15,7 +15,7 @@ it('loads the In-Out Transactions Summary page', function (): void {
     $this->withoutExceptionHandling();
     $this->attachPermissions($admin, 'reports.in.out.transactions.summary');
 
-    app()->bind(TransactionBook::class, fn() => new class
+    app()->bind(TransactionBook::class, fn () => new class
     {
         public function totalAdvances(): object
         {

@@ -15,16 +15,25 @@ class ValueAddition extends Model
 
     protected $guarded = [];
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'vendor_id');
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function packedBy(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'packed_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

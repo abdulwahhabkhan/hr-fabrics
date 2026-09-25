@@ -39,13 +39,5 @@ final readonly class RevenueBook
     public function totalPayableReceived(): float
     {
         return 0;
-        $data = JournalLedger::query()
-            ->selectRaw('sum(dr) as total_dr, sum(cr) as total_cr')
-            ->headJournal()
-            ->typeSupplier()
-            ->whereBetween('posted_at', [$this->startDate?->toDateString(), $this->endDate?->toDateString()])
-            ->first();
-
-        return (float) $data->total_dr - (float) $data->total_cr;
     }
 }

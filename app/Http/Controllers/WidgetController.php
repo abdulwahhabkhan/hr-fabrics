@@ -46,7 +46,7 @@ class WidgetController extends Controller
                     ->confirmedBetween($dates[0], $dates[1])
             )->groupBy('unit')
             ->get()->map(function ($row) {
-                $row->qty = round($row->qty);
+                $row->qty = (int) round($row->qty);
                 $row->avg_meter = round($row->amount / $row->qty);
                 $row->per_trans = round($row->amount / $row->orders);
 

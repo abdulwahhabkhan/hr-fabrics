@@ -31,7 +31,7 @@ class AttendanceRegisterController extends Controller
             ->get()
             ->map(function (Employee $employee) use ($attendances): array {
                 $attendance = $attendances->get($employee->id);
-                $status = $attendance?->status ?? AttendanceStatus::Absent;
+                $status = $attendance->status ?? AttendanceStatus::Absent;
 
                 return [
                     'id' => $employee->id,
@@ -67,7 +67,7 @@ class AttendanceRegisterController extends Controller
             ->where('date', $date)
             ->first();
 
-        $status = $attendance?->status ?? AttendanceStatus::Absent;
+        $status = $attendance->status ?? AttendanceStatus::Absent;
 
         $logs = AttendanceLog::query()
             ->where('worker_id', $workerId)

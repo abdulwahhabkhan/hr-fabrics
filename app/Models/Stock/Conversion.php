@@ -11,7 +11,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
+/**
+ * @property Collection<string, mixed> $from
+ * @property Collection<string, mixed> $to
+ */
 class Conversion extends Model
 {
     use HasFactory;
@@ -21,6 +26,8 @@ class Conversion extends Model
 
     /**
      * created by user
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

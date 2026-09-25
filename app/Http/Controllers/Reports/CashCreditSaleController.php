@@ -18,16 +18,16 @@ class CashCreditSaleController extends Controller
 
     public function __invoke(Request $request): Response
     {
-        $filters = ['start_date' => today(), 'end_date' => today()];
+        $filters = ['start_date' => today()->toDateString(), 'end_date' => today()->toDateString()];
         $query_string = $request->only(['start_date', 'end_date']);
         if ($query_string) {
             $filters['start_date'] = $request->start_date;
             $filters['end_date'] = $request->end_date;
         }
-        $sale_column = 'name';
         $start_date = Carbon::create($filters['start_date'])->startOfDay();
         $end_date = Carbon::create($filters['end_date'])->endOfDay();
-        $search = $filters['account'] ?? '';
+        $filters['start_date'] = $start_date->toDateString();
+        $filters['end_date'] = $end_date->toDateString();
         $sales = Order::query()
             ->select([
                 DB::raw('SUM(net_total) as total_sales'),
@@ -36,9 +36,6 @@ class CashCreditSaleController extends Controller
             ])
             ->selectRaw('transaction_date')
             ->confirmedBetween($start_date, $end_date)
-            ->when($search, function ($query, $search) use ($sale_column) {
-                $query->where($sale_column, 'like', '%'.$search.'%');
-            })
             ->groupBy('transaction_date')
             ->get()
             ->keyBy('transaction_date');
@@ -53,9 +50,6 @@ class CashCreditSaleController extends Controller
             ->selectRaw('transaction_date')
             ->confirmedBetween($start_date, $end_date)
             // ->whereBetween(SalesReturn::qCol('created_at'), [$start_date, $end_date])
-            ->when($search, function ($query, $search) use ($sale_column) {
-                $query->where($sale_column, 'like', '%'.$search.'%');
-            })
             ->groupBy('transaction_date')
             ->get()
             ->keyBy('transaction_date');
@@ -81,7 +75,7 @@ class CashCreditSaleController extends Controller
             $total_cash = $cash_sale - $cash_return;
             $net_sale = $total_credit + $total_cash;
             $sale_summary[] = [
-                'date' => $date,
+                'date' => Carbon::parse($date)->toDateString(),
                 'cash_sale' => $cash_sale,
                 'credit_sale' => $credit_sale,
 

@@ -43,6 +43,8 @@ class StoreTransferItem extends Model
 
     /**
      * Store transfer item product
+     *
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
@@ -51,6 +53,8 @@ class StoreTransferItem extends Model
 
     /**
      * Parent store transfer
+     *
+     * @return BelongsTo<StoreTransfer, $this>
      */
     public function storeTransfer(): BelongsTo
     {

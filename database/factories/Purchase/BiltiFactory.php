@@ -5,12 +5,15 @@ namespace Database\Factories\Purchase;
 use App\Models\Purchase\Bilti;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Bilti>
+ */
 class BiltiFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Bilti>
      */
     protected $model = Bilti::class;
 

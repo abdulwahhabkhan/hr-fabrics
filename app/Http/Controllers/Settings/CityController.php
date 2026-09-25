@@ -54,14 +54,6 @@ class CityController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(City $city)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(City $city): Response

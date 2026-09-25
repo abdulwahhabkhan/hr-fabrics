@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  */
 trait MorphManayToLog
 {
+    /**
+     * @return MorphMany<Log, $this>
+     */
     public function logs(): MorphMany
     {
         return $this->morphMany(Log::class, 'loggable');

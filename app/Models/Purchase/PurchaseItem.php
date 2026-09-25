@@ -7,10 +7,9 @@ use App\Models\Catalog\Product;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string product_name
+ * @property-read string $product_name
  */
 final class PurchaseItem extends Model
 {
@@ -29,6 +28,9 @@ final class PurchaseItem extends Model
         'total' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<Purchase, $this>
+     */
     public function purchase(): BelongsTo
     {
         return $this->belongsTo(Purchase::class);
@@ -36,18 +38,12 @@ final class PurchaseItem extends Model
 
     /**
      * Order Item products
+     *
+     * @return BelongsTo<Product, $this>
      */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Purchase items
-     */
-    public function returns(): HasMany
-    {
-        return $this->hasMany(PurchaseItemReturn::class);
     }
 
     public function isBox(): bool

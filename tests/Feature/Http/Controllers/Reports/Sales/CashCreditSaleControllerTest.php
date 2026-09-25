@@ -21,5 +21,7 @@ it('renders the CashCredit report page with expected props', function (): void {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Reports/Daily/CashCreditReport')
         ->hasAll(['filters', 'sale_summary', 'total_cash', 'total_credit'])
+        ->where('filters.start_date', today()->toDateString())
+        ->where('filters.end_date', today()->toDateString())
     );
 });

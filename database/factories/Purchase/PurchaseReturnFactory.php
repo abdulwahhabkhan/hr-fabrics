@@ -8,12 +8,15 @@ use App\Models\Purchase\PurchaseReturn;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<PurchaseReturn>
+ */
 class PurchaseReturnFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<PurchaseReturn>
      */
     protected $model = PurchaseReturn::class;
 

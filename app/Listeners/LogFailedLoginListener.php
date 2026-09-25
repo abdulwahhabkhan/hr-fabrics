@@ -12,7 +12,7 @@ class LogFailedLoginListener
 
     public function handle(Failed $event): void
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $event->user;
         $request = request();
         $user?->loginActivity()->create([

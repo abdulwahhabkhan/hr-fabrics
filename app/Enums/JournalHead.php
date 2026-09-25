@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum JournalHead: string
+use App\Contracts\HasLabel;
+
+enum JournalHead: string implements HasLabel
 {
     use HasOptions;
 

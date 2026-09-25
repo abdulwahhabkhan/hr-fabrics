@@ -20,7 +20,7 @@ class JournalResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'date' => $this->posted_at,
+            'date' => $this->posted_at->toDateString(),
             'account' => $this->name.', '.$this->city,
             'head' => $this->head,
             'detail' => $this->detail,

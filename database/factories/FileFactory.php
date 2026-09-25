@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\FileType;
+use App\Models\File;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read bool $is_image
+ */
 final class File extends Model
 {
     use HasFactory;
@@ -28,19 +31,17 @@ final class File extends Model
         'type' => FileType::class,
     ];
 
+    /**
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     */
     public function fileable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function isImage(): bool
+    protected function isImage(): Attribute
     {
-        return $this->type === FileType::Image;
-    }
-
-    public function getIsImageAttribute(): bool
-    {
-        return $this->isImage();
+        return Attribute::get(fn () => $this->type === FileType::Image);
     }
 
     #[Scope]
@@ -49,6 +50,10 @@ final class File extends Model
         return $query->where('directory', DirectoryType::SalesBilties->value);
     }
 
+    /**
+     * @param  Builder<File>  $query
+     * @return Builder<File>
+     */
     #[Scope]
     protected function trashedBefore(Builder $query, CarbonInterface $date): Builder
     {

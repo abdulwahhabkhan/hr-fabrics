@@ -12,7 +12,7 @@ class CreateOrder
         $customer = $request['customer'];
         $invoice_sr = Order::query()->max('invoice_sr');
         $invoice_sr++;
-        $invoice_no = date('ym').mb_str_pad($invoice_sr, 3, '0', STR_PAD_LEFT);
+        $invoice_no = date('ym').mb_str_pad((string) $invoice_sr, 3, '0', STR_PAD_LEFT);
         $created_by = request()->user()->id;
         $rate = $customer['customer_id'] ?
             Account::find($customer['customer_id'])->commission_rate : 0;

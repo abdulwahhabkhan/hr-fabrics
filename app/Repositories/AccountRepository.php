@@ -140,14 +140,18 @@ class AccountRepository
         return [
             'total_debit' => $total_debit,
             'total_credit' => $total->total_credit,
-            'transaction' => $history?->first()?->journal,
+            'transaction' => $history->first()?->journal,
             'balance' => ($total->total_debit - $total->total_credit),
             'journal' => $journal,
         ];
 
     }
 
-    /** @deprecated */
+    /**
+     * @deprecated
+     *
+     * @return Builder<JournalDetail>
+     */
     public function getAccountOverDueQuery(int $account_id, int $total): Builder
     {
         // query: select * from (

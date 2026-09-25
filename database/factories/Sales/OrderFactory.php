@@ -14,12 +14,15 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @extends Factory<Order>
+ */
 class OrderFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Order>
      */
     protected $model = Order::class;
 

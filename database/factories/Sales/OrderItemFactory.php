@@ -8,12 +8,15 @@ use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<OrderItem>
+ */
 class OrderItemFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<OrderItem>
      */
     protected $model = OrderItem::class;
 

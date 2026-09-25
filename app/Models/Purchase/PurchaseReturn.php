@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
- * @property string supplier_name
+ * @property string $supplier_name
  */
 #[UsePolicy(PurchaseReturnPolicy::class)]
 class PurchaseReturn extends Model implements Journalable, Logable
@@ -37,7 +37,7 @@ class PurchaseReturn extends Model implements Journalable, Logable
     protected $casts = [
         'info' => AsCollection::class,
         'status' => ReturnStatus::class,
-        'transaction_date' => 'date',
+        'transaction_date' => 'date:Y-m-d',
         'total_qty' => 'float',
         'total_amount' => 'float',
         'total' => 'float',
@@ -45,26 +45,41 @@ class PurchaseReturn extends Model implements Journalable, Logable
         'discount' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'supplier_id');
     }
 
+    /**
+     * @return MorphMany<Inventory, $this>
+     */
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'outbound');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<PurchaseReturnItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseReturnItem::class);
     }
 
+    /**
+     * @return HasMany<PurchaseReturnItem, $this>
+     */
     public function itemsWithProduct(): HasMany
     {
         return $this->items()
@@ -85,7 +100,7 @@ class PurchaseReturn extends Model implements Journalable, Logable
     }
 
     #[Scope]
-    public function confirmed(Builder $query): Builder
+    protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', ReturnStatus::Closed);
     }

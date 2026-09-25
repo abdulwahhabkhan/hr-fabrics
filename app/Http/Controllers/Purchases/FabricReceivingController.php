@@ -18,7 +18,6 @@ use App\Models\Accounts\Account;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\FabricReceivingItem;
 use App\Services\ProductService;
-use Auth;
 use DB;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -107,7 +106,7 @@ final class FabricReceivingController extends Controller
             'Purchases/FabricReceivings/FabricReceivingView',
             [
                 'order' => $data,
-                'transaction_date' => $data->transaction_display_date,
+                'transaction_date' => $data->transaction_display_date->toDateString(),
                 'attachments' => $fabric_receiving->files()->get(),
                 'total_summary' => $total_summary,
             ]
@@ -159,7 +158,7 @@ final class FabricReceivingController extends Controller
             'info' => ['nullable', 'array'],
         ]);
 
-        DB::transaction(function () use ($recordAction, $stockConfirmed, $updateStockTotal, $fabric_receiving, $data) {
+        DB::transaction(function () use ($recordAction, $stockConfirmed, $updateStockTotal, $fabric_receiving, $data, $request) {
             unset($data['files']);
             $fabric_receiving->fill($data);
             if ($fabric_receiving->isClosed() && ! $fabric_receiving->transaction_date) {
@@ -169,7 +168,7 @@ final class FabricReceivingController extends Controller
             $updateStockTotal->handle($fabric_receiving);
             if ($fabric_receiving->isClosed()) {
                 $stockConfirmed->handle($fabric_receiving);
-                $recordAction->handle($fabric_receiving, Auth::user(), 'Stock receiving confirmed');
+                $recordAction->handle($fabric_receiving, $request->user(), 'Stock receiving confirmed');
             }
         });
 
@@ -191,7 +190,7 @@ final class FabricReceivingController extends Controller
         FabricReceivingItem::query()
             ->where('fabric_receiving_id', $fabric_receiving->id)
             ->update(['status' => 2]);
-        $recordAction->handle($fabric_receiving, Auth::user(), 'Stock receiving deleted');
+        $recordAction->handle($fabric_receiving, $request->user(), 'Stock receiving deleted');
 
         return Redirect::route('purchases.fabric-receivings.index')
             ->with(['success' => 'Fabric receiving deleted successfully']);

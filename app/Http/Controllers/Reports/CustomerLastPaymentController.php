@@ -51,7 +51,7 @@ class CustomerLastPaymentController extends Controller
                 'balance' => $row->balance,
                 'city' => $row->address['city'] ?? '',
                 'days' => ceil($row->balance_date?->diffInDays(now())),
-                'payment_date' => $row->balance_date,
+                'payment_date' => $row->balance_date?->toDateString(),
             ]);
 
         return Inertia::render('Reports/Customers/LastPayment',

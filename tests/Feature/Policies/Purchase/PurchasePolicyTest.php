@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\Purchase;
 use App\Models\Stock\Inventory;
 
@@ -111,7 +112,7 @@ it('denies check-inventory when the receipt is open', function () {
 
 it('allows check-inventory when the confirmed receipt has no booked stock', function () {
     $user = $this->userWithoutPermissions();
-    $stock = \App\Models\Purchase\FabricReceiving::factory()->create();
+    $stock = FabricReceiving::factory()->create();
     $receipt = Purchase::factory()->confirmed()->create(['stock_ids' => (string) $stock->id]);
     actingAs($user);
 
@@ -120,7 +121,7 @@ it('allows check-inventory when the confirmed receipt has no booked stock', func
 
 it('denies check-inventory when the confirmed receipt has booked stock', function () {
     $user = $this->userWithoutPermissions();
-    $stock = \App\Models\Purchase\FabricReceiving::factory()->create();
+    $stock = FabricReceiving::factory()->create();
     $receipt = Purchase::factory()->confirmed()->create(['stock_ids' => (string) $stock->id]);
     Inventory::factory()->create([
         'stockable_type' => $stock->getMorphClass(),

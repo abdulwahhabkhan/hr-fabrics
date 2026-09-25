@@ -78,15 +78,15 @@ class IncomeStatementController extends Controller
             ->selectRaw('MAX(price) as last_price')
             ->groupBy(['product_id', 'unit']);
 
-        $opening_inventory = (int) Inventory::query()
+        $opening_inventory = (int) (Inventory::query()
             ->availableBefore($start_datetime)
             ->stockValue(true)
-            ->first()->stock_value ?? 0;
+            ->first()->stock_value ?? 0);
 
-        $closing_inventory = (int) Inventory::query()
+        $closing_inventory = (int) (Inventory::query()
             ->availableAfter($end_datetime)
             ->stockValue(true)
-            ->first()->stock_value ?? 0;
+            ->first()->stock_value ?? 0);
 
         $sales = [];
         $sales[] = ['desc' => 'Total Revenue', 'amount' => $total_sales];

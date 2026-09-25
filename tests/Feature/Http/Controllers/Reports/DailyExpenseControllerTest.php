@@ -14,7 +14,8 @@ it('loads the daily expenses report page with expected keys', function () {
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Reports/Daily/DailyExpensesReport')
-        ->has('filters')
+        ->where('filters.start_date', today()->toDateString())
+        ->where('filters.end_date', today()->toDateString())
         ->has('rows')
         ->has('total_expenses')
         ->has('total_returns')

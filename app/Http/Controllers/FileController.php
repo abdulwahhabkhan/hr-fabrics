@@ -34,7 +34,7 @@ class FileController extends Controller
 
         abort_if(! Storage::disk()->exists($file->path), 404);
 
-        if (! $file->isImage()) {
+        if (! $file->is_image) {
             return Storage::disk()->download($file->path);
         }
 

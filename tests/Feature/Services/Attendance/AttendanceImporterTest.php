@@ -32,7 +32,7 @@ test('fetches logs without a from/to bound when none is given', function () {
         ->and($punches[0]->punchedAtDate->format('Y-m-d\TH:i:s.v\Z'))->toBe('2026-07-18T19:38:32.000Z')
         ->and($punches[0]->raw)->toBe($fixture['logs'][0]);
 
-    Http::assertSent(fn(Request $request): bool => str_starts_with($request->url(), 'https://api.shehryar.me/api/public/attendance/logs')
+    Http::assertSent(fn (Request $request): bool => str_starts_with($request->url(), 'https://api.shehryar.me/api/public/attendance/logs')
         && ! array_key_exists('from', $request->data())
         && ! array_key_exists('to', $request->data())
         && $request['limit'] === 500

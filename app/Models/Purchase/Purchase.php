@@ -14,6 +14,7 @@ use App\Models\Traits\MorphManayToLog;
 use App\Models\Traits\MorphToJournal;
 use App\Models\Traits\TransactionDateScopes;
 use App\Policies\Purchase\PurchasePolicy;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property string supplier_name
+ * @property string $supplier_name
  */
 #[UsePolicy(PurchasePolicy::class)]
 final class Purchase extends Model implements Journalable, Logable
@@ -43,7 +44,7 @@ final class Purchase extends Model implements Journalable, Logable
         'stock_id' => 'integer',
         'total_qty' => 'float',
         'status' => StatusText::class,
-        'transaction_date' => 'date',
+        'transaction_date' => 'date:Y-m-d',
         'discount' => 'integer',
         'total' => 'integer',
         'total_return' => 'integer',
@@ -60,11 +61,17 @@ final class Purchase extends Model implements Journalable, Logable
         return $this->status === StatusText::Close;
     }
 
+    /**
+     * @return HasMany<PurchaseItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseItem::class);
     }
 
+    /**
+     * @return HasMany<PurchaseItem, $this>
+     */
     public function itemsWithProduct(): HasMany
     {
         return $this->items()
@@ -75,6 +82,9 @@ final class Purchase extends Model implements Journalable, Logable
             ->join(Product::tName(), 'product_id', '=', Product::qCol('id'));
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'supplier_id');
@@ -89,7 +99,10 @@ final class Purchase extends Model implements Journalable, Logable
         ]);
     }
 
-    public function inventories(): Builder|self
+    /**
+     * @return Builder<Inventory>
+     */
+    public function inventories(): Builder
     {
         return Inventory::query()
             ->where('stockable_type', FabricReceiving::morphClass())
@@ -97,11 +110,14 @@ final class Purchase extends Model implements Journalable, Logable
     }
 
     #[Scope]
-    public function confirmed(Builder $query): Builder
+    protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', StatusText::Close);
     }
 
+    /**
+     * @return Attribute<CarbonImmutable|null, never>
+     */
     protected function transactionDisplayDate(): Attribute
     {
         return Attribute::get(function () {

@@ -5,12 +5,15 @@ namespace Database\Factories\Catalog;
 use App\Models\Catalog\Finish;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Finish>
+ */
 class FinishFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Finish>
      */
     protected $model = Finish::class;
 
@@ -23,7 +26,7 @@ class FinishFactory extends Factory
 
         return [
             'name' => $color,
-            'description' => $color.' '.$this->faker->rgbcolor(),
+            'description' => $color.' '.$this->faker->rgbColor(),
         ];
     }
 }

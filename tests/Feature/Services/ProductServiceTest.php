@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PackingType;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\Purchase;
@@ -63,7 +64,7 @@ it('only returns products that have available inventory', function () {
     $brand = Brand::factory()->create();
     $available = Product::factory()->create(['name' => 'Available Product', 'brand_id' => $brand->id]);
     $unavailable = Product::factory()->create(['name' => 'Unavailable Product', 'brand_id' => $brand->id]);
-    $this->addInventory($available, \App\Enums\PackingType::Thaan, 2, 10);
+    $this->addInventory($available, PackingType::Thaan, 2, 10);
 
     $products = $this->service->availableProducts();
 
@@ -74,7 +75,7 @@ it('only returns products that have available inventory', function () {
 it('caches the available products list', function () {
     $brand = Brand::factory()->create();
     $product = Product::factory()->create(['brand_id' => $brand->id]);
-    $this->addInventory($product, \App\Enums\PackingType::Thaan, 2, 10);
+    $this->addInventory($product, PackingType::Thaan, 2, 10);
 
     expect(Cache::has(Product::$availableCacheKey))->toBeFalse();
 

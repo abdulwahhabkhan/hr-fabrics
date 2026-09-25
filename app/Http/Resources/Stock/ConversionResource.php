@@ -2,9 +2,13 @@
 
 namespace App\Http\Resources\Stock;
 
+use App\Models\Stock\Conversion;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Conversion
+ */
 class ConversionResource extends JsonResource
 {
     /**
@@ -14,9 +18,7 @@ class ConversionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'receipt_id' => $this->receipt_id,
             // 'user' => $this->user->name,
-            'lot_no' => $this->lot_no,
             'sku' => $this->sku,
             'from' => $this->from,
             'to' => $this->to,

@@ -14,6 +14,7 @@ use App\Models\Traits\MorphManayToLog;
 use App\Models\Traits\TransactionDateScopes;
 use App\Models\User;
 use App\Policies\Purchase\FabricReceivingPolicy;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,7 +41,7 @@ class FabricReceiving extends Model implements Fileable, Logable
         'info' => AsCollection::class,
         'photos' => AsCollection::class,
         'invoiced' => 'bool',
-        'transaction_date' => 'date',
+        'transaction_date' => 'date:Y-m-d',
         'status' => StatusText::class,
         'total_qty' => 'float',
         'total_meters' => 'float',
@@ -51,26 +52,41 @@ class FabricReceiving extends Model implements Fileable, Logable
         return $this->status === StatusText::Close;
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'supplier_id');
     }
 
+    /**
+     * @return HasMany<FabricReceivingItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(FabricReceivingItem::class);
     }
 
+    /**
+     * @return MorphMany<Inventory, $this>
+     */
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'stockable');
     }
 
+    /**
+     * @return HasMany<FabricReceivingItem, $this>
+     */
     public function itemsWithProduct(): HasMany
     {
         return $this->items()
@@ -98,6 +114,9 @@ class FabricReceiving extends Model implements Fileable, Logable
         $builder->where('invoiced', $invoiced);
     }
 
+    /**
+     * @return Attribute<CarbonImmutable|null, never>
+     */
     protected function transactionDisplayDate(): Attribute
     {
         return Attribute::get(function () {

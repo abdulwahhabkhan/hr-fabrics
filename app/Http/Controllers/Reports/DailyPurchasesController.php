@@ -18,8 +18,8 @@ class DailyPurchasesController extends Controller
         $filters = [
             'type' => 'city',
             'account' => '',
-            'start_date' => today(),
-            'end_date' => today(),
+            'start_date' => today()->toDateString(),
+            'end_date' => today()->toDateString(),
         ];
         $query_string = $request->only(['start_date', 'end_date']);
         if ($query_string) {
@@ -30,6 +30,8 @@ class DailyPurchasesController extends Controller
 
         $start_date = Carbon::create($filters['start_date'])->startOfDay();
         $end_date = Carbon::create($filters['end_date'])->endOfDay();
+        $filters['start_date'] = $start_date->toDateString();
+        $filters['end_date'] = $end_date->toDateString();
         $purchases = Purchase::query()
             ->select([
                 'bilti_no',

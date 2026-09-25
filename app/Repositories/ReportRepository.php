@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 /** @deprecated */
@@ -151,8 +151,8 @@ class ReportRepository
 
     public function salesSummary(CarbonInterface $start_date, CarbonInterface $end_date): array
     {
-        $this->startDate = $start_date;
-        $this->endDate = $end_date;
+        $this->startDate = $start_date->toImmutable();
+        $this->endDate = $end_date->toImmutable();
         $sales = $this->getSalesSummary();
 
         $sales_total = $sales->map(fn ($data) => $data->sum('net_total'));
@@ -183,7 +183,7 @@ class ReportRepository
         return SalesReturn::query()
             ->with(
                 [
-                    'customer' => fn (BelongsTo $query) => $query
+                    'customer' => fn (Relation $query) => $query
                         ->select(['id', 'name', 'address->city as city']),
                 ]
             )
@@ -218,7 +218,7 @@ class ReportRepository
             })
             ->with(
                 [
-                    'customer' => fn (BelongsTo $query) => $query
+                    'customer' => fn (Relation $query) => $query
                         ->select(['id', 'name', 'address->city as city']),
                 ]
             )

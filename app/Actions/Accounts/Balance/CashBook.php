@@ -33,7 +33,7 @@ final class CashBook
 
     private function baseSQL(): Builder
     {
-        $cashAccountId = resolve(AccountService::class)->getCashAccount()?->id;
+        $cashAccountId = resolve(AccountService::class)->getCashAccount()->id;
 
         return JournalLedger::query()
             ->selectRaw('sum(dr) as total_dr, sum(cr) as total_cr')

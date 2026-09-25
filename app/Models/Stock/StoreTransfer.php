@@ -49,14 +49,20 @@ class StoreTransfer extends Model implements Journalable, Logable
         'expenses' => 'integer',
         'discount_on_total' => 'integer',
         'net_total' => FloorInteger::class,
-        'confirmed_at' => 'date',
+        'confirmed_at' => 'date:Y-m-d',
     ];
 
+    /**
+     * @return HasMany<StoreTransferItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(StoreTransferItem::class);
     }
 
+    /**
+     * @return MorphMany<Inventory, $this>
+     */
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'outbound');
@@ -64,6 +70,8 @@ class StoreTransfer extends Model implements Journalable, Logable
 
     /**
      * Store transfer record created by
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -79,7 +87,7 @@ class StoreTransfer extends Model implements Journalable, Logable
     }
 
     #[Scope]
-    public function confirmed(Builder $query): Builder
+    protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', StoreTransferStatus::Closed);
     }

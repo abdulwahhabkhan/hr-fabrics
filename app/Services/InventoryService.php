@@ -258,7 +258,10 @@ class InventoryService
         ) => ($r->price !== $r->closing_price) && ($r->closing_qty > 0 || $r->qty > 0))->values();
     }
 
-    public function getOpeningInventoryByDate(CarbonInterface $datetime, $details = false): Collection|int
+    /**
+     * @return ($details is true ? Collection<int, Product> : int)
+     */
+    public function getOpeningInventoryByDate(CarbonInterface $datetime, bool $details = false): Collection|int
     {
         $product_cost = PurchaseItem::query()
             ->from(PurchaseItem::tName().' as ri')

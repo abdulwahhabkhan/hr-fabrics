@@ -6,7 +6,8 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 if (! function_exists('user_avatar')) {
     function user_avatar(): string
     {
-        $name = str(Auth::user() ? Auth::user()->name : 'Guest User')
+        $user = Auth::user();
+        $name = str($user instanceof User ? $user->name : 'Guest User')
             ->slug().'.svg';
         $path = 'avatars/'.$name;
         $filesystem = Storage::disk('public');
@@ -54,16 +55,7 @@ if (! function_exists('generate_thumbnail')) {
             return $storage->temporaryUrl($file_thumb_path, now()->addMinutes($expiresIn));
         }
 
-        return match ($mimeType) {
-            'application/pdf' => Vite::asset('resources/images/icons/pdf-icon.png'),
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => Vite::asset('resources/images/icons/word-icon.jpg'),
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => Vite::asset('resources/images/icons/excel-icon.jpg'),
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => Vite::asset('resources/images/icons/ppt-icon.jpg'),
-            default => Vite::asset('resources/images/icons/file-icon.jpg'),
-        };
+        return Vite::asset('resources/images/icons/pdf-icon.png');
     }
 }
 
@@ -82,7 +74,7 @@ if (! function_exists('download_link')) {
     }
 }
 if (! function_exists('hasPermission')) {
-    function hasPermission(string $ability, ?User $user = null): Closure|bool
+    function hasPermission(string $ability, ?User $user = null): bool
     {
         if (! $user) {
             $user = auth()->user();

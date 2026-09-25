@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 trait BelongsToCustomer
 {
+    /**
+     * @return BelongsTo<Account, $this>
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Account::class, 'customer_id')->customers();

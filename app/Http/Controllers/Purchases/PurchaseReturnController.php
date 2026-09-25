@@ -13,7 +13,6 @@ use App\Http\Resources\Purchases\PurchaseReturnResource;
 use App\Models\Accounts\Account;
 use App\Models\Purchase\PurchaseReturn;
 use App\Services\ProductService;
-use Auth;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -84,7 +83,7 @@ class PurchaseReturnController extends Controller
         ]);
         $invoice_sr = PurchaseReturn::query()->max('sr');
         $invoice_sr++;
-        $invoice_no = 'POR-'.date('ym').mb_str_pad($invoice_sr, 3, '0', STR_PAD_LEFT);
+        $invoice_no = 'POR-'.date('ym').mb_str_pad((string) $invoice_sr, 3, '0', STR_PAD_LEFT);
         $return = new PurchaseReturn();
         $return->supplier_id = $data['supplier']['supplier_id'];
         $return->sr = $invoice_sr;
@@ -165,7 +164,7 @@ class PurchaseReturnController extends Controller
 
             ]
         );
-        DB::transaction(function () use ($data, $por, $updateReturnTotal): void {
+        DB::transaction(function () use ($data, $por, $updateReturnTotal, $request): void {
             $por->fill($data);
             if ($data['status'] === ReturnStatus::Closed->value && ! $por->transaction_date) {
                 $por->transaction_date = today();
@@ -173,7 +172,7 @@ class PurchaseReturnController extends Controller
             $updateReturnTotal->handle($por);
 
             if ($data['status'] === ReturnStatus::Closed->value) {
-                resolve(ConfirmReturn::class)->handle($por, Auth::user());
+                resolve(ConfirmReturn::class)->handle($por, $request->user());
             }
         });
 

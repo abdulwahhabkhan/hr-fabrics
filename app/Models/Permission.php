@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Permission extends Model
@@ -15,9 +16,9 @@ class Permission extends Model
     /**
      * List permission for for form display
      *
-     * @return Permission[]|\Illuminate\Database\Eloquent\Collection|Collection
+     * @return Collection<array-key, mixed>
      */
-    public static function listPermissions()
+    public static function listPermissions(): Collection
     {
         $section = ['pos' => 'Fabrics', 'fabric-receivings' => 'Vouchers',
             'por' => 'Fabric Returns'];
@@ -38,9 +39,9 @@ class Permission extends Model
                 })->toArray();
                 $label = $children[0]['label'];
                 if (str_contains($label, 'Cutpiece')) {
-                    $section_lbl = $key;
+                    $section_lbl = (string) $key;
                 } else {
-                    $section_lbl = $section[$key] ?? $key;
+                    $section_lbl = Arr::get($section, $key, (string) $key);
                 }
                 $section_val = "{$section_lbl}_section";
 
@@ -51,11 +52,14 @@ class Permission extends Model
                 ];
             })->toArray();
 
-            return ['label' => ucfirst($key), 'value' => "{$key}_module",
+            return ['label' => ucfirst((string) $key), 'value' => "{$key}_module",
                 'children' => array_values($children)];
         });
     }
 
+    /**
+     * @return BelongsToMany<Role, $this>
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

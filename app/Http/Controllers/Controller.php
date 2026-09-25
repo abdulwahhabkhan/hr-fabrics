@@ -10,5 +10,5 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    private int $pageSize = 20;
+    protected string $sessionKey = 'filters';
 }

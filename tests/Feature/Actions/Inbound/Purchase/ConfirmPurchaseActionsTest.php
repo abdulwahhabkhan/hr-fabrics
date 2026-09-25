@@ -2,16 +2,16 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Actions\Inbound\FabricReceiving\FabricReceivingConfirmed;
+use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Enums\JournalHead;
 use App\Models\Accounts\Journal;
 use App\Models\Accounts\JournalDetail;
 use App\Models\Action\Log;
-use App\Models\Purchase\Purchase;
-use App\Models\Purchase\PurchaseItem;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\FabricReceiving;
+use App\Models\Purchase\Purchase;
+use App\Models\Purchase\PurchaseItem;
 use App\Models\Stock\Inventory;
 
 use function Pest\Laravel\assertDatabaseHas;

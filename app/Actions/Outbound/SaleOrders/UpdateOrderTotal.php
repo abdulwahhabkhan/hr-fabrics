@@ -13,14 +13,14 @@ class UpdateOrderTotal
             ->selectRaw('sum(discount) as discount')
             ->selectRaw('sum(total_qty) as total_qty')
             ->selectRaw('sum(total_commission) as total_commission')
-            ->get()->first();
+            ->first();
         $commission = (int) $total->total_commission;
         $net_total = $total->total - $total->discount + $order->expenses - $order->discount_on_total;
         $order->update([
-            'total' => $total->total ?? 0,
-            'customer_discount' => $total->discount ?? 0,
-            'total_qty' => $total->total_qty ?? 0,
-            'net_total' => $net_total ?? 0,
+            'total' => $total->total,
+            'customer_discount' => $total->discount,
+            'total_qty' => $total->total_qty,
+            'net_total' => $net_total,
             'commission' => $commission,
         ]);
     }

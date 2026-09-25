@@ -4,7 +4,8 @@ use App\Http\Controllers\Traits\HandlesIndexFilters;
 use Illuminate\Http\Request;
 
 test('it saves query string filters to session using property sessionKey and returns them', function () {
-    $controller = new class {
+    $controller = new class
+    {
         use HandlesIndexFilters;
 
         protected string $sessionKey = 'test.filters';
@@ -25,42 +26,45 @@ test('it saves query string filters to session using property sessionKey and ret
         'search' => 'shoes',
     ])
         ->and(session('test.filters'))->toBe([
-        'status' => 'active',
-        'search' => 'shoes',
-    ])
+            'status' => 'active',
+            'search' => 'shoes',
+        ])
         ->and($request->input('status'))->toBe('active')
         ->and($request->input('search'))->toBe('shoes');
 });
 
-test('it retrieves cached filters from session when request has no query filters and merges them into request', function () {
-    $controller = new class {
-        use HandlesIndexFilters;
-
-        protected string $sessionKey = 'test.filters';
-
-        public function test(Request $request, array|string $keys): array
+test('it retrieves cached filters from session when request has no query filters and merges them into request',
+    function () {
+        $controller = new class
         {
-            return $this->filterSession($request, $keys);
-        }
-    };
+            use HandlesIndexFilters;
 
-    session(['test.filters' => ['status' => 'pending', 'page_size' => 25]]);
+            protected string $sessionKey = 'test.filters';
 
-    $request = Request::create('/test', 'GET');
-    $request->setLaravelSession(app('session.store'));
+            public function test(Request $request, array|string $keys): array
+            {
+                return $this->filterSession($request, $keys);
+            }
+        };
 
-    $filters = $controller->test($request, ['status', 'page_size']);
+        session(['test.filters' => ['status' => 'pending', 'page_size' => 25]]);
 
-    expect($filters)->toBe([
-        'status' => 'pending',
-        'page_size' => 25,
-    ])
-        ->and($request->input('status'))->toBe('pending')
-        ->and($request->input('page_size'))->toBe(25);
-});
+        $request = Request::create('/test', 'GET');
+        $request->setLaravelSession(app('session.store'));
+
+        $filters = $controller->test($request, ['status', 'page_size']);
+
+        expect($filters)->toBe([
+            'status' => 'pending',
+            'page_size' => 25,
+        ])
+            ->and($request->input('status'))->toBe('pending')
+            ->and($request->input('page_size'))->toBe(25);
+    });
 
 test('it clears session and returns empty array when remember is set to forget', function () {
-    $controller = new class {
+    $controller = new class
+    {
         use HandlesIndexFilters;
 
         protected string $sessionKey = 'test.filters';
@@ -82,48 +86,9 @@ test('it clears session and returns empty array when remember is set to forget',
         ->and(session()->has('test.filters'))->toBeFalse();
 });
 
-test('it supports snake_case session_key property on controller', function () {
-    $controller = new class {
-        use HandlesIndexFilters;
-
-        protected string $session_key = 'snake.test.filters';
-
-        public function test(Request $request, array|string $keys): array
-        {
-            return $this->filterSession($request, $keys);
-        }
-    };
-
-    $request = Request::create('/test?role=admin', 'GET');
-    $request->setLaravelSession(app('session.store'));
-
-    $filters = $controller->test($request, ['role']);
-
-    expect($filters)->toBe(['role' => 'admin'])
-        ->and(session('snake.test.filters'))->toBe(['role' => 'admin']);
-});
-
-test('it supports explicit sessionKey passed as argument', function () {
-    $controller = new class {
-        use HandlesIndexFilters;
-
-        public function test(Request $request, array|string $keys, ?string $sessionKey = null): array
-        {
-            return $this->filterSession($request, $keys, $sessionKey);
-        }
-    };
-
-    $request = Request::create('/test?category=electronics', 'GET');
-    $request->setLaravelSession(app('session.store'));
-
-    $filters = $controller->test($request, ['category'], 'override.session.key');
-
-    expect($filters)->toBe(['category' => 'electronics'])
-        ->and(session('override.session.key'))->toBe(['category' => 'electronics']);
-});
-
 test('it works without session key without throwing exceptions', function () {
-    $controller = new class {
+    $controller = new class
+    {
         use HandlesIndexFilters;
 
         public function test(Request $request, array|string $keys): array
@@ -141,7 +106,8 @@ test('it works without session key without throwing exceptions', function () {
 });
 
 test('it accepts a single string key instead of array', function () {
-    $controller = new class {
+    $controller = new class
+    {
         use HandlesIndexFilters;
 
         protected string $sessionKey = 'single.key';

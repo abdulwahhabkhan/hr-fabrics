@@ -7,6 +7,9 @@ use App\Models\Attendance\Attendance;
 use App\Models\Attendance\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Attendance>
+ */
 class AttendanceFactory extends Factory
 {
     protected $model = Attendance::class;

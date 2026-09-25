@@ -7,6 +7,9 @@ use App\Models\Purchase\PurchaseReturn;
 use App\Models\Purchase\PurchaseReturnItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<PurchaseReturnItem>
+ */
 class PurchaseReturnItemFactory extends Factory
 {
     protected $model = PurchaseReturnItem::class;

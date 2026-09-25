@@ -2,11 +2,11 @@
 
 /** @noinspection PhpUnhandledExceptionInspection */
 
-use App\Actions\Inbound\Purchase\UpdateStockPrice;
 use App\Actions\Inbound\FabricReceiving\FabricReceivingConfirmed;
+use App\Actions\Inbound\Purchase\UpdateStockPrice;
+use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
-use App\Models\Purchase\FabricReceiving;
 use App\Models\Stock\Inventory;
 
 use function Pest\Laravel\assertDatabaseHas;

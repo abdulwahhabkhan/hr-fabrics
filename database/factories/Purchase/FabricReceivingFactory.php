@@ -10,12 +10,15 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @extends Factory<FabricReceiving>
+ */
 final class FabricReceivingFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<FabricReceiving>
      */
     protected $model = FabricReceiving::class;
 

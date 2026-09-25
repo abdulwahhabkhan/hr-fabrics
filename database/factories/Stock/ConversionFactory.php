@@ -8,12 +8,15 @@ use App\Models\Stock\Conversion;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Conversion>
+ */
 class ConversionFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<Conversion>
      */
     protected $model = Conversion::class;
 

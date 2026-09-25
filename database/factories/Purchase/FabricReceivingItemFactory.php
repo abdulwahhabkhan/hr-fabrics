@@ -8,12 +8,15 @@ use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\FabricReceivingItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<FabricReceivingItem>
+ */
 class FabricReceivingItemFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var string
+     * @var class-string<FabricReceivingItem>
      */
     protected $model = FabricReceivingItem::class;
 
