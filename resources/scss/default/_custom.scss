@@ -412,3 +412,29 @@ img.height-150 {
     opacity: 0;
   }
 }
+// react-datetime inside .input-group: mimic Bootstrap's .form-control behaviour
+.input-group > .rdt {
+  position: relative;
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+
+  &:focus-within,
+  &.rdtOpen {
+    z-index: 5;
+  }
+
+  > .form-control {
+    width: 100%;
+  }
+
+  &:not(:first-child) > .form-control {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &:not(:last-child) > .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}

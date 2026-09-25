@@ -436,7 +436,7 @@ body {
 .form-check-input:focus { box-shadow: var(--hf-ring); border-color: rgba(var(--hf-brand-rgb), .55); }
 
 // Filter bars
-.default-search .input-group { margin-bottom: 1.25rem !important; }
+.default-search .input-group { margin-bottom: 0 !important; }
 
 // ---------------------------------------------------------------------------
 // Buttons
