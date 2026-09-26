@@ -59,8 +59,8 @@ test('unlock reopens closed order', function () {
     assertDatabaseHas(Log::class, [
         'loggable_type' => $order->getMorphClass(),
         'loggable_id' => $order->id,
-        'log' => json_encode([
-            'action' => 'Sale Order UnLocked', 'user' => ['id' => $user->id, 'name' => $user->name],
-        ]),
+        'log->action' => 'Sale Order UnLocked',
+        'log->user->id' => $user->id,
+        'log->user->name' => $user->name,
     ]);
 });

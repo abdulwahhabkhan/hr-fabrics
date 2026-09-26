@@ -144,9 +144,9 @@ test('store sale return with agent commission', function () {
         [
             'customer_id' => $customer->id,
             'agent_id' => $customer->agent_id,
-            'agent_rate' => json_encode($customer->commission_rate),
         ]
     );
+    expect(SalesReturn::first()->agent_rate->toArray())->toEqual($agent_rate);
 });
 test('update cash sale return', function () {
     // arrange
