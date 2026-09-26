@@ -14,9 +14,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(BaseSeeder::class);
         $this->call(InboundSeeder::class);
-        /* $this->call(FabricReceivingSeeder::class);
-         $this->call(PurchaseSeeder::class);
-         $this->call(CustomerSeeder::class);
-         $this->call(OrderSeeder::class);*/
+        $this->call(OutboundSeeder::class);
+        $this->call(AccountSeeder::class);
     }
 }

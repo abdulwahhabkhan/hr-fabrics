@@ -15,7 +15,6 @@ use App\Enums\ReturnStatus;
 use App\Enums\StatusText;
 use App\Models\Accounts\Account;
 use App\Models\Catalog\Product;
-use App\Models\Model;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
@@ -23,10 +22,10 @@ use App\Models\Purchase\PurchaseReturn;
 use App\Models\Stock\Inventory;
 use App\Models\User;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonInterface;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Random\RandomException;
 use Throwable;
 
 /**
@@ -37,13 +36,15 @@ use Throwable;
  */
 class InboundSeeder extends Seeder
 {
-    private const RECEIVINGS_LAST_MONTH = 12;
+    use SeedsTransactions;
 
-    private const RECEIVINGS_TODAY = 3;
+    private const int RECEIVINGS_LAST_MONTH = 12;
 
-    private const RETURNS_LAST_MONTH = 4;
+    private const int RECEIVINGS_TODAY = 3;
 
-    private const RETURNS_TODAY = 1;
+    private const int RETURNS_LAST_MONTH = 4;
+
+    private const int RETURNS_TODAY = 1;
 
     /**
      * @throws Throwable
@@ -68,6 +69,7 @@ class InboundSeeder extends Seeder
 
         return $dates->map(function (CarbonImmutable $date): FabricReceiving {
             return DB::transaction(function () use ($date): FabricReceiving {
+                /** @var User $user */
                 $user = $this->getUsers()->random();
                 $serial = (int) FabricReceiving::query()->max('id') + 1;
 
@@ -113,19 +115,22 @@ class InboundSeeder extends Seeder
             ->reject(fn (FabricReceiving $receiving, int $index) => $index % 4 === 3)
             ->map(function (FabricReceiving $receiving): Purchase {
                 return DB::transaction(function () use ($receiving): Purchase {
+                    /** @var User $user */
                     $user = $this->getUsers()->random();
                     $date = $this->clampToToday(
                         CarbonImmutable::parse($receiving->transaction_date)->addDays(random_int(0, 2))
                     );
 
                     $purchase = resolve(CreatePurchase::class)->handle([
-                        'stock' => [[
-                            'id' => $receiving->id,
-                            'supplier_id' => $receiving->supplier_id,
-                            'bilti_no' => $receiving->bilti_no,
-                            'invoice_no' => $receiving->invoice_no,
-                            'lot_no' => $receiving->lot_no,
-                        ]],
+                        'stock' => [
+                            [
+                                'id' => $receiving->id,
+                                'supplier_id' => $receiving->supplier_id,
+                                'bilti_no' => $receiving->bilti_no,
+                                'invoice_no' => $receiving->invoice_no,
+                                'lot_no' => $receiving->lot_no,
+                            ],
+                        ],
                     ], $user);
 
                     $purchase->items->each(function (PurchaseItem $item): void {
@@ -167,11 +172,12 @@ class InboundSeeder extends Seeder
             $isToday = $number > $lastMonthReturns;
 
             DB::transaction(function () use ($isToday): void {
+                /** @var Collection<int, Inventory> $inventories */
                 $inventories = $this->pickReturnableInventories();
                 if ($inventories->isEmpty()) {
                     return;
                 }
-
+                /** @var User $user */
                 $user = $this->getUsers()->random();
                 $supplierId = $inventories->first()->stockable->supplier_id;
                 $date = $isToday
@@ -210,15 +216,14 @@ class InboundSeeder extends Seeder
     }
 
     /**
-     * Random available stock lines of a single supplier.
-     *
-     * @return Collection<int, Inventory>
+     * @throws RandomException
      */
     private function pickReturnableInventories(): Collection
     {
         $first = Inventory::query()
             ->available()
             ->where('stockable_type', FabricReceiving::morphClass())
+            ->whereNotNull('cost')
             ->with('stockable')
             ->inRandomOrder()
             ->first();
@@ -227,9 +232,11 @@ class InboundSeeder extends Seeder
             return collect();
         }
 
+        /** @var Collection<int, Inventory> */
         return Inventory::query()
             ->available()
             ->where('stockable_type', FabricReceiving::morphClass())
+            ->whereNotNull('cost')
             ->whereIn(
                 'stockable_id',
                 FabricReceiving::query()->where('supplier_id', $first->stockable->supplier_id)->select('id')
@@ -277,6 +284,8 @@ class InboundSeeder extends Seeder
 
     /**
      * @return array<string, mixed>
+     *
+     * @throws RandomException
      */
     private function returnItemAttributes(Inventory $inventory): array
     {
@@ -309,45 +318,9 @@ class InboundSeeder extends Seeder
         ];
     }
 
-    /**
-     * Sorted dates: random days of last month, then today.
-     *
-     * @return Collection<int, CarbonImmutable>
-     */
-    private function transactionDates(int $lastMonthCount, int $todayCount): Collection
-    {
-        $start = CarbonImmutable::today()->subMonthNoOverflow()->startOfMonth();
-        $days = $start->daysInMonth;
-
-        $lastMonth = collect(range(1, $lastMonthCount))
-            ->map(fn () => $start->addDays(random_int(0, $days - 1)))
-            ->sort()
-            ->values();
-
-        return $lastMonth->concat(array_fill(0, $todayCount, CarbonImmutable::today()));
-    }
-
-    private function clampToToday(CarbonImmutable $date): CarbonImmutable
-    {
-        return $date->min(CarbonImmutable::today());
-    }
-
-    /**
-     * Align created/updated timestamps with the transaction date, as reports sort by them.
-     */
-    private function stampTimestamps(Model $model, CarbonInterface $date): void
-    {
-        $model->timestamps = false;
-        $model->forceFill(['created_at' => $date, 'updated_at' => $date])->saveQuietly();
-    }
-
-    private function getUsers(): Collection
-    {
-        return once(fn () => User::query()->get());
-    }
-
     private function getProducts(): Collection
     {
+        /** @var Collection<int, Product> */
         return once(fn () => Product::query()->get());
     }
 
