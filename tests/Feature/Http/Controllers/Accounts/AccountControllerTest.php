@@ -26,6 +26,23 @@ test('account index page can be rendered', function () {
     );
 });
 
+test('account index page can filter by type', function () {
+    // Arrange
+    Account::factory()->expense()->count(2)->create();
+    Account::factory()->bank()->create();
+
+    // Act
+    $response = $this->get(route('accounts.accounts.index', ['type' => AccountType::Bank->value]));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('accounts.data', 1)
+        ->where('accounts.data.0.type', AccountType::Bank->value)
+        ->where('filters.type', AccountType::Bank->value)
+    );
+});
+
 test('account create page can be rendered', function () {
     // Act
     $response = $this->get(route('accounts.accounts.create'));
@@ -76,6 +93,8 @@ test('account can be created', function () {
         'name' => 'Test Expense Account',
         'type' => AccountType::Expenses->value,
         'email' => 'expense@example.com',
+        'expense_account' => 0,
+        'created_by' => auth()->id(),
     ]);
 });
 

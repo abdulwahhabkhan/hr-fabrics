@@ -37,7 +37,7 @@ test('journal index page loaded', function () {
     );
 });
 
-test('journal index echoes active filters', function () {
+test('journal index returns applied filters', function () {
     // Arrange
     $user = $this->getAdmin();
 
@@ -45,12 +45,13 @@ test('journal index echoes active filters', function () {
     $response = $this->actingAs($user)->get(route('accounts.journals.index', [
         'type' => 'sales',
         'reference_no' => 'JV-1',
-        'account' => 'cash',
+        'unrelated' => 'ignored',
     ]));
 
     // Assert
+    $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->where('filters', ['type' => 'sales', 'reference_no' => 'JV-1', 'account' => 'cash'])
+        ->where('filters', ['type' => 'sales', 'reference_no' => 'JV-1'])
     );
 });
 

@@ -60,6 +60,7 @@ test('customer index page can filter by status', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Sales/Customers/CustomerIndex')
         ->has('customers.data', 1)
+        ->where('customers.data.0.suspended', true)
     );
 });
 
@@ -76,6 +77,24 @@ test('customer index page can filter by credit', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Sales/Customers/CustomerIndex')
         ->has('customers.data', 1)
+        ->where('customers.data.0.credit', true)
+    );
+});
+
+test('customer index page can filter by city', function () {
+    // Arrange
+    Account::factory()->customer()->count(2)->create(['address' => ['city' => 'Lahore']]);
+    Account::factory()->customer()->create(['address' => ['city' => 'Karachi']]);
+
+    // Act
+    $response = $this->get(route('sales.customers.index', ['city' => 'Karachi']));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Customers/CustomerIndex')
+        ->has('customers.data', 1)
+        ->where('customers.data.0.address.city', 'Karachi')
     );
 });
 
@@ -265,7 +284,7 @@ test('customer with agent but without discount', function () {
 });
 
 test('update customer without agent but with discount', function () {
-    $customer = Account::factory()->customer()->create();
+    $customer = Account::factory()->customer()->create(['credit' => true]);
     $address = $customer->address;
     $body = Arr::except($customer->toArray(), ['name', 'created_by', 'updated_at']);
     $body['name'] = fake()->name();
@@ -385,6 +404,30 @@ test('create customer with credit limit', function () {
     $this->assertDatabaseHas(Account::class, $data);
 });
 
+test('cash only customer ignores submitted credit limit', function () {
+    // Arrange
+    $data = [
+        'name' => 'Cash Customer',
+        'name_urdu' => fake('ar_EG')->name,
+        'address' => ['address' => fake()->streetAddress(), 'region' => fake()->postcode(), 'city' => fake()->city()],
+        'discount' => 0,
+        'discount_type' => DiscountType::FixedPerMeter->value,
+        'limit' => 5000,
+        'credit' => 0,
+    ];
+
+    // Act
+    $response = $this->post(route('sales.customers.store'), $data);
+
+    // Assert
+    $response->assertSessionHasNoErrors();
+    $this->assertDatabaseHas(Account::class, [
+        'name' => 'Cash Customer',
+        'credit' => false,
+        'limit' => 0,
+    ]);
+});
+
 test('customer can be suspended', function () {
     // Arrange
     $customer = Account::factory()->customer()->create([
@@ -409,6 +452,25 @@ test('customer can be suspended', function () {
     $customer->refresh();
     expect($customer->suspended)->toBeTrue()
         ->and($customer->suspended_at)->not->toBeNull();
+});
+
+test('suspending a customer revokes credit and clears the credit limit', function () {
+    // Arrange
+    $customer = Account::factory()->customer()->create([
+        'suspended' => false,
+        'credit' => true,
+        'limit' => 50000,
+    ]);
+
+    // Act
+    $response = $this->post(route('sales.customers.suspend', $customer));
+
+    // Assert
+    $response->assertRedirect(route('sales.customers.index'));
+    $customer->refresh();
+    expect($customer->suspended)->toBeTrue()
+        ->and($customer->credit)->toBeFalse()
+        ->and($customer->limit)->toBeNull();
 });
 
 test('already suspended customer cannot be suspended again', function () {

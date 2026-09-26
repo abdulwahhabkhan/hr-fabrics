@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Permission;
 use App\Models\Role;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -40,3 +41,28 @@ test('role form loaded', function ($action) {
         ->has('rolePermission')
     );
 })->with(['create', 'update']);
+
+test('role form permission tree has unique node values when a section repeats across modules', function () {
+    // Arrange
+    Permission::factory()->create(['name' => 'sales.customers.index', 'section' => 'sales', 'module' => 'customers']);
+    Permission::factory()->create(['name' => 'reports.customers.balance', 'section' => 'reports', 'module' => 'customers']);
+
+    // Act
+    $response = $this->get(route('settings.roles.create'));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(function (Assert $page) {
+        $values = [];
+        $collect = function (array $nodes) use (&$collect, &$values): void {
+            foreach ($nodes as $node) {
+                $values[] = (string) $node['value'];
+                $collect($node['children'] ?? []);
+            }
+        };
+        $collect($page->toArray()['props']['permissions']);
+
+        expect($values)->toContain('sales_customers_section', 'reports_customers_section')
+            ->and($values)->toHaveSameSize(array_unique($values));
+    });
+});

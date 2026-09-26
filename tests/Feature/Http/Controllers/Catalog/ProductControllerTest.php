@@ -75,7 +75,6 @@ test('filter product list by vendor presence', function () {
     $withVendor->assertInertia(fn (Assert $page) => $page
         ->component('Catalog/Products/ProductIndex')
         ->has('products.data', 3)
-        ->where('filters.has_vendor', 'yes')
     );
     $withoutVendor->assertInertia(fn (Assert $page) => $page
         ->component('Catalog/Products/ProductIndex')

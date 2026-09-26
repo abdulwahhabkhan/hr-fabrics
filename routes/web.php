@@ -6,7 +6,6 @@ use App\Http\Controllers\Accounts\CashBankController;
 use App\Http\Controllers\Accounts\IncomeStatementController;
 use App\Http\Controllers\Accounts\JournalController;
 use App\Http\Controllers\Accounts\LedgerController;
-use App\Http\Controllers\Accounts\LegacyIncomeStatementController;
 use App\Http\Controllers\Accounts\SalesSummaryController;
 use App\Http\Controllers\Catalog\BrandController;
 use App\Http\Controllers\Catalog\FinishController;
@@ -200,15 +199,6 @@ Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stoc
 /* Account Routes */
 Route::prefix('accounts')->middleware(['auth', 'verified', 'auth.role'])
     ->name('accounts.')->group(function () {
-        Route::prefix('legacy')
-            ->name('legacy.')
-            ->withoutMiddleware('auth.role')
-            ->group(function () {
-                Route::get('profit-loss', [LegacyIncomeStatementController::class, 'index'])
-                    ->name('profit-loss');
-                Route::get('profit-loss-detail', [LegacyIncomeStatementController::class, 'detail'])
-                    ->name('profit-loss.detail');
-            });
         Route::get('ledgers', [LedgerController::class, 'index'])->name('ledgers.index');
         Route::get('ledgers/{account}', [LedgerController::class, 'show'])
             ->name('ledgers.show')->where(['account' => '[0-9]+']);
