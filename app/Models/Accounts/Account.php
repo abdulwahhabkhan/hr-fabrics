@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -48,11 +47,6 @@ class Account extends Model implements Fileable
         'discount_type' => DiscountType::class,
     ];
 
-    public static function getAll(): Collection|array
-    {
-        return self::query()->orderBy('name', 'asc')->get();
-    }
-
     /**
      * @return BelongsTo<User, $this>
      */
@@ -83,7 +77,7 @@ class Account extends Model implements Fileable
     protected function partners(Builder $query): Builder
     {
         $query->where(fn (Builder $where) => $where->where('type', AccountType::Partner)
-            ->orWhereIn('id', self::$partnersIds));
+            ->orWhereIn('id', $this->partnerIds()));
 
         return $query;
     }
@@ -220,5 +214,10 @@ class Account extends Model implements Fileable
     protected function fullName(): Attribute
     {
         return Attribute::make(get: fn ($value, $attributes) => $attributes['name'].', '.$attributes['address']['city']);
+    }
+
+    private function partnerIds(): array
+    {
+        return config('store.partners_ids');
     }
 }

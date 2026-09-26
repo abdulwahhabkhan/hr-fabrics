@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Sales;
 
 use App\Enums\DiscountType;
+use App\Models\City;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,6 +45,16 @@ class CustomerRequest extends FormRequest
     {
         if (! $this->boolean('credit')) {
             $this->merge(['limit' => 0]);
+        }
+    }
+
+    protected function passedValidation(): void
+    {
+        $address = $this->input('address', []);
+        if (! empty($address['city'] ?? null)) {
+            $address['city_urdu'] = City::where('name', $address['city'])->pluck('name_urdu');
+            $this->merge(['address' => $address]);
+            $this->getValidatorInstance()->setData($this->all());
         }
     }
 }

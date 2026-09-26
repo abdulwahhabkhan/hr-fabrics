@@ -33,8 +33,10 @@ class AccountFactory extends Factory
             'email' => fake()->safeEmail(),
             'address' => [
                 'address' => fake()->streetName(),
+                'address_urdu' => fake('ar_EG')->streetName(),
                 'city' => fake()->city(),
                 'region' => 'Region',
+                'region_urdu' => fake('ar_EG')->streetName(),
                 'country' => 'Pakistan',
             ],
             'created_by' => fn () => User::factory(),

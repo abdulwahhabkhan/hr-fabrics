@@ -78,7 +78,7 @@ class JournalController extends Controller
      */
     public function create(): Response
     {
-        $accounts = Account::getAll();
+        $accounts = Account::query()->orderByName()->get();
 
         return Inertia::render(
             'Accounts/Journals/JournalForm',
