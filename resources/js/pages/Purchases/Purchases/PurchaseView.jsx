@@ -2,13 +2,14 @@ import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Icon } from '@iconify/react';
 import Moment from '@/components/Moment';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { PurchaseItemReturnForm } from '@/pages/Purchases/Purchases/PurchaseItemReturnForm';
 import { getPOUnit, STATUS_CLOSE, STATUS_OPEN } from '@/util/util';
 import { Col, Row } from 'react-bootstrap';
 import Print from '@/components/button/Print.jsx';
+import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import BackButton from '@/components/button/back.tsx';
 import pos from '@/routes/purchases/pos';
 
@@ -18,6 +19,7 @@ const PurchaseView = () => {
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const { items, supplier } = receipt;
     const [returnForm, setReturnForm] = useState(false);
+    const invoiceRef = useRef(null);
     const print = () => {
         window.print();
     };
@@ -56,12 +58,13 @@ const PurchaseView = () => {
                             </InertiaLink>
                         )}
                         <Print />
+                        <DownloadPdf target={invoiceRef} fileName={'PO-' + receipt.invoice_no + '.pdf'} />
                     </>
                 }
             />
             <PageContent>
                 <Head title={'Voucher: ' + receipt.invoice_no} />
-                <div className="invoice">
+                <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
                     </div>

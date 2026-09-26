@@ -1,22 +1,25 @@
 import * as React from 'react';
 
-export const Address = ({address, name, email, phone}) => {
-    const {city, address:address_line, region} = address
+export const Address = ({ address, name, email, phone }) => {
+    const { city, address: address_line, region } = address;
     return (
         <>
             <address className="m-t-5 m-b-5">
-                <strong className="text-inverse">{name}</strong><br />
-                {address_line}<br/>
-                {city}<br/>
+                <strong className="text-inverse">{name}</strong>
+                <br />
+                {address_line}
+                <br />
+                {city}
+                <br />
                 {region}
-                { phone && (
+                {phone && (
                     <span>
-                        <br/> Phone: {phone}
+                        <br /> Phone: {phone}
                     </span>
                 )}
-                { email && (
+                {email && (
                     <span>
-                        <br/> Email: {email}
+                        <br /> Email: {email}
                     </span>
                 )}
             </address>
@@ -32,7 +35,7 @@ export const UrduAddress = ({ address, name }) => {
         return null;
     }
     return (
-        <address className="m-t-5 m-b-5 text-end" dir="rtl" lang="ur">
+        <address className="m-t-5 m-b-5 text-start" dir="rtl" lang="ur">
             {lines.map((line, index) => (
                 <React.Fragment key={index}>
                     {index > 0 && <br />}

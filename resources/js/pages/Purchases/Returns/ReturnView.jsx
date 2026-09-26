@@ -3,12 +3,14 @@ import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Icon } from '@iconify/react';
 import { settings } from '@/config/page-settings';
 import Moment from '@/components/Moment';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { FileIcon } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
+import Print from '@/components/button/Print.jsx';
+import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import por from '@/routes/purchases/por';
 
 
@@ -18,9 +20,7 @@ const ReturnView = () => {
 
     const [group, setGroup] = useState(false);
     const [itemsList, setItemsList] = useState(items);
-    const print = () => {
-        window.print();
-    };
+    const invoiceRef = useRef(null);
     const canModify = pr_return.status === 0;
     const getGroup = (items) => {
         if (!group)
@@ -62,14 +62,13 @@ const ReturnView = () => {
                         </InertiaLink>
                     )
                 }
-                <button className="btn btn-sm btn-white" onClick={() => print()}>
-                    <Icon icon={"solar:printer-bold-duotone"} /> Print
-                </button>
+                <Print />
+                <DownloadPdf target={invoiceRef} fileName={'PR-' + pr_return.invoice_no + '.pdf'} />
                 <FileIcon file={file_info} size={"xs"} />
             </>)} />
             <PageContent>
                 <Head title={"Fabric Return: " + pr_return.invoice_no} />
-                <div className="invoice">
+                <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
                         <span className="float-end">Purchase Order Return</span>

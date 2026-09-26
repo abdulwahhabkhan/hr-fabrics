@@ -3,13 +3,14 @@ import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Icon } from '@iconify/react';
 import { AppName, settings } from '@/config/page-settings';
 import Moment from '@/components/Moment';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { getPOUnit } from '@/util/util';
 import { Col, Row } from 'react-bootstrap';
 import { PreviewAttachments } from '@/components/File.jsx';
 import Print from '@/components/button/Print.jsx';
+import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import BackButton from '@/components/button/back.tsx';
 import fabricReceivings from '@/routes/purchases/fabric-receivings';
 
@@ -19,6 +20,7 @@ const FabricReceivingView = () => {
     const { items, supplier } = order;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const [returnForm, setReturnForm] = useState(false);
+    const invoiceRef = useRef(null);
     const print = () => {
         window.print();
     };
@@ -52,10 +54,11 @@ const FabricReceivingView = () => {
                     )
                 }
                 <Print />
+                <DownloadPdf target={invoiceRef} fileName={'FR-' + order.invoice_no + '.pdf'} />
             </>)} />
             <PageContent>
                 <Head title={"Fabric: " + order.invoice_no} />
-                <div className="invoice">
+                <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
                     </div>

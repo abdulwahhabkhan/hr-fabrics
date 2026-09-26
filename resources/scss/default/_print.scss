@@ -25,7 +25,7 @@
     display: table-row;
   }
   .app-with-top-menu.app-header-fixed {
-    padding-top: 0px;
+    padding-top: 0;
   }
   #header, #top-menu, .page-header, .hidden-print, .app-footer,
   .hf-sidebar, .hf-mobile-bar, .hf-footer, .page-header-wrapper, .Toastify {
@@ -59,12 +59,10 @@
     }
   }
   .app-content, .hf-app .app-content {
-    padding: 0 !important;
-    margin: 0 !important;
+    padding-right: 1cm;
+    padding-left: 2cm;
   }
-  .invoice .invoice-content {
-    margin: 0 -1.25rem;
-  }
+
   .table-responsive {
     overflow-x: inherit
   }
