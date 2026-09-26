@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @property-read int $supplier_id
@@ -28,8 +29,6 @@ class Account extends Model implements Fileable
     use HasFactory;
     use HasFiles;
     use SoftDeletes;
-
-    public static array $partnersIds = [734];
 
     protected $guarded = ['id'];
 
@@ -216,8 +215,19 @@ class Account extends Model implements Fileable
         return Attribute::make(get: fn ($value, $attributes) => $attributes['name'].', '.$attributes['address']['city']);
     }
 
+    /**
+     * Partner account ids from config, which may be a single id or a comma-separated list.
+     *
+     * @return array<int, int>
+     */
     private function partnerIds(): array
     {
-        return config('store.partners_ids');
+        return Str::of((string) config('store.partners_ids'))
+            ->explode(',')
+            ->map(fn (string $id): string => mb_trim($id))
+            ->filter()
+            ->map(fn (string $id): int => (int) $id)
+            ->values()
+            ->all();
     }
 }
