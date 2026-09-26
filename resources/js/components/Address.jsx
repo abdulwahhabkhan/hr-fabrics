@@ -23,3 +23,22 @@ export const Address = ({address, name, email, phone}) => {
         </>
     );
 };
+
+export const UrduAddress = ({ address, name }) => {
+    const { address_urdu, city_urdu, region_urdu } = address ?? {};
+    const city = Array.isArray(city_urdu) ? city_urdu[0] : city_urdu;
+    const lines = [name, address_urdu, city, region_urdu];
+    if (!lines.some(Boolean)) {
+        return null;
+    }
+    return (
+        <address className="m-t-5 m-b-5 text-end" dir="rtl" lang="ur">
+            {lines.map((line, index) => (
+                <React.Fragment key={index}>
+                    {index > 0 && <br />}
+                    <span className="urdu">{line}</span>
+                </React.Fragment>
+            ))}
+        </address>
+    );
+};

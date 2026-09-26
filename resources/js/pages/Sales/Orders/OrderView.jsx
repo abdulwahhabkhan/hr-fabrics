@@ -2,12 +2,13 @@ import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Icon } from '@iconify/react';
 import Moment from '@/components/Moment';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
-import { Address } from '@/components/Address';
+import { Address, UrduAddress } from '@/components/Address';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import orders from '@/routes/sales/orders';
 
 const OrderView = () => {
@@ -16,6 +17,7 @@ const OrderView = () => {
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const [group, setGroup] = useState(false);
     const [itemsList, setItemsList] = useState(items);
+    const invoiceRef = useRef(null);
     const print = () => {
         window.print();
     };
@@ -56,10 +58,11 @@ const OrderView = () => {
                     )
                 }
                 <Print />
+                <DownloadPdf target={invoiceRef} fileName={'SO-' + order.invoice_no + '.pdf'} />
             </>)} />
             <PageContent>
                 <Head title={"SO: " + order.invoice_no} />
-                <div className="invoice">
+                <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
                         <span className="float-end">Sales Invoice</span>
@@ -73,6 +76,9 @@ const OrderView = () => {
                                 email={customer.email}
                                 phone={customer.phone} />
 
+                        </div>
+                        <div className="invoice-to">
+                            <UrduAddress address={customer.address} name={customer.name_urdu} />
                         </div>
                         <div className="invoice-date">
                             <div className="date text-inverse m-t-5">

@@ -3,6 +3,16 @@
   display: none;
 }
 
+/* Applied by DownloadPdf while capturing, so the PDF matches the printed page. */
+.pdf-export .hidden-print {
+  display: none !important;
+}
+
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
 @media print {
   /* Targets all the pages */
   .page-break {
@@ -17,17 +27,40 @@
   .app-with-top-menu.app-header-fixed {
     padding-top: 0px;
   }
-  #header, #top-menu, .page-header, .hidden-print, .app-footer {
-    display: none;
+  #header, #top-menu, .page-header, .hidden-print, .app-footer,
+  .hf-sidebar, .hf-mobile-bar, .hf-footer, .page-header-wrapper, .Toastify {
+    display: none !important;
+  }
+  .hf-app, .hf-main {
+    display: block;
+    min-height: auto;
+  }
+  .animate-fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .invoice {
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .invoice .invoice-header {
+    display: flex !important;
+
+    > div {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   }
   .invoice-company {
     .sub-title {
       padding-right: 0;
     }
   }
-  .app-content {
-    padding-right: 1cm;
-    padding-left: 2cm;
+  .app-content, .hf-app .app-content {
+    padding: 0 !important;
+    margin: 0 !important;
   }
   .invoice .invoice-content {
     margin: 0 -1.25rem;
