@@ -4,7 +4,7 @@ import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import { Icon } from '@iconify/react';
 import {
-    Delete,
+    DeleteDropdownItem,
     InertiaEdit,
     InertiaView,
     UnLockDropdownItem,
@@ -138,14 +138,18 @@ const PurchaseIndex = () => {
                                                             {can.view && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaView
-                                                                        href={pos.show(id)}
+                                                                        href={pos.show(
+                                                                            id,
+                                                                        )}
                                                                     />
                                                                 </span>
                                                             )}
                                                             {can.edit && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed">
                                                                     <InertiaEdit
-                                                                        href={pos.edit(id)}
+                                                                        href={pos.edit(
+                                                                            id,
+                                                                        )}
                                                                     />
                                                                 </span>
                                                             )}
@@ -162,7 +166,9 @@ const PurchaseIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={pos.inventory(id)}
+                                                                            href={pos.inventory(
+                                                                                id,
+                                                                            )}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -180,7 +186,9 @@ const PurchaseIndex = () => {
                                                                             target={
                                                                                 '_blank'
                                                                             }
-                                                                            href={pos.ledger(id)}
+                                                                            href={pos.ledger(
+                                                                                id,
+                                                                            )}
                                                                         >
                                                                             <Icon
                                                                                 icon={
@@ -193,7 +201,9 @@ const PurchaseIndex = () => {
                                                                     )}
                                                                     {can.unlock && (
                                                                         <UnLockDropdownItem
-                                                                            action={openPurchase}
+                                                                            action={
+                                                                                openPurchase
+                                                                            }
                                                                             id={
                                                                                 id
                                                                             }
@@ -203,23 +213,17 @@ const PurchaseIndex = () => {
                                                                         </UnLockDropdownItem>
                                                                     )}
                                                                     {can.delete && (
-                                                                        <div
-                                                                            className={
-                                                                                'dropdown-item border-top p-0'
+                                                                        <DeleteDropdownItem
+                                                                            action={
+                                                                                pos.destroy
                                                                             }
-                                                                            onClick={(
-                                                                                event,
-                                                                            ) =>
-                                                                                event.stopPropagation()
-                                                                            }
-                                                                        >
-                                                                            <Delete
-                                                                                action={pos.destroy}
-                                                                                id={
+                                                                            id={
                                                                                 id
                                                                             }
-                                                                            />
-                                                                        </div>
+                                                                        >
+                                                                            Delete
+                                                                            Record
+                                                                        </DeleteDropdownItem>
                                                                     )}
                                                                 </RowActionsMenu>
                                                             )}

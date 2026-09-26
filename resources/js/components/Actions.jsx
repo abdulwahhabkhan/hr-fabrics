@@ -160,6 +160,38 @@ export const UnLockDropdownItem = ({ action, id, children }) => {
         </button>
     );
 };
+export const DeleteDropdownItem = ({ action, id, children }) => {
+    const handleClick = async (event) => {
+        event.preventDefault();
+        await confirmDelete({
+            onConfirm: () =>
+                new Promise((resolve, reject) => {
+                    router.delete(resolveAction(action, id), {
+                        preserveScroll: true,
+                        onSuccess: () => resolve(),
+                        onError: () => reject(),
+                    });
+                }),
+        });
+    };
+    return (
+        <button
+            className={'btn dropdown-item border-top justify-content-start'}
+            onClick={handleClick}
+        >
+            <OverlayTrigger
+                placement={'bottom'}
+                overlay={<Tooltip>Delete Record</Tooltip>}
+            >
+                <Icon
+                    icon={'solar:trash-bin-trash-bold-duotone'}
+                    className={'text-danger-600'}
+                />
+            </OverlayTrigger>
+            {children || 'Delete Record'}
+        </button>
+    );
+};
 
 export const DeleteAjax = ({ onDelete, id, className }) => {
     const handleClick = async (event) => {
