@@ -48,9 +48,10 @@
   .invoice .invoice-header {
     display: flex !important;
 
-    > div {
+    & > div {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      background: white !important;
     }
   }
   .invoice-company {
@@ -61,6 +62,7 @@
   .app-content, .hf-app .app-content {
     padding-right: 1cm;
     padding-left: 2cm;
+    background: white !important;
   }
 
   .table-responsive {
@@ -86,9 +88,14 @@
   table {
     --bs-table-border-color: #565353 !important;
   }
-
+  .table > thead > tr > th {
+    background: transparent !important;
+  }
   span.urdu {
     font-size: 1.0em;
     text-align: right;
+  }
+  .invoice .invoice-price {
+    background: transparent !important;
   }
 }
