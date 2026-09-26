@@ -37,6 +37,23 @@ test('journal index page loaded', function () {
     );
 });
 
+test('journal index echoes active filters', function () {
+    // Arrange
+    $user = $this->getAdmin();
+
+    // Act
+    $response = $this->actingAs($user)->get(route('accounts.journals.index', [
+        'type' => 'sales',
+        'reference_no' => 'JV-1',
+        'account' => 'cash',
+    ]));
+
+    // Assert
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('filters', ['type' => 'sales', 'reference_no' => 'JV-1', 'account' => 'cash'])
+    );
+});
+
 test('journal single entry page loaded', function () {
     // Arrange
     $user = $this->getAdmin();

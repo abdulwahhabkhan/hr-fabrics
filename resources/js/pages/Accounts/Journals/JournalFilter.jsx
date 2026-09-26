@@ -63,27 +63,20 @@ export default () => {
     }
 
     return (
-        <div className="default-search">
+        <div className="default-search mb-20px">
             <div>
-                <InputGroup className="mb-20px">
-                    <FormSelect
-                        name={"type"}
-                        className="input-150"
-                        autoComplete="off"
-                        value={values.type}
-                        onChange={handleChange}
-                    >
-                        <option value="">Types</option>
-                        {types.map((type) => {
-                            return (
-                                <option key={type} value={type}>
-                                    {type}
-                                </option>
-                            );
-                        })}
-                    </FormSelect>
+                <InputGroup>
                     <FormControl
-                        placeholder="voucher no"
+                        placeholder="Search by account name..."
+                        type="text"
+                        name={"account"}
+                        className="input-white"
+                        autoComplete="off"
+                        value={values.account}
+                        onChange={handleChange}
+                    />
+                    <FormControl
+                        placeholder="Voucher no"
                         type="text"
                         name={"reference_no"}
                         className="input-150"
@@ -91,27 +84,24 @@ export default () => {
                         value={values.reference_no}
                         onChange={handleChange}
                     />
-                    <FormControl
-                        placeholder="account"
-                        type="text"
-                        name={"account"}
-                        className=""
+                    <FormSelect
+                        name={"type"}
+                        className="input-150"
                         autoComplete="off"
-                        value={values.account}
+                        value={values.type}
                         onChange={handleChange}
-                    />
+                    >
+                        <option value="">All types</option>
+                        {types.map((type) => {
+                            return (
+                                <option key={type} value={type}>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </option>
+                            );
+                        })}
+                    </FormSelect>
 
-                    {/*<FormControl
-                        placeholder="to account"
-                        type="text"
-                        name={'to_account'}
-                        className=""
-                        autoComplete="off"
-                        value={values.city}
-                        onChange={handleChange}
-                    />*/}
-
-                    <FilterButton onClick={reset} />
+                    {Object.keys(pickBy(values)).length > 0 && <FilterButton onClick={reset} />}
                 </InputGroup>
             </div>
         </div>

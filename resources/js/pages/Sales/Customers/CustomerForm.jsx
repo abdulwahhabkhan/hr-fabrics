@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
-import {
-    Panel,
-    PanelBody,
-    PanelFooter,
-    PanelHeader,
-} from '@/components/panel/panel';
+import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Icon } from '@iconify/react';
-import { Col, Form, InputGroup, Row, Tooltip } from 'react-bootstrap';
-import OverlayTrigger from '@/components/ui/OverlayTrigger';
+import { Col, Form, InputGroup, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import { ErrorPanel, updateErrors } from '@/components/panel/ErrorPanel';
 import StyledSelect from '@/components/StyledSelect';
 import BackButton from '@/components/button/back';
+import { FormActions, FormField, FormSection } from '@/components/form/FormSection';
 import customers from '@/routes/sales/customers';
 
 const CustomerForm = () => {
@@ -29,7 +23,6 @@ const CustomerForm = () => {
     const title = customer ? 'Edit Customer' : 'Add Customer';
     const [processing, setProcessing] = useState(false);
     const customer_agent = customer ? customer.agent : null;
-    const city = customer ? customer.address.city : null;
     const {
         register,
         handleSubmit,
@@ -44,6 +37,7 @@ const CustomerForm = () => {
         },
     };
     const agent = watch('agent', customer_agent);
+    const credit = watch('credit');
     const sendRequest = async (data) => {
         const post_data = { ...data };
         setProcessing(true);
@@ -63,274 +57,228 @@ const CustomerForm = () => {
     }, [serverErrors]);
     return (
         <>
-            <Head title="Customer Update" />
+            <Head title={title} />
             <PageHeader
-                title="Customer Update"
-                buttons={
-                    <>
-                        <BackButton href={customers.index()} />
-                    </>
-                }
+                title={title}
+                description={customer ? customer.name : 'Register a new customer account'}
+                buttons={<BackButton href={customers.index()} label="Customers" />}
             />
             <PageContent>
-                <Panel>
-                    <PanelHeader heading={title} />
-                    <PanelBody>
-                        <ErrorPanel errors={serverErrors} />
-                        <form
-                            action=""
-                            className=""
-                            onSubmit={handleSubmit(sendRequest)}
-                        >
-                            <Row>
-                                <Col lg={12}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Agent:</Form.Label>
-                                        <Controller
-                                            render={({ field }) => (
-                                                <StyledSelect
-                                                    {...field}
-                                                    defaultValue={
-                                                        customer_agent
-                                                    }
-                                                    options={agents}
-                                                    getOptionValue={(option) =>
-                                                        option['id']
-                                                    }
-                                                    getOptionLabel={(option) =>
-                                                        option['name']
-                                                    }
-                                                    isClearable
-                                                />
-                                            )}
-                                            control={control}
-                                            name={'agent'}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                {agent &&
-                                    agent.id &&
-                                    brands.map(({ id, name }, index) => {
-                                        const field_name =
-                                            'commission_rate.brand_' + id; //`commission_rate[${id}]`
-                                        return (
-                                            <Col sm={2} key={index}>
-                                                <Form.Group className="mb-3">
-                                                    <Form.Label>
-                                                        {name}
-                                                    </Form.Label>
-                                                    <Form.Control
-                                                        {...register(
-                                                            field_name,
-                                                            { required: true },
-                                                        )}
-                                                        isInvalid={
-                                                            errors.commission_rate
-                                                        }
-                                                        placeholder={
-                                                            'commission rate'
-                                                        }
-                                                    />
-                                                </Form.Group>
-                                            </Col>
-                                        );
-                                    })}
-                            </Row>
-                            <Row>
-                                <Col sm={5}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Customer Name:</Form.Label>
-                                        <InputGroup className="mb-3">
+                <ErrorPanel errors={serverErrors} />
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Panel className="hf-form-panel">
+                        <PanelBody>
+                            <FormSection
+                                icon="solar:user-id-bold-duotone"
+                                title="Customer details"
+                                description="Name in English and Urdu as printed on invoices, plus contact details."
+                            >
+                                <Row className="g-3">
+                                    <Col md={6}>
+                                        <FormField label="Customer name" htmlFor="name" required>
                                             <Form.Control
-                                                {...register('name', {
-                                                    required: true,
-                                                })}
+                                                id="name"
+                                                {...register('name', { required: true })}
                                                 isInvalid={errors.name}
-                                                placeholder={'name'}
+                                                placeholder={'Full name'}
                                             />
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                                <Col sm={5}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Customer Urdu:</Form.Label>
-                                        <InputGroup className="mb-3">
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Name in Urdu" htmlFor="name_urdu" required>
                                             <Form.Control
+                                                id="name_urdu"
                                                 className={'urdu'}
-                                                {...register('name_urdu', {
-                                                    required: true,
-                                                })}
+                                                dir="rtl"
+                                                lang="ur"
+                                                {...register('name_urdu', { required: true })}
                                                 isInvalid={errors.name_urdu}
-                                                placeholder={'name in urdu'}
+                                                placeholder={'اردو نام'}
                                             />
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                                <Col sm={2}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Discount:</Form.Label>
-                                        <InputGroup>
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Phone" htmlFor="phone">
                                             <Form.Control
-                                                {...register('discount', {
-                                                    required: true,
-                                                })}
-                                                isInvalid={errors.discount}
-                                                placeholder={'discount'}
+                                                id="phone"
+                                                type="tel"
+                                                {...register('phone')}
+                                                isInvalid={errors.phone}
+                                                placeholder={'03xx xxxxxxx'}
                                             />
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Email" htmlFor="email">
+                                            <Form.Control
+                                                id="email"
+                                                type="email"
+                                                {...register('email')}
+                                                isInvalid={errors.email}
+                                                placeholder={'name@example.com'}
+                                            />
+                                        </FormField>
+                                    </Col>
+                                </Row>
+                            </FormSection>
+
+                            <FormSection
+                                icon="solar:map-point-bold-duotone"
+                                title="Address"
+                                description="Used for delivery and to group customers by city."
+                            >
+                                <Row className="g-3">
+                                    <Col md={12}>
+                                        <FormField label="Street address" htmlFor="address">
+                                            <Form.Control
+                                                id="address"
+                                                {...register('address.address')}
+                                                placeholder={'Shop / street / market'}
+                                            />
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="City" htmlFor="city" required>
                                             <Form.Select
-                                                aria-label="per meter or on total"
-                                                {...register('discount_type', {
-                                                    required: true,
-                                                })}
-                                                isInvalid={errors.discount_type}
+                                                id="city"
+                                                {...register('address.city', { required: true })}
+                                                isInvalid={errors.address?.city}
                                             >
-                                                {discountTypes &&
-                                                    discountTypes.map(
-                                                        (type, index) => {
-                                                            return (
-                                                                <option
-                                                                    key={index}
-                                                                    value={
-                                                                        type.value
-                                                                    }
-                                                                >
-                                                                    {type.label}
-                                                                </option>
-                                                            );
-                                                        },
-                                                    )}
+                                                <option value="">Select city</option>
+                                                {cities &&
+                                                    cities.map((city, index) => <option key={index}>{city.name}</option>)}
                                             </Form.Select>
-                                        </InputGroup>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-
-                            <Row>
-                                <Col sm={3}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Credit Allowed</Form.Label>
-                                        <br />
-                                        <div className="switcher">
-                                            <input
-                                                type="checkbox"
-                                                id="switcher_checkbox"
-                                                {...register('credit')}
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Region" htmlFor="region">
+                                            <Form.Control
+                                                id="region"
+                                                {...register('address.region')}
+                                                placeholder={'Area / region'}
                                             />
-                                            <label htmlFor="switcher_checkbox" />
-                                        </div>
-                                    </Form.Group>
-                                </Col>
-                                <Col sm={3}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>
-                                            Credit Limit: &nbsp;
-                                            <OverlayTrigger
-                                                placement={'bottom'}
-                                                overlay={
-                                                    <Tooltip>
-                                                        Add zero value for
-                                                        unlimited
-                                                    </Tooltip>
-                                                }
-                                            >
-                                                <Icon
-                                                    icon={
-                                                        'solar:question-circle-bold-duotone'
-                                                    }
-                                                />
-                                            </OverlayTrigger>
-                                        </Form.Label>
-                                        <Form.Control
-                                            {...register('limit', {
-                                                required: true,
-                                            })}
-                                            isInvalid={errors.phone}
-                                            placeholder={'credit limit'}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col sm={3}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Phone:</Form.Label>
-                                        <Form.Control
-                                            {...register('phone', {
-                                                email: true,
-                                            })}
-                                            isInvalid={errors.phone}
-                                            placeholder={'phone'}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col sm={3}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Email:</Form.Label>
-                                        <Form.Control
-                                            {...register('email')}
-                                            isInvalid={errors.email}
-                                            placeholder={'email'}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Form.Group className="mb-3">
-                                <Form.Label> Address:</Form.Label>
-                                <Form.Control
-                                    {...register('address.address')}
-                                    placeholder={'address'}
-                                />
-                            </Form.Group>
-                            <Row>
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label> City:</Form.Label>
-                                        <Form.Select
-                                            {...register('address.city', {
-                                                required: true,
-                                            })}
+                                        </FormField>
+                                    </Col>
+                                </Row>
+                            </FormSection>
+
+                            <FormSection
+                                icon="solar:card-bold-duotone"
+                                title="Credit & discount"
+                                description="Control whether this customer can buy on credit and their standard discount."
+                            >
+                                <Row className="g-3">
+                                    <Col md={12}>
+                                        <label className="hf-toggle" htmlFor="credit">
+                                            <Form.Check type="switch" id="credit" className="m-0 p-0" {...register('credit')} />
+                                            <span>
+                                                <span className="hf-toggle__title">Allow credit</span>
+                                                <span className="hf-toggle__desc">
+                                                    {credit
+                                                        ? 'Customer can buy on credit up to the limit below.'
+                                                        : 'Cash only — invoices must be paid in full.'}
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField
+                                            label="Credit limit"
+                                            htmlFor="limit"
+                                            required
+                                            hint="Enter 0 for an unlimited credit limit."
                                         >
-                                            <option value="">
-                                                Select City
-                                            </option>
-                                            {cities &&
-                                                cities.map((city, index) => {
-                                                    return (
-                                                        <option key={index}>
-                                                            {city.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
+                                            <InputGroup className="hf-amount">
+                                                <InputGroup.Text>Rs</InputGroup.Text>
+                                                <Form.Control
+                                                    id="limit"
+                                                    inputMode="decimal"
+                                                    {...register('limit', { required: true })}
+                                                    isInvalid={errors.limit}
+                                                    placeholder={'0'}
+                                                />
+                                            </InputGroup>
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Discount" htmlFor="discount" required>
+                                            <InputGroup>
+                                                <Form.Control
+                                                    id="discount"
+                                                    inputMode="decimal"
+                                                    {...register('discount', { required: true })}
+                                                    isInvalid={errors.discount}
+                                                    placeholder={'0'}
+                                                />
+                                                <Form.Select
+                                                    aria-label="per meter or on total"
+                                                    className="flex-grow-0 w-auto"
+                                                    {...register('discount_type', { required: true })}
+                                                    isInvalid={errors.discount_type}
+                                                >
+                                                    {discountTypes &&
+                                                        discountTypes.map((type, index) => (
+                                                            <option key={index} value={type.value}>
+                                                                {type.label}
+                                                            </option>
+                                                        ))}
+                                                </Form.Select>
+                                            </InputGroup>
+                                        </FormField>
+                                    </Col>
+                                </Row>
+                            </FormSection>
 
-                                <Col md={6}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label> Region:</Form.Label>
-                                        <Form.Control
-                                            {...register('address.region')}
-                                            placeholder={'region'}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        </form>
-                    </PanelBody>
-                    <PanelFooter className={'text-center'}>
-                        <BackButton
-                            size={'md'}
-                            href={customers.index()}
-                        />
-
-                        <LoadingButton
-                            processing={processing}
-                            onClick={handleSubmit(sendRequest)}
-                        >
-                            Save Changes
-                        </LoadingButton>
-                    </PanelFooter>
-                </Panel>
+                            <FormSection
+                                icon="solar:users-group-rounded-bold-duotone"
+                                title="Agent & commission"
+                                description="Leave empty for direct customers. Selecting an agent asks for a commission rate per brand."
+                            >
+                                <FormField label="Agent">
+                                    <Controller
+                                        render={({ field }) => (
+                                            <StyledSelect
+                                                {...field}
+                                                defaultValue={customer_agent}
+                                                options={agents}
+                                                getOptionValue={(option) => option['id']}
+                                                getOptionLabel={(option) => option['name']}
+                                                placeholder="Direct customer (no agent)"
+                                                isClearable
+                                            />
+                                        )}
+                                        control={control}
+                                        name={'agent'}
+                                    />
+                                </FormField>
+                                {agent && agent.id && brands.length > 0 && (
+                                    <div className="hf-rate-grid">
+                                        {brands.map(({ id, name }) => {
+                                            const field_name = 'commission_rate.brand_' + id;
+                                            return (
+                                                <FormField key={id} label={name} htmlFor={field_name} required>
+                                                    <Form.Control
+                                                        id={field_name}
+                                                        inputMode="decimal"
+                                                        {...register(field_name, { required: true })}
+                                                        isInvalid={errors.commission_rate?.['brand_' + id]}
+                                                        placeholder={'Rate'}
+                                                    />
+                                                </FormField>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </FormSection>
+                        </PanelBody>
+                        <FormActions hint={<><span className="hf-required">*</span> Required fields</>}>
+                            <BackButton href={customers.index()} label="Cancel" />
+                            <LoadingButton type="submit" variant="theme" processing={processing}>
+                                Save customer
+                            </LoadingButton>
+                        </FormActions>
+                    </Panel>
+                </form>
             </PageContent>
         </>
     );

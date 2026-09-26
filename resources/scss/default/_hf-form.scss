@@ -1,0 +1,290 @@
+// ===========================================================================
+// Sectioned create/edit forms (components/form/FormSection.jsx)
+// ===========================================================================
+
+.hf-form-panel {
+  overflow: visible;
+
+  > .panel-body { padding: 0; }
+}
+
+.hf-form-section {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: 1.5rem 2.5rem;
+  padding: 1.5rem 1.5rem 1.75rem;
+
+  & + & { border-top: 1px solid var(--hf-border); }
+
+  &__intro {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+  }
+
+  &__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--hf-brand-50);
+    color: var(--hf-brand);
+    box-shadow: inset 0 0 0 1px rgba(var(--hf-brand-rgb), .08);
+
+    svg { width: 20px; height: 20px; }
+  }
+
+  &__title {
+    margin: .1rem 0 .25rem;
+    font-size: .875rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--hf-text);
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: .75rem;
+    line-height: 1.5;
+    color: var(--hf-text-3);
+  }
+
+  &__body { min-width: 0; }
+
+  @media (max-width: 991.98px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Fields
+// ---------------------------------------------------------------------------
+.hf-field {
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+    font-size: .75rem;
+    font-weight: 500;
+    color: var(--hf-text-2);
+  }
+
+  // react-select (StyledSelect) matches .form-control height/radius
+  [class$='-control']:not(.form-control) {
+    min-height: 36px;
+    border-radius: var(--hf-radius);
+    border-color: var(--hf-border-strong);
+    box-shadow: var(--hf-shadow-xs);
+    font-size: .8125rem;
+
+    &:focus-within { border-color: rgba(var(--hf-brand-rgb), .55); box-shadow: var(--hf-ring); }
+  }
+
+  // keep open menus above the sticky .hf-form-actions footer
+  [class$='-menu'] { z-index: 10 !important; }
+
+  // react-datetime wrapper
+  .rdt .form-control { width: 100%; }
+}
+
+.hf-required { color: #c9503f; font-weight: 600; }
+
+.hf-field-hint {
+  margin-top: .35rem;
+  font-size: .72rem;
+  color: var(--hf-text-3);
+}
+
+// Read-only value presented like a field (e.g. running balance)
+.hf-field-static {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: .45rem .75rem;
+  border: 1px dashed var(--hf-border-strong);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+  font-size: .8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--hf-text);
+
+  &.is-negative { color: #b3392a; }
+}
+
+// Toggle row: switch with title + description
+.hf-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .75rem .9rem;
+  border: 1px solid var(--hf-border);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+  cursor: pointer;
+
+  .form-check-input {
+    flex: none;
+    width: 2.25em;
+    height: 1.2em;
+    margin: .1rem 0 0;
+    cursor: pointer;
+  }
+
+  &__title { display: block; font-size: .8125rem; font-weight: 600; color: var(--hf-text); }
+  &__desc { display: block; margin-top: .1rem; font-size: .72rem; color: var(--hf-text-3); }
+}
+
+// Segmented radio control
+.hf-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--hf-border-strong);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+  box-shadow: var(--hf-shadow-xs);
+
+  &__option {
+    margin: 0;
+    cursor: pointer;
+
+    input { position: absolute; opacity: 0; pointer-events: none; }
+
+    > span {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      min-height: 28px;
+      padding: .25rem .85rem;
+      border-radius: calc(var(--hf-radius) - 2px);
+      font-size: .8125rem;
+      font-weight: 500;
+      color: var(--hf-text-2);
+      transition: background .12s var(--hf-ease), color .12s var(--hf-ease), box-shadow .12s var(--hf-ease);
+
+      svg { width: 16px; height: 16px; }
+    }
+
+    &:hover > span { color: var(--hf-text); }
+    input:checked + span { background: var(--hf-surface); color: var(--hf-navy); box-shadow: var(--hf-shadow); }
+    input:focus-visible + span { box-shadow: var(--hf-ring); }
+  }
+
+  &.is-debit-credit {
+    .hf-segmented__option:first-child input:checked + span { color: #1f3470; }
+    .hf-segmented__option:last-child input:checked + span { color: #8d6a2a; }
+  }
+}
+
+// From → To transfer layout (journal voucher)
+.hf-transfer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: .75rem;
+
+  &__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--hf-gold-50);
+    color: var(--hf-gold-text);
+
+    svg { width: 18px; height: 18px; }
+  }
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__arrow { justify-self: center; transform: rotate(90deg); }
+  }
+}
+
+// Currency-prefixed amount inputs
+.hf-amount .input-group-text { min-width: 40px; justify-content: center; font-weight: 500; }
+.hf-amount .form-control { font-variant-numeric: tabular-nums; }
+
+// Attachment drop zone inside a section (plugin styles use !important)
+.hf-form-section .dropzone {
+  min-height: 0;
+  padding: 1.25rem 1rem;
+  border: 1.5px dashed var(--hf-border-strong) !important;
+  border-radius: var(--hf-radius-lg);
+  background: var(--hf-surface-2) !important;
+  cursor: pointer;
+  transition: border-color .15s var(--hf-ease), background .15s var(--hf-ease);
+
+  &:hover { border-color: rgba(var(--hf-brand-rgb), .45) !important; background: var(--hf-brand-50) !important; }
+
+  .dz-message {
+    margin: 0 !important;
+    font-size: .875rem !important;
+    font-weight: 400 !important;
+    color: var(--hf-text-2) !important;
+
+    b { font-weight: 600; color: var(--hf-navy); }
+  }
+
+  .dz-note { display: block; margin-top: .25rem; font-size: .72rem !important; color: var(--hf-text-3) !important; }
+}
+
+.hf-attachment-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  padding: .5rem;
+  border: 1px solid var(--hf-border);
+  border-radius: var(--hf-radius-lg);
+  background: var(--hf-surface);
+
+  img { max-width: 100%; max-height: 150px; border-radius: var(--hf-radius-sm); }
+}
+
+// Commission rates grid (customer agent brands)
+.hf-rate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--hf-border);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+}
+
+// ---------------------------------------------------------------------------
+// Footer
+// ---------------------------------------------------------------------------
+.hf-form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem 1.5rem;
+  border-top: 1px solid var(--hf-border);
+  border-radius: 0 0 var(--hf-radius-lg) var(--hf-radius-lg);
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(6px);
+
+  &__hint { font-size: .72rem; color: var(--hf-text-3); }
+  &__buttons { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+
+  @media (max-width: 575.98px) {
+    padding: .75rem 1rem;
+
+    &__hint { display: none; }
+  }
+}

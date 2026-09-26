@@ -68,7 +68,7 @@ class JournalController extends Controller
                 'canAddSingle' => $request->user()->can('accounts.journals.single'),
                 'canView' => $request->user()->can('accounts.journals.show'),
                 'canDelete' => $request->user()->can('accounts.journals.destroy'),
-                'filters' => [],
+                'filters' => $request->only(['type', 'reference_no', 'account']),
             ]
         );
     }

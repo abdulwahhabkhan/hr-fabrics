@@ -63,7 +63,7 @@ export default () => {
             <div>
                 <InputGroup className="mb-20px">
                     <FormControl
-                        placeholder="product name"
+                        placeholder="Search products by name..."
                         type="text"
                         name={"product_name"}
                         className="input-white"
@@ -88,9 +88,9 @@ export default () => {
                         value={values.has_vendor}
                         onChange={handleChange}
                     >
-                        <option value={""}>Vendor</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
+                        <option value={""}>All vendors</option>
+                        <option value="yes">With vendor</option>
+                        <option value="no">No vendor</option>
                     </FormControl>
 
                     {Object.keys(pickBy(values)).length > 0 && <FilterButton onClick={reset} />}

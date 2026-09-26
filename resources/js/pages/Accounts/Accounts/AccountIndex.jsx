@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
-import { PageContent, PageHeader } from '@/components/page.jsx';
+import { PageContent, PageFilters, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import SearchFilter from '@/components/SearchFilter';
@@ -27,12 +27,12 @@ const AccountIndex = () => {
                     )
                 }
             />
+            <PageFilters>
+                <SearchFilter />
+            </PageFilters>
             <PageContent>
                 <Panel>
                     <PanelBody>
-                        <div className="mb-3">
-                            <SearchFilter />
-                        </div>
                         <AccountTable
                             accounts={data}
                             startIndex={accounts.from || 1}

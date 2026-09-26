@@ -183,3 +183,29 @@
   }
   .page-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 }
+
+// ---------------------------------------------------------------------------
+// Products table
+// ---------------------------------------------------------------------------
+.hf-price {
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--hf-text);
+  font-variant-numeric: tabular-nums;
+
+  & + & { font-size: .75rem; font-weight: 500; color: var(--hf-text-2); }
+}
+.hf-price-unit { margin-left: .15em; font-size: .72rem; font-weight: 400; color: var(--hf-text-3); }
+
+// ---------------------------------------------------------------------------
+// Journal vouchers table
+// ---------------------------------------------------------------------------
+.hf-journal-table {
+  .hf-journal-detail { min-width: 220px; max-width: 360px; font-size: .75rem; color: var(--hf-text-2); }
+  .hf-amount-cell { font-variant-numeric: tabular-nums; }
+  .hf-amount-cell.is-debit { font-weight: 600; color: #1f3470; }
+  .hf-amount-cell.is-credit { font-weight: 600; color: #8d6a2a; }
+}
+
+button.hf-icon-btn { padding: 0; }
+.hf-icon-btn.has-file { color: var(--hf-navy); border-color: rgba(var(--hf-brand-rgb), .35); background: var(--hf-brand-50); }
