@@ -66,10 +66,9 @@ class RoleController extends Controller
      */
     public function edit(int $id): Response
     {
-        $role = Role::find($id);
+        $role = Role::findOrFail($id);
         $permissions = Permission::listPermissions();
 
-        // dd($permissions);
         return Inertia::render(
             'Settings/Role/RoleForm',
             [

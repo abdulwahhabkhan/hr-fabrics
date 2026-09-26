@@ -9,7 +9,6 @@ use App\Models\Traits\BelongsToUser;
 use App\Models\Traits\HasFiles;
 use App\Models\Traits\MorphManayToLog;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -19,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read string $city
  * @property-read int $debit
  * @property-read int $credit
+ * @property-read int $account_id
  * @property array<string, mixed>|null $file
  */
 final class Journal extends Model implements Fileable, Logable
@@ -54,15 +54,5 @@ final class Journal extends Model implements Fileable, Logable
     public function resource(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    protected function fileDownloadLink(): Attribute
-    {
-        return Attribute::get(fn () => download_link($this->file['file_path'] ?? ''));
-    }
-
-    protected function fileThumbnailLink(): Attribute
-    {
-        return Attribute::get(fn () => generate_thumbnail($this->file['file_path'] ?? ''));
     }
 }

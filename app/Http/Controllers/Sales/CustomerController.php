@@ -33,33 +33,24 @@ class CustomerController extends Controller
             ->customers()
             ->with('agent')
             ->when($request->input('search'), function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('name_urdu', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhereRaw("JSON_VALUE(address, '$.\"city\"') LIKE ?", ["%{$search}%"]);
-                });
+                $query->where(fn ($where) => $where
+                    ->whereRaw(
+                        "LOWER(CONCAT(name, ' ', JSON_VALUE(address, '$.\"city\"'))) LIKE ?",
+                        ['%'.mb_strtolower($search).'%']
+                    )
+                    ->orWhereLike('name_urdu', "%{$search}%")
+                    ->orWhereLike('phone', "%{$search}%")
+                );
             })
             ->filterWhere('agent_id', $request->input('agent_id'))
-            ->when($request->filled('city'), function ($query) use ($request) {
-                $query->whereRaw("JSON_VALUE(address, '$.\"city\"') = ?", [$request->input('city')]);
+            ->when($request->input('city'), function ($query, $city) {
+                $query->whereRaw("JSON_VALUE(address, '$.\"city\"') = ?", [$city]);
             })
-            ->when($request->filled('status'), function ($query) use ($request) {
-                $status = $request->input('status');
-                if ($status === 'active') {
-                    $query->where('suspended', false);
-                } elseif ($status === 'suspended') {
-                    $query->where('suspended', true);
-                }
+            ->when(in_array($request->input('status'), ['active', 'suspended'], true), function ($query) use ($request) {
+                $query->where('suspended', $request->input('status') === 'suspended');
             })
             ->when($request->filled('credit'), function ($query) use ($request) {
-                $credit = $request->input('credit');
-                if ($credit === '1' || $credit === 'yes') {
-                    $query->where('credit', true);
-                } elseif ($credit === '0' || $credit === 'no') {
-                    $query->where('credit', false);
-                }
+                $query->where('credit', $request->boolean('credit'));
             })
             ->orderby('updated_at', 'desc')
             ->paginate()
@@ -72,10 +63,8 @@ class CustomerController extends Controller
                 'filters' => $filters,
                 'agents' => $this->agentOptions(),
                 'cities' => City::getAll(),
-                'canAdd' => $request->user()?->can('sales.customers.store') ?? true,
-                'canUpdate' => $request->user()?->can('sales.customers.update') ?? true,
-                'canSuspend' => $request->user()?->can('sales.customers.suspend') ?? true,
-                'canActivate' => $request->user()?->can('sales.customers.activate') ?? true,
+                'canAdd' => $request->user()->can('sales.customers.store'),
+                'canUpdate' => $request->user()->can('sales.customers.update'),
             ]
         );
     }
@@ -169,6 +158,8 @@ class CustomerController extends Controller
         $customer->update([
             'suspended' => true,
             'suspended_at' => now(),
+            'credit' => false,
+            'limit' => null,
         ]);
 
         return Redirect::route('sales.customers.index')

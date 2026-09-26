@@ -30,7 +30,7 @@ class JournalController extends Controller
      */
     public function index(Request $request): Response
     {
-        $filters = $request->all();
+        $filters = $request->only('type', 'reference_no', 'account', 'date');
         $query = Journal::query();
         $query->join(JournalDetail::tName(), Journal::qCol('id'), 'journal_id');
         $query->join(Account::tName(), Account::qCol('id'), 'account_id');
@@ -68,7 +68,7 @@ class JournalController extends Controller
                 'canAddSingle' => $request->user()->can('accounts.journals.single'),
                 'canView' => $request->user()->can('accounts.journals.show'),
                 'canDelete' => $request->user()->can('accounts.journals.destroy'),
-                'filters' => $request->only(['type', 'reference_no', 'account']),
+                'filters' => $filters,
             ]
         );
     }

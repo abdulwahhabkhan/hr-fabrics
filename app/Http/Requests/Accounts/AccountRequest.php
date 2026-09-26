@@ -30,4 +30,21 @@ class AccountRequest extends FormRequest
             'commission_rate' => ['nullable', 'array'],
         ];
     }
+
+    /**
+     * Get the validated data with defaults and the creating user applied.
+     *
+     * @param  array-key|null  $key
+     */
+    public function validated($key = null, $default = null): mixed
+    {
+        $data = $this->validator->validated();
+        $data['expense_account'] ??= 0;
+
+        if ($this->isMethod('post')) {
+            $data['created_by'] = $this->user()->id;
+        }
+
+        return data_get($data, $key, $default);
+    }
 }

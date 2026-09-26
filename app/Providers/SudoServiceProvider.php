@@ -25,8 +25,9 @@ class SudoServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
-        Carbon::macro('displayDate', fn () => $this->format('d-M-Y'));
+        Carbon::macro('displayDate', fn (): string => $this->format('d-M-Y'));
 
+        CarbonImmutable::macro('displayDate', fn (): string => $this->format('d-M-Y'));
         $this->bootAuth();
     }
 

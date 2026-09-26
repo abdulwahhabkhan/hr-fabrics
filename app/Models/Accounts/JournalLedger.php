@@ -50,8 +50,8 @@ class JournalLedger extends Model
         'posted_at' => 'date:Y-m-d',
         'total_dr' => 'float',
         'total_cr' => 'float',
-        'credit_limit' => 'int',
-        'is_suspended' => 'int',
+        'credit_limit' => 'integer',
+        'is_suspended' => 'boolean',
     ];
 
     /**

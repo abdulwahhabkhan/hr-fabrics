@@ -19,16 +19,19 @@ class AccountController extends Controller
      */
     public function index(Request $request): Response
     {
+        $filters = $request->only('search', 'type');
+
         $accounts = Account::query()
             ->accounts()
             ->filterContain('name', $request->input('search'))
+            ->filterWhere('type', $request->input('type'))
             ->orderby('updated_at', 'desc')->paginate()
-            ->appends($request->only(['search']));
+            ->appends($filters);
 
         return Inertia::render('Accounts/Accounts/AccountIndex',
             [
                 'accounts' => $accounts,
-                'filters' => $request->only('search'),
+                'filters' => $filters,
                 'canAdd' => $request->user()
                     ->can('accounts.accounts.store'),
                 'canUpdate' => $request->user()
@@ -55,10 +58,7 @@ class AccountController extends Controller
      */
     public function store(AccountRequest $request): RedirectResponse
     {
-        $request->validated();
-        $data = $request->validated();
-        $data['created_by'] = $request->user()->id;
-        Account::create($data);
+        Account::query()->create($request->validated());
 
         return Redirect::route('accounts.accounts.index')
             ->with(['success' => 'Account created Successfully']);

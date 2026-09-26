@@ -25,10 +25,15 @@ class CustomerBalanceController extends Controller
                 $query->where('is_suspended', 0);
             })
             ->when($limit === 1, function ($query) {
-                $query->where('credit_limit', '>=', 1);
+                $query->where(fn ($query) => $query
+                    ->where('credit_limit', '>=', 1)
+                    ->orWhere('is_suspended', 1));
             })
             ->when($limit === 2, function ($query) {
-                $query->where('credit_limit', '=', 0);
+                $query->where('is_suspended', 0)
+                    ->where(fn ($query) => $query
+                        ->where('credit_limit', 0)
+                        ->orWhereNull('credit_limit'));
             })
             ->when($hasBalance === 1, function ($query) {
                 $query->having('balance', '<>', 0);
@@ -38,8 +43,9 @@ class CustomerBalanceController extends Controller
             })
             ->orderByRaw('sum(dr - cr) <= 0')
             ->orderBy('balance')
-            ->groupBy(['account_id', 'name', 'city'])
-            ->get()->map(fn (JournalLedger $row) => [
+            ->groupBy('account_id', 'name', 'city')
+            ->get()
+            ->map(fn (JournalLedger $row) => [
                 'id' => $row->account_id,
                 'name' => $row->name,
                 'suspended' => (bool) $row->is_suspended,

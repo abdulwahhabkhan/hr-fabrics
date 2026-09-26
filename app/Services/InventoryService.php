@@ -312,4 +312,18 @@ class InventoryService
             ->sum(DB::raw('CASE WHEN product_cost.unit = "'.PackingType::Box->value.'" THEN  qty * last_price ELSE meters * last_price END'));
 
     }
+
+    public function availableInventory(int $product_id, PackingType $unit, float $size): ?Inventory
+    {
+        $query = Inventory::query()
+            ->available()
+            ->where('product_id', $product_id)
+            ->where('unit', $unit)
+            ->when($unit !== PackingType::Thaan, function ($query) use ($size) {
+                $query->where('size', $size);
+            })
+            ->selectRaw('SUM(qty) total_qty, SUM(meters) as total_meters');
+
+        return $query->first();
+    }
 }

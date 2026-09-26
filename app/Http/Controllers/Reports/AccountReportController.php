@@ -9,7 +9,7 @@ use App\Http\Resources\Reports\AccountsResource;
 use App\Models\Accounts\Account;
 use App\Models\Accounts\JournalLedger;
 use App\Models\City;
-use App\Repositories\AccountRepository;
+use App\Services\AccountService;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,7 +38,7 @@ class AccountReportController extends Controller
         $query->filterWhere('city', $filters['city'] ?? null);
         $query->filterWhere('type', $filters['type'] ?? null);
         $query->postedOnBefore($filters['date']);
-        $query->groupBy(['account_id', 'name', 'city', 'type']);
+        $query->groupBy('account_id', 'name', 'city', 'type');
         $query->orderBy('name');
         $query->havingRaw('total_dr - total_cr <> 0');
         $rows = $query->get();
@@ -56,7 +56,7 @@ class AccountReportController extends Controller
         $filters = [];
         $filter_cities = $request->input('filter_cities', []);
         $filters['filter_cities'] = $filter_cities;
-        $repo = resolve(AccountRepository::class);
+        $service = resolve(AccountService::class);
         $receivables = JournalLedger::query()
             ->select(['account_id', 'type', 'name_urdu', 'name', 'city', 'credit_limit', 'is_suspended'])
             ->selectRaw('sum(dr) as total_dr, sum(cr) as total_cr')
@@ -65,14 +65,14 @@ class AccountReportController extends Controller
             ->whereIn('city', collect($filter_cities)
                 ->pluck('name')
                 ->filter())
-            ->groupBy(['account_id'])
+            ->groupBy('account_id')
             // ->havingRaw('total_dr > total_cr and total_cr > 0')
             ->havingRaw('total_dr != total_cr')
             ->orderBy('city')
             ->orderBy('name_urdu')
             ->get()
-            ->map(function ($row) use ($repo) {
-                $overDue = $repo->getAccountOverDueQuery($row->account_id, $row->total_cr ?? 0)
+            ->map(function ($row) use ($service) {
+                $overDue = $service->getAccountOverDueQuery($row->account_id, $row->total_cr ?? 0)
                     ->where('created_at', '<', now()->subDays(150)->toDateString())
                     ->latest()->first()?->balance;
                 $row->balance_150_days = $overDue ?? 0;

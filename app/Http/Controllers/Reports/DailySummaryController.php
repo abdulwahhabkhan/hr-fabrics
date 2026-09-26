@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\ReportRepository;
 use App\Services\AccountService;
 use App\Services\ReportService;
 use Carbon\Carbon;
@@ -23,15 +22,15 @@ class DailySummaryController extends Controller
         }
         $summary_start_date = Carbon::create($filter['start_date'])->toImmutable();
         $summary_end_date = Carbon::create($filter['end_date'])->toImmutable();
-        $repo = resolve(ReportRepository::class);
+        $service = resolve(ReportService::class);
         $startOfDay = $summary_start_date->startOfDay();
         $endOfDay = $summary_end_date->endOfDay();
-        $bankDetails = $repo->bankBookDetail($startOfDay, $endOfDay);
+        $bankDetails = $service->bankBookDetail($startOfDay, $endOfDay);
 
         $expenses = $accountService->getExpenses($startOfDay, $endOfDay, null);
         $total_expenses = $expenses->sum('expenses');
         $total_expenses_cr = $expenses->sum('cr');
-        $sale_summary = $repo->salesSummary($startOfDay, $endOfDay);
+        $sale_summary = $service->salesSummary($startOfDay, $endOfDay);
         $net_expenses = $total_expenses - $total_expenses_cr;
         $filter['start_date'] = $summary_start_date->format('d-M-Y');
         $filter['end_date'] = $summary_end_date->format('d-M-Y');

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Stock;
 
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Brand;
-use App\Repositories\InventoryRepository;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,7 +22,6 @@ class BrandValuationController extends Controller
 
             }
             $items = $inventory->get();
-            // $items = InventoryRepository::inventoryValuation($filters);
             $total_value = $items->sum('total_value');
         }
 

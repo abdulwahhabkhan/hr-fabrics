@@ -15,8 +15,8 @@ use Illuminate\Support\Collection;
 class AccountService
 {
     public function getExpenses(
-        CarbonInterface $startDate,
-        CarbonInterface $endDate,
+        CarbonInterface|string $startDate,
+        CarbonInterface|string $endDate,
         ?string $account = null
     ): Collection {
         $expenses = JournalLedger::query()
@@ -272,6 +272,7 @@ class AccountService
 
         $query->orderBy('name');
 
+        /** @var Collection<int, Account> */
         return $query->get();
     }
 
@@ -281,5 +282,55 @@ class AccountService
             ->selectRaw('sum(dr) as total_debit')
             ->selectRaw('sum(cr) as total_credit')
             ->where('account_id', $account_id)->first();
+    }
+
+    public function getAccountOverDueCredit(int $account_id): array
+    {
+        $total = $this->getAccountTotal($account_id);
+        $total_debit = $total->total_credit;
+        $history = $this->getAccountOverDueQuery($account_id, $total_debit)
+            ->with('journal')
+            ->get();
+        $journal = $history->map(fn ($row) => [
+            'journal_id' => $row->journal_id,
+            'balance' => $row->balance,
+            'month' => $row->journal->posted_at->format('M, Y'),
+            'reference_no' => $row->journal->reference_no,
+            'detail' => $row->journal->detail,
+            'resource_id' => $row->journal->resource_id,
+            'resource_type' => $row->journal->resource_type,
+            'head' => $row->journal->head,
+        ]);
+
+        return [
+            'total_debit' => $total_debit,
+            'total_credit' => $total->total_credit,
+            'transaction' => $history->first()?->journal,
+            'balance' => ($total->total_debit - $total->total_credit),
+            'journal' => $journal,
+        ];
+
+    }
+
+    /**
+     * @return Builder<JournalDetail>
+     */
+    public function getAccountOverDueQuery(int $account_id, int $total): Builder
+    {
+        // query: select * from (
+        //  select sum(dr) over( order by journal_id) debit, journal_id  from journal_details where account_id = 1 order by journal_id asc
+        // ) total where debit > 4916605 limit 1;
+        $sum_query = JournalDetail::query()
+            ->select(['journal_id', 'created_at'])
+            ->selectRaw('sum(dr) over( order by journal_id) debit')
+            ->where('account_id', $account_id)
+            ->where('dr', '>', 0)
+            ->orderBy('journal_id');
+
+        return JournalDetail::query()
+            ->select('*')
+            ->selectRaw('(debit - '.$total.') as  balance')
+            ->fromSub($sum_query->toRawSql(), 'ledger')
+            ->where('debit', '>', $total);
     }
 }

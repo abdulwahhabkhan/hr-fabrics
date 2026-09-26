@@ -23,10 +23,10 @@ class Permission extends Model
         $section = ['pos' => 'Fabrics', 'fabric-receivings' => 'Vouchers',
             'por' => 'Fabric Returns'];
 
-        return self::all()->groupBy(['section', 'module'])->map(function ($item, $key) use (
+        return self::all()->groupBy(['section', 'module'])->map(function ($item, $moduleKey) use (
             $section
         ) {
-            $children = $item->map(function ($item, $key) use ($section) {
+            $children = $item->map(function ($item, $key) use ($section, $moduleKey) {
                 $children = $item->map(function ($item) use ($section) {
                     $name = $item['name'];
                     $sec = $section[$item['module']] ?? null;
@@ -43,7 +43,9 @@ class Permission extends Model
                 } else {
                     $section_lbl = Arr::get($section, $key, (string) $key);
                 }
-                $section_val = "{$section_lbl}_section";
+                // Prefixed with the module: the same section name (e.g. customers) exists in several modules,
+                // and the checkbox tree requires unique node values.
+                $section_val = "{$moduleKey}_{$section_lbl}_section";
 
                 return [
                     'label' => ucfirst($section_lbl),
@@ -52,7 +54,7 @@ class Permission extends Model
                 ];
             })->toArray();
 
-            return ['label' => ucfirst((string) $key), 'value' => "{$key}_module",
+            return ['label' => ucfirst((string) $moduleKey), 'value' => "{$moduleKey}_module",
                 'children' => array_values($children)];
         });
     }

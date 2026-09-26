@@ -31,8 +31,19 @@ class CustomerRequest extends FormRequest
             'phone' => ['nullable', 'max:50'],
             'discount' => ['numeric', 'required'],
             'discount_type' => ['required', Rule::enum(DiscountType::class)],
-            'limit' => ['numeric', 'required_if:credit,1'],
+            'limit' => ['required_if_accepted:credit', 'numeric', 'min:0'],
             'credit' => ['bool', 'required'],
         ];
+    }
+
+    /**
+     * A credit limit only applies to customers allowed credit; cash-only
+     * customers always store a zero limit.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->boolean('credit')) {
+            $this->merge(['limit' => 0]);
+        }
     }
 }

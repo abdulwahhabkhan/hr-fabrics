@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accounts\Account;
-use App\Repositories\AccountRepository;
+use App\Services\AccountService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,43 +20,13 @@ class BalanceHistoryController extends Controller
         $customer_id = $customer['id'] ?? 0;
         if (! empty($customer) && $customer_id) {
 
-            $data = resolve(AccountRepository::class)->getAccountOverDueCredit($customer_id);
+            $data = resolve(AccountService::class)->getAccountOverDueCredit($customer_id);
 
             $net_balance = abs($data['balance'] ?? 0);
             $posted_date = $data['transaction']['posted_at'] ?? null;
             if ($posted_date) {
                 $days = ceil(($posted_date)->diffInDays());
             }
-
-            /*$history = JournalLedger::query()
-                ->selectRaw('SUM(dr) debit, SUM(cr) credit, date_format(posted_at, "%M, %Y") month')
-                ->where('account_id', $customer_id)
-                ->groupByRaw('date_format(posted_at, "%m %y")')
-                ->orderByRaw('date_format(posted_at, "%y %m")')
-                ->get();
-            $total_credit = $history->sum('credit');
-            $payment = 0;
-            $monthly = 0;
-            $data = $history->map(
-                function ($row) use ($total_credit, &$payment, &$monthly) {
-                    $payment += $row->debit;
-                    $balance = $total_credit - $payment;
-                    if ($balance < 0 && $row->debit > 0) {
-                        $net_balance = $balance * -1;
-                        $monthly_balance = $net_balance - $monthly;
-                        $monthly += $monthly_balance;
-                        $month = $row->month;
-                        $month .= ' '.(today()->parse($row->month));
-                        return [
-                            'month' => $month,
-                            'balance' => $monthly_balance,
-                        ];
-                    } else {
-                        return false;
-                    }
-                })->ray()->filter()->values();
-
-            $net_balance = collect($data)->sum('balance') ?? 0;*/
         }
         $monthly_credit = 0;
         $journals = collect($data['journal'] ?? [])

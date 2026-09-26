@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\AccountRepository;
+use App\Services\AccountService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -31,7 +31,7 @@ class DailyExpenseController extends Controller
         $end_date = $filters['end_date'];
         $account = $filters['account'];
         $group_by = $filters['group_by'];
-        $expenses = AccountRepository::getExpenses($start_date, $end_date, $account);
+        $expenses = resolve(AccountService::class)->getExpenses($start_date, $end_date, $account);
         if ($group_by) {
             $expenses = $expenses->groupBy(fn ($r) => $r->account_id)->map(function ($row) {
                 $summary = $row->first();

@@ -3,27 +3,6 @@
 use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
-if (! function_exists('user_avatar')) {
-    function user_avatar(): string
-    {
-        $user = Auth::user();
-        $name = str($user instanceof User ? $user->name : 'Guest User')
-            ->slug().'.svg';
-        $path = 'avatars/'.$name;
-        $filesystem = Storage::disk('public');
-
-        if (! $filesystem->exists($path)) {
-            $image_url = 'https://eu.ui-avatars.com/api/'
-                .'?background=4b0900&format=svg&color=fff&name='
-                .$name;
-            $content = file_get_contents($image_url);
-            $filesystem->put($path, $content);
-        }
-
-        return Storage::disk('public')->url($path);
-    }
-}
-
 if (! function_exists('storage')) {
     function storage(): Filesystem
     {

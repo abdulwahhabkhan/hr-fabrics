@@ -39,7 +39,6 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ?
                     $request->user()->only(['id', 'name', 'email']) : null,
-                'avatar' => user_avatar(),
                 'permissions' => $request->user() ? Inertia::once(fn (
                 ) => $request->user()->permissions()->toArray()) : null,
             ],
