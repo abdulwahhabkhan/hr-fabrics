@@ -269,9 +269,9 @@ test('customer without agent and with discount', function () {
     $response->assertSessionHasNoErrors();
     $response->assertRedirect(route('sales.customers.index'));
     unset($body['address']);
-    $body['address'] = json_encode($address);
     $this->assertDatabaseCount(Account::class, 1);
     $this->assertDatabaseHas(Account::class, $body);
+    expect(Account::where('name', $body['name'])->sole()->address->all())->toMatchArray($address);
 
 });
 
@@ -308,10 +308,10 @@ test('customer with agent but without discount', function () {
     unset($body['agent']);
     unset($body['commission_rate']);
     $body['agent_id'] = $agent->id;
-    $body['address'] = json_encode($address);
     $body['commission_rate'] = json_encode($commission_rates);
     $this->assertDatabaseCount(Account::class, 2);
     $this->assertDatabaseHas(Account::class, $body);
+    expect(Account::where('name', $body['name'])->sole()->address->all())->toMatchArray($address);
 
 });
 
@@ -331,9 +331,9 @@ test('update customer without agent but with discount', function () {
     $response->assertSessionDoesntHaveErrors();
     $response->assertRedirect(route('sales.customers.index'));
     unset($body['address']);
-    $body['address'] = json_encode($address);
     $this->assertDatabaseCount(Account::class, 1);
     $this->assertDatabaseHas(Account::class, $body);
+    expect($customer->refresh()->address->all())->toMatchArray($address->all());
 
 });
 
@@ -371,10 +371,10 @@ test('update customer with agent without discount', function () {
     unset($body['agent']);
     unset($body['commission_rate']);
     $body['agent_id'] = $agent->id;
-    $body['address'] = json_encode($address);
     $body['commission_rate'] = json_encode($commission_rates);
     $this->assertDatabaseCount(Account::class, 2);
     $this->assertDatabaseHas(Account::class, $body);
+    expect($customer->refresh()->address->all())->toMatchArray($address);
 
 });
 
@@ -432,8 +432,8 @@ test('create customer with credit limit', function () {
     // $response->assertOk();
     $response->assertSessionDoesntHaveErrors();
     unset($data['address']);
-    $data['address'] = json_encode($address);
     $this->assertDatabaseHas(Account::class, $data);
+    expect(Account::where('name', $data['name'])->sole()->address->all())->toMatchArray($address);
 });
 
 test('cash only customer ignores submitted credit limit', function () {

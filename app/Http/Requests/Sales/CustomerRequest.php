@@ -52,7 +52,7 @@ class CustomerRequest extends FormRequest
     {
         $address = $this->input('address', []);
         if (! empty($address['city'] ?? null)) {
-            $address['city_urdu'] = City::where('name', $address['city'])->pluck('name_urdu');
+            $address['city_urdu'] = City::where('name', $address['city'])->value('name_urdu');
             $this->merge(['address' => $address]);
             $this->getValidatorInstance()->setData($this->all());
         }

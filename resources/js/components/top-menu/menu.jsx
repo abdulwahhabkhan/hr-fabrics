@@ -31,7 +31,7 @@ import journalReport from '@/routes/reports/journal-report';
 import users from '@/routes/settings/users';
 import roles from '@/routes/settings/roles';
 import cities from '@/routes/settings/cities';
-import employees from '@/routes/settings/employees';
+// import employees from '@/routes/settings/employees';
 
 const Menu = [
     {
@@ -316,11 +316,12 @@ const Menu = [
                 title: 'Cities',
                 name: 'settings.cities.index',
             },
-            {
-                path: employees.index().url,
-                title: 'Employees',
-                name: 'settings.employees.index',
-            },
+            // Employees & attendance disabled for now.
+            // {
+            //     path: employees.index().url,
+            //     title: 'Employees',
+            //     name: 'settings.employees.index',
+            // },
         ],
     },
 ];
