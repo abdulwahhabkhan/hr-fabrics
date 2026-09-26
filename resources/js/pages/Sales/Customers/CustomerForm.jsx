@@ -125,15 +125,48 @@ const CustomerForm = () => {
                             <FormSection
                                 icon="solar:map-point-bold-duotone"
                                 title="Address"
-                                description="Used for delivery and to group customers by city."
+                                description="Address and region in English and Urdu. City is used to group customers."
                             >
                                 <Row className="g-3">
-                                    <Col md={12}>
+                                    <Col md={6}>
                                         <FormField label="Street address" htmlFor="address">
                                             <Form.Control
                                                 id="address"
                                                 {...register('address.address')}
                                                 placeholder={'Shop / street / market'}
+                                            />
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Address in Urdu" htmlFor="address_urdu">
+                                            <Form.Control
+                                                id="address_urdu"
+                                                className={'urdu'}
+                                                dir="rtl"
+                                                lang="ur"
+                                                {...register('address.address_urdu')}
+                                                placeholder={'دکان / گلی / بازار'}
+                                            />
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Region" htmlFor="region">
+                                            <Form.Control
+                                                id="region"
+                                                {...register('address.region')}
+                                                placeholder={'Area / region'}
+                                            />
+                                        </FormField>
+                                    </Col>
+                                    <Col md={6}>
+                                        <FormField label="Region in Urdu" htmlFor="region_urdu">
+                                            <Form.Control
+                                                id="region_urdu"
+                                                className={'urdu'}
+                                                dir="rtl"
+                                                lang="ur"
+                                                {...register('address.region_urdu')}
+                                                placeholder={'علاقہ'}
                                             />
                                         </FormField>
                                     </Col>
@@ -148,15 +181,6 @@ const CustomerForm = () => {
                                                 {cities &&
                                                     cities.map((city, index) => <option key={index}>{city.name}</option>)}
                                             </Form.Select>
-                                        </FormField>
-                                    </Col>
-                                    <Col md={6}>
-                                        <FormField label="Region" htmlFor="region">
-                                            <Form.Control
-                                                id="region"
-                                                {...register('address.region')}
-                                                placeholder={'Area / region'}
-                                            />
                                         </FormField>
                                     </Col>
                                 </Row>

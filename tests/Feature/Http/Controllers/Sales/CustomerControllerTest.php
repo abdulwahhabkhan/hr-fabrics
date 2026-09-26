@@ -173,6 +173,38 @@ test('customer can be created', function () {
     ]);
 });
 
+test('customer address and region can be saved in english and urdu', function () {
+    // Arrange
+    $data = [
+        'name' => 'Bilingual Customer',
+        'name_urdu' => 'دو لسانی گاہک',
+        'address' => [
+            'address' => 'Shop 12, Cloth Market',
+            'address_urdu' => 'دکان 12، کلاتھ مارکیٹ',
+            'region' => 'Old City',
+            'region_urdu' => 'پرانا شہر',
+            'city' => 'Lahore',
+        ],
+        'discount' => 0,
+        'discount_type' => DiscountType::FixedPerMeter->value,
+        'limit' => 0,
+        'credit' => 0,
+    ];
+
+    // Act
+    $response = post(route('sales.customers.store'), $data);
+
+    // Assert
+    $response->assertSessionHasNoErrors();
+    $address = Account::where('name', 'Bilingual Customer')->sole()->address->all();
+    expect($address)->toMatchArray([
+        'address' => 'Shop 12, Cloth Market',
+        'address_urdu' => 'دکان 12، کلاتھ مارکیٹ',
+        'region' => 'Old City',
+        'region_urdu' => 'پرانا شہر',
+    ]);
+});
+
 test('customer can be updated', function () {
     // Arrange
     $customer = Account::factory()->customer()->create();
