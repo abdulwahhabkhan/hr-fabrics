@@ -6,6 +6,46 @@ import useSidebarMenu from './useSidebarMenu';
 import SidebarGlyph from './SidebarGlyph';
 
 /**
+ * Nested sub-menu section (third level) inside an expanded accordion.
+ * Starts open when it holds the current page.
+ */
+function SubnavGroup({ group }) {
+    const [isOpen, setIsOpen] = useState(group.active);
+
+    useEffect(() => {
+        if (group.active) {
+            setIsOpen(true);
+        }
+    }, [group.active]);
+
+    return (
+        <div className={cx('hf-subnav-group', { 'is-open': isOpen, 'is-active': group.active })}>
+            <button type="button" className="hf-subnav-link hf-subnav-toggle" aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}>
+                <span>{group.title}</span>
+                <SidebarGlyph name="chevronDown" size={12} className="hf-nav-caret" />
+            </button>
+            <div className="hf-subnav" aria-hidden={!isOpen}>
+                <div className="hf-subnav-inner">
+                    {group.children.map((child) => (
+                        <InertiaLink key={child.name} href={child.path} className={cx('hf-subnav-link', { 'is-active': child.active })}>
+                            {child.title}
+                        </InertiaLink>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function FlyoutLink({ item, onNavigate }) {
+    return (
+        <InertiaLink href={item.path} className={cx('hf-flyout-link', { 'is-active': item.active })} onClick={onNavigate}>
+            {item.title}
+        </InertiaLink>
+    );
+}
+
+/**
  * Expanded: accordion (the active section opens automatically).
  * Collapsed: icon rail; hovering shows a flyout with its pages,
  * clicking an item pins/persists the flyout open until clicked again,
@@ -137,15 +177,19 @@ export default function SidebarNav({ collapsed = false }) {
                                 // Outer grid animates 0fr -> 1fr (smooth height); inner wrapper clips.
                                 <div className="hf-subnav" aria-hidden={!isOpen}>
                                     <div className="hf-subnav-inner">
-                                        {item.children.map((child) => (
-                                            <InertiaLink
-                                                key={child.name}
-                                                href={child.path}
-                                                className={cx('hf-subnav-link', { 'is-active': child.active })}
-                                            >
-                                                {child.title}
-                                            </InertiaLink>
-                                        ))}
+                                        {item.children.map((child) =>
+                                            child.children.length ? (
+                                                <SubnavGroup key={child.name} group={child} />
+                                            ) : (
+                                                <InertiaLink
+                                                    key={child.name}
+                                                    href={child.path}
+                                                    className={cx('hf-subnav-link', { 'is-active': child.active })}
+                                                >
+                                                    {child.title}
+                                                </InertiaLink>
+                                            ),
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -154,16 +198,18 @@ export default function SidebarNav({ collapsed = false }) {
                             <div className="hf-flyout" role="menu">
                                 <div className="hf-flyout-title">{item.title}</div>
                                 {hasChildren ? (
-                                    item.children.map((child) => (
-                                        <InertiaLink
-                                            key={child.name}
-                                            href={child.path}
-                                            className={cx('hf-flyout-link', { 'is-active': child.active })}
-                                            onClick={() => setPinnedFlyout(null)}
-                                        >
-                                            {child.title}
-                                        </InertiaLink>
-                                    ))
+                                    item.children.map((child) =>
+                                        child.children.length ? (
+                                            <div key={child.name} className="hf-flyout-group">
+                                                <div className="hf-flyout-group-title">{child.title}</div>
+                                                {child.children.map((link) => (
+                                                    <FlyoutLink key={link.name} item={link} onNavigate={() => setPinnedFlyout(null)} />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <FlyoutLink key={child.name} item={child} onNavigate={() => setPinnedFlyout(null)} />
+                                        ),
+                                    )
                                 ) : null}
                             </div>
                         </div>

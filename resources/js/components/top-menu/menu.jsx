@@ -216,89 +216,117 @@ const Menu = [
         name: 'reports',
         children: [
             {
-                path: po.purchases().url,
-                title: 'Purchases',
-                name: 'reports.po.purchases',
+                path: '#',
+                title: 'Sales',
+                name: 'reports.group.sales',
+                children: [
+                    {
+                        path: reports.salesDaily().url,
+                        title: 'Daily Sales By City',
+                        name: 'reports.sales-daily',
+                    },
+                    {
+                        path: reports.saleCashCredit().url,
+                        title: 'Sales Details',
+                        name: 'reports.sale-cash-credit',
+                    },
+                    {
+                        path: reports.salesDailyAverage().url,
+                        title: 'Sales Daily Average',
+                        name: 'reports.sales-daily-average',
+                    },
+                    {
+                        path: fastSelling.products().url,
+                        title: 'Fast Selling Products',
+                        name: 'reports.fast-selling.products',
+                    },
+                ],
             },
             {
-                path: fastSelling.products().url,
-                title: 'Fast Selling Products',
-                name: 'reports.fast-selling.products',
+                path: '#',
+                title: 'Purchases & Stock',
+                name: 'reports.group.purchases',
+                children: [
+                    {
+                        path: po.purchases().url,
+                        title: 'Purchases',
+                        name: 'reports.po.purchases',
+                    },
+                    {
+                        path: reports.purchases_daily().url,
+                        title: 'Daily Purchases',
+                        name: 'reports.purchases_daily',
+                    },
+                    {
+                        path: purchasedDate.products().url,
+                        title: 'Products by Purchase Date',
+                        name: 'reports.purchased-date.products',
+                    },
+                ],
             },
             {
-                path: purchasedDate.products().url,
-                title: 'Products by Purchase Date',
-                name: 'reports.purchased-date.products',
+                path: '#',
+                title: 'Receivables',
+                name: 'reports.group.receivables',
+                children: [
+                    {
+                        path: accountReport.receivables().url,
+                        title: 'Accounts Receivables',
+                        name: 'reports.account-report.receivables',
+                    },
+                    {
+                        path: accountReport.cityByReceivables().url,
+                        title: 'Receivables By City',
+                        name: 'reports.account-report.city-by-receivables',
+                    },
+                    {
+                        path: reportCustomers.balance().url,
+                        title: 'Customer Balance',
+                        name: 'reports.customers.balance',
+                    },
+                    {
+                        path: reportCustomers.lastPayment().url,
+                        title: 'Customer Payments',
+                        name: 'reports.customers.last-payment',
+                    },
+                ],
             },
             {
-                path: reports.summary().url,
-                title: 'Daily Summary',
-                name: 'reports.summary',
-            },
-            {
-                path: inMethod.out.transactions.summary().url,
-                title: 'In/Out Transaction Summary',
-                name: 'reports.in.out.transactions.summary',
-            },
-            {
-                path: reports.salesDaily().url,
-                title: 'Daily Sales By City',
-                name: 'reports.sales-daily',
-            },
-            {
-                path: reports.saleCashCredit().url,
-                title: 'Sales Details',
-                name: 'reports.sale-cash-credit',
-            },
-            {
-                path: reports.purchases_daily().url,
-                title: 'Daily Purchases',
-                name: 'reports.purchases_daily',
-            },
-            {
-                path: accountReport.receivables().url,
-                title: 'Accounts Receivables',
-                name: 'reports.account-report.receivables',
-            },
-            {
-                path: accountReport.cityByReceivables().url,
-                title: 'Accounts Receivables By City',
-                name: 'reports.account-report.city-by-receivables',
-            },
-            {
-                path: reportCustomers.balance().url,
-                title: 'Customer Balance',
-                name: 'reports.customers.balance',
-            },
-            {
-                path: reportCustomers.lastPayment().url,
-                title: 'Customer Payments',
-                name: 'reports.customers.last-payment',
-            },
-            {
-                path: accountReport.bankBook().url,
-                title: 'Bank Book',
-                name: 'reports.account-report.bank-book',
-            },
-            {
-                path: accountReport.expenses().url,
-                title: 'Daily Expenses',
-                name: 'reports.account-report.expenses',
-            },
-            {
-                path: accountReport.index().url,
-                title: 'Accounts',
-                name: 'reports.account-report.index',
-            },
-            {
-                path: journalReport.index().url,
-                title: 'Daily Journal',
-                name: 'reports.journal-report.index',
-            },
-            {
-                path: reports.salesDailyAverage().url,
-                title: 'Sales Daily Average',
-                name: 'reports.sales-daily-average',
+                path: '#',
+                title: 'Cash & Accounts',
+                name: 'reports.group.accounts',
+                children: [
+                    {
+                        path: reports.summary().url,
+                        title: 'Daily Summary',
+                        name: 'reports.summary',
+                    },
+                    {
+                        path: inMethod.out.transactions.summary().url,
+                        title: 'In/Out Transaction Summary',
+                        name: 'reports.in.out.transactions.summary',
+                    },
+                    {
+                        path: accountReport.bankBook().url,
+                        title: 'Bank Book',
+                        name: 'reports.account-report.bank-book',
+                    },
+                    {
+                        path: accountReport.expenses().url,
+                        title: 'Daily Expenses',
+                        name: 'reports.account-report.expenses',
+                    },
+                    {
+                        path: accountReport.index().url,
+                        title: 'Accounts',
+                        name: 'reports.account-report.index',
+                    },
+                    {
+                        path: journalReport.index().url,
+                        title: 'Daily Journal',
+                        name: 'reports.journal-report.index',
+                    },
+                ],
             },
         ],
     },

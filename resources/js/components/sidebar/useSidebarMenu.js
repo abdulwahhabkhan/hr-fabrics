@@ -33,17 +33,31 @@ export default function useSidebarMenu() {
         const permissions = props.auth?.permissions ?? [];
         const allowed = (item) => item.always || permissions.includes(item.name);
 
-        return menu.filter(allowed).map((item) => {
-            const children = (item.children ?? [])
-                .filter(allowed)
-                .map((child) => ({ ...child, active: isRouteActive(child, url) }));
+        // Top-level items and links need their own permission; nested groups show when any child is allowed.
+        const resolve = (items, nested = false) =>
+            items.flatMap((item) => {
+                const isGroup = nested && item.children;
 
-            return {
-                ...item,
-                children,
-                active: isRouteActive(item, url) || children.some((child) => child.active),
-            };
-        });
+                if (!isGroup && !allowed(item)) {
+                    return [];
+                }
+
+                const children = resolve(item.children ?? [], true);
+
+                if (isGroup && !children.length) {
+                    return [];
+                }
+
+                return [
+                    {
+                        ...item,
+                        children,
+                        active: isRouteActive(item, url) || children.some((child) => child.active),
+                    },
+                ];
+            });
+
+        return resolve(menu);
         // `url` re-evaluates active state after every Inertia visit.
     }, [url, props.auth?.permissions]);
 }

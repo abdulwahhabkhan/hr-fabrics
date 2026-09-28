@@ -246,7 +246,8 @@
   transform: translateY(-4px);
   transition: transform .26s var(--hf-ease);
 }
-.hf-nav-item.is-open > .hf-subnav {
+.hf-nav-item.is-open > .hf-subnav,
+.hf-subnav-group.is-open > .hf-subnav {
   grid-template-rows: 1fr;
   margin: .2rem 0 .4rem 1.2rem;
   opacity: 1;
@@ -293,6 +294,23 @@
     }
   }
 }
+
+// Third level: collapsible group inside a sub-menu.
+.hf-subnav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-weight: 600;
+}
+.hf-subnav-group > .hf-subnav { margin-left: .35rem; }
+.hf-subnav-group.is-open > .hf-subnav { margin: .1rem 0 .3rem .35rem; }
+.hf-subnav-group.is-open > .hf-subnav-toggle .hf-nav-caret { transform: rotate(180deg); }
+.hf-subnav-group.is-active > .hf-subnav-toggle { color: var(--hf-sidebar-text-strong); }
 
 @keyframes hf-subnav-in {
   from { opacity: 0; transform: translateY(-3px); }
@@ -517,6 +535,24 @@
   font-size: .75rem;
   font-weight: 600;
   color: var(--hf-navy);
+  white-space: nowrap;
+}
+// Grouped flyouts (e.g. Reports) split into two columns so they stay short.
+.hf-flyout:has(.hf-flyout-group) {
+  column-count: 2;
+  column-gap: .25rem;
+  min-width: 440px;
+
+  .hf-flyout-title { column-span: all; }
+}
+.hf-flyout-group { break-inside: avoid; padding-bottom: .25rem; }
+.hf-flyout-group-title {
+  padding: .4rem .625rem .2rem;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--hf-text-3);
   white-space: nowrap;
 }
 .hf-flyout-link {

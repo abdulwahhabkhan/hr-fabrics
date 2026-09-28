@@ -60,7 +60,13 @@ const TopMenuNavList = ({ data, expand, active, topLevel = true }) => {
         setChildActive((current) => (current === i ? -1 : i));
     };
 
-    if (!data.always && !hasPermission(data.name)) {
+    // Nested groups have no permission of their own; show them when any child is allowed.
+    const isNestedGroup = !topLevel && data.children;
+    const isVisible = isNestedGroup
+        ? data.children.some((child) => child.always || hasPermission(child.name))
+        : data.always || hasPermission(data.name);
+
+    if (!isVisible) {
         return (
             <></>
         );
