@@ -36,16 +36,18 @@ import cities from '@/routes/settings/cities';
 const Menu = [
     {
         path: dashboard().url,
-        icon: 'solar:laptop-bold-duotone',
+        icon: 'solar:widget-5-bold-duotone',
         title: 'Dashboard',
+        group: 'Overview',
         name: 'dashboard',
         always: true,
     },
 
     {
         path: '/catalog',
-        icon: 'solar:book-2-bold-duotone',
+        icon: 'solar:hanger-2-bold-duotone',
         title: 'Catalog',
+        group: 'Operations',
         name: 'catalog',
         children: [
             {
@@ -67,13 +69,14 @@ const Menu = [
     },
     {
         path: '/sales',
-        icon: 'solar:clipboard-list-bold-duotone',
+        icon: 'solar:tag-price-bold-duotone',
         title: 'Sales',
+        group: 'Operations',
         name: 'sales',
         children: [
             {
                 path: customers.index().url,
-                title: 'Manage Customers',
+                title: 'Customers',
                 name: 'sales.customers.index',
             },
             {
@@ -95,8 +98,9 @@ const Menu = [
     },
     {
         path: '/purchase',
-        icon: 'solar:inbox-in-bold-duotone',
+        icon: 'solar:delivery-bold-duotone',
         title: 'Purchases',
+        group: 'Operations',
         name: 'purchases',
         children: [
             {
@@ -123,8 +127,9 @@ const Menu = [
     },
     {
         path: '/stock',
-        icon: 'solar:clipboard-list-bold',
+        icon: 'solar:box-bold-duotone',
         title: 'Stock',
+        group: 'Operations',
         name: 'stocks',
         children: [
             {
@@ -161,8 +166,9 @@ const Menu = [
     },
     {
         path: '/accounts',
-        icon: 'solar:notebook-bold-duotone',
+        icon: 'solar:wallet-money-bold-duotone',
         title: 'Accounts',
+        group: 'Finance',
         name: 'accounts',
         children: [
             {
@@ -204,8 +210,9 @@ const Menu = [
     },
     {
         path: '/reports',
-        icon: 'solar:chart-bold-duotone',
+        icon: 'solar:chart-2-bold-duotone',
         title: 'Reports',
+        group: 'Finance',
         name: 'reports',
         children: [
             {
@@ -299,6 +306,7 @@ const Menu = [
         path: '/settings',
         icon: 'solar:settings-bold-duotone',
         title: 'Settings',
+        group: 'Admin',
         name: 'settings',
         children: [
             {

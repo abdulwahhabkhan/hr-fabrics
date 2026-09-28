@@ -23,13 +23,8 @@ class IncomeStatementController extends Controller
 
     public function index(Request $request): Response
     {
-        $seasonStart = Carbon::parse(config('store.session_start'));
-        $legacyVersionEndDate = Carbon::parse(config('store.legacy_version_end_date'));
-        if ($seasonStart->lessThan($legacyVersionEndDate)) {
-            $seasonStart = $legacyVersionEndDate;
-        }
         $filters = [
-            'start_date' => $seasonStart->toDateString(),
+            'start_date' => Carbon::parse(config('store.session_start'))->toDateString(),
             'end_date' => today()->toDateString(),
             'account' => '',
         ];
@@ -38,14 +33,6 @@ class IncomeStatementController extends Controller
             $filters['account'] = $request->account;
             $filters['start_date'] = Carbon::create($request->start_date)->toDateString();
             $filters['end_date'] = Carbon::create($request->end_date)->toDateString();
-        }
-        $filters['min_date'] = $legacyVersionEndDate->toDateString();
-        if ($legacyVersionEndDate->greaterThan($filters['start_date'])) {
-            return Inertia::render('Reports/Accounts/IncomeStatementReport',
-                [
-                    'filters' => $filters,
-                    'exception' => 'Start date should be greater than '.$legacyVersionEndDate->displayDate().' or check legacy version for old data!',
-                ]);
         }
         $start_date = $filters['start_date'];
         $start_datetime = Carbon::create($start_date)->startOfDay();

@@ -31,7 +31,6 @@ export default function AppSidebar({ collapsed, onToggle, mobileOpen, onMobileCl
                     <SidebarGlyph name={collapsed ? 'chevronRight' : 'chevronLeft'} size={14} />
                 </button>
 
-                <div className="hf-sidebar-label">Workspace</div>
                 <div className="hf-sidebar-body">
                     <SidebarNav collapsed={collapsed} />
                 </div>

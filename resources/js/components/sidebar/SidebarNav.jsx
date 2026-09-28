@@ -81,7 +81,8 @@ export default function SidebarNav({ collapsed = false }) {
 
     return (
         <nav ref={navRef} className="hf-nav" aria-label="Main">
-            {items.map((item) => {
+            {items.map((item, index) => {
+                const startsGroup = item.group && item.group !== items[index - 1]?.group;
                 const hasChildren = item.children.length > 0;
                 const isOpen = hasChildren && openSection === item.name;
                 const isFlyoutOpen = hasChildren && pinnedFlyout === item.name;
@@ -95,72 +96,78 @@ export default function SidebarNav({ collapsed = false }) {
                 );
 
                 return (
-                    <div
-                        key={item.name}
-                        className={cx('hf-nav-item', {
-                            'is-active': item.active,
-                            'is-open': isOpen,
-                            'is-flyout-open': isFlyoutOpen,
-                            'is-hover-disabled': isHoverDisabled,
-                        })}
-                        onMouseLeave={() => {
-                            if (hoverDisabledItem === item.name) {
-                                setHoverDisabledItem(null);
-                            }
-                        }}
-                    >
-                        {hasChildren ? (
-                            <button
-                                type="button"
-                                className="hf-nav-link"
-                                aria-expanded={isOpen || isFlyoutOpen}
-                                onClick={() => handleItemClick(item)}
-                            >
-                                {icon}
-                                <span className="hf-nav-text">{item.title}</span>
-                                <SidebarGlyph name="chevronDown" size={14} className="hf-nav-caret" />
-                            </button>
-                        ) : (
-                            <InertiaLink href={item.path} className="hf-nav-link">
-                                {icon}
-                                <span className="hf-nav-text">{item.title}</span>
-                            </InertiaLink>
+                    <React.Fragment key={item.name}>
+                        {startsGroup && (
+                            <div className="hf-nav-group" role="presentation">
+                                <span>{item.group}</span>
+                            </div>
                         )}
+                        <div
+                                className={cx('hf-nav-item', {
+                                'is-active': item.active,
+                                'is-open': isOpen,
+                                'is-flyout-open': isFlyoutOpen,
+                                'is-hover-disabled': isHoverDisabled,
+                            })}
+                            onMouseLeave={() => {
+                                if (hoverDisabledItem === item.name) {
+                                    setHoverDisabledItem(null);
+                                }
+                            }}
+                        >
+                            {hasChildren ? (
+                                <button
+                                    type="button"
+                                    className="hf-nav-link"
+                                    aria-expanded={isOpen || isFlyoutOpen}
+                                    onClick={() => handleItemClick(item)}
+                                >
+                                    {icon}
+                                    <span className="hf-nav-text">{item.title}</span>
+                                    <SidebarGlyph name="chevronDown" size={14} className="hf-nav-caret" />
+                                </button>
+                            ) : (
+                                <InertiaLink href={item.path} className="hf-nav-link">
+                                    {icon}
+                                    <span className="hf-nav-text">{item.title}</span>
+                                </InertiaLink>
+                            )}
 
-                        {hasChildren && (
-                            // Outer grid animates 0fr -> 1fr (smooth height); inner wrapper clips.
-                            <div className="hf-subnav" aria-hidden={!isOpen}>
-                                <div className="hf-subnav-inner">
-                                    {item.children.map((child) => (
+                            {hasChildren && (
+                                // Outer grid animates 0fr -> 1fr (smooth height); inner wrapper clips.
+                                <div className="hf-subnav" aria-hidden={!isOpen}>
+                                    <div className="hf-subnav-inner">
+                                        {item.children.map((child) => (
+                                            <InertiaLink
+                                                key={child.name}
+                                                href={child.path}
+                                                className={cx('hf-subnav-link', { 'is-active': child.active })}
+                                            >
+                                                {child.title}
+                                            </InertiaLink>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Collapsed-mode flyout (hidden in expanded mode via CSS). */}
+                            <div className="hf-flyout" role="menu">
+                                <div className="hf-flyout-title">{item.title}</div>
+                                {hasChildren ? (
+                                    item.children.map((child) => (
                                         <InertiaLink
                                             key={child.name}
                                             href={child.path}
-                                            className={cx('hf-subnav-link', { 'is-active': child.active })}
+                                            className={cx('hf-flyout-link', { 'is-active': child.active })}
+                                            onClick={() => setPinnedFlyout(null)}
                                         >
                                             {child.title}
                                         </InertiaLink>
-                                    ))}
-                                </div>
+                                    ))
+                                ) : null}
                             </div>
-                        )}
-
-                        {/* Collapsed-mode flyout (hidden in expanded mode via CSS). */}
-                        <div className="hf-flyout" role="menu">
-                            <div className="hf-flyout-title">{item.title}</div>
-                            {hasChildren ? (
-                                item.children.map((child) => (
-                                    <InertiaLink
-                                        key={child.name}
-                                        href={child.path}
-                                        className={cx('hf-flyout-link', { 'is-active': child.active })}
-                                        onClick={() => setPinnedFlyout(null)}
-                                    >
-                                        {child.title}
-                                    </InertiaLink>
-                                ))
-                            ) : null}
                         </div>
-                    </div>
+                    </React.Fragment>
                 );
             })}
         </nav>

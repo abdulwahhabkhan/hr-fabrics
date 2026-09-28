@@ -1,20 +1,19 @@
-import React, { useState } from "react";
-import { Inertia, usePage } from "@/util/Inertia";
-import { usePrevious } from "react-use";
-import pickBy from "lodash/pickBy";
-import { Button, InputGroup } from "react-bootstrap";
-import Datetime from "react-datetime";
-import { settings } from "@/config/page-settings";
-import { Controller, useForm } from "react-hook-form";
-import "react-datetime/css/react-datetime.css";
+import React, { useState } from 'react';
+import { Inertia, usePage } from '@/util/Inertia';
+import { usePrevious } from 'react-use';
+import pickBy from 'lodash/pickBy';
+import { Button, InputGroup } from 'react-bootstrap';
+import Datetime from 'react-datetime';
+import { settings } from '@/config/page-settings';
+import { Controller, useForm } from 'react-hook-form';
+import 'react-datetime/css/react-datetime.css';
 
 export default () => {
     const { filters } = usePage().props;
     const DatetimeComponent = Datetime.default ? Datetime.default : Datetime;
-    const { min_date } = filters;
     const [values, setValues] = useState({
-        start_date: filters.start_date || "",
-        end_date: filters.end_date || "",
+        start_date: filters.start_date || '',
+        end_date: filters.end_date || '',
     });
 
     const prevValues = usePrevious(values);
@@ -26,7 +25,7 @@ export default () => {
 
     function reset() {
         setValues({
-            date: "",
+            date: '',
         });
     }
 
@@ -42,19 +41,13 @@ export default () => {
 
     function doSearch(e) {
         e.preventDefault();
-        const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
+        const query = Object.keys(pickBy(values)).length
+            ? pickBy(values)
+            : { remember: 'forget' };
         Inertia.get(window.location.pathname, query, {
             replace: true,
             preserveState: true,
         });
-    }
-
-    function isValidStart(current) {
-        return current.isSameOrAfter(min_date);
-    }
-
-    function isValidEnd(current) {
-        return current.isSameOrAfter(min_date);
     }
 
     return (
@@ -71,13 +64,12 @@ export default () => {
                                 onChange={(e) =>
                                     setValues((values) => ({
                                         ...values,
-                                        start_date: e.format("YYYY-MM-DD"),
+                                        start_date: e.format('YYYY-MM-DD'),
                                     }))
                                 }
                                 closeOnSelect={true}
-                                placeholder={"start date"}
+                                placeholder={'start date'}
                                 timeFormat={false}
-                                isValidDate={isValidStart}
                             />
                         )}
                     />
@@ -92,19 +84,23 @@ export default () => {
                                 onChange={(e) =>
                                     setValues((values) => ({
                                         ...values,
-                                        end_date: e.format("YYYY-MM-DD"),
+                                        end_date: e.format('YYYY-MM-DD'),
                                     }))
                                 }
                                 closeOnSelect={true}
-                                placeholder={"end date"}
+                                placeholder={'end date'}
                                 timeFormat={false}
-                                isValidDate={isValidEnd}
                                 readonly={true}
                             />
                         )}
                     />
 
-                    <Button type={"button"} onClick={doSearch} variant="primary" style={{ zIndex: 0 }}>
+                    <Button
+                        type={'button'}
+                        onClick={doSearch}
+                        variant="primary"
+                        style={{ zIndex: 0 }}
+                    >
                         View Report
                     </Button>
                 </InputGroup>
