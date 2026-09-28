@@ -11,7 +11,7 @@ import logo from '@/img/brand/hr-fabrics-logo-horizontal.svg';
  */
 export default function AuthLayout({ children, title, description }) {
     const { appName, store } = usePage().props;
-    const brandName = appName || 'HR Fabrics International';
+    const brandName = appName || 'HR Fabrics';
 
     return (
         <div className="hf-auth">
