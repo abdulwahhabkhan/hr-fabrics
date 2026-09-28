@@ -1,213 +1,255 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useRef, useState } from 'react';
+import { Button, Col, Form, InputGroup, Modal, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
-import { notifyMessage, serverSideError, UNIT_SUIT, usePackingUnits } from '@/util/util';
+import { FormField, SegmentedControl } from '@/components/form/FormSection';
+import { NumberFormat } from '@/util/NumberFormat';
+import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
 import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
+
+const UNIT_ICONS = {
+    [UNIT_BOX]: 'solar:box-bold-duotone',
+    [UNIT_SUIT]: 'solar:t-shirt-bold-duotone',
+    [UNIT_THAAN]: 'solar:layers-bold-duotone',
+};
+
+const toNumber = (value) => parseFloat(value) || 0;
 
 export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, products }) => {
     const packingUnits = usePackingUnits();
+    const isEdit = item.id > 0;
     const itemDetail = _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
-    const [product, setProduct] = useState(
-        itemDetail
-            ? {
-                  ...itemDetail,
-                  qty: item.qty ?? "",
-                  voucher_no: item.voucher_no ?? "",
-                  unit: item.unit ?? "Box",
-                  size: item.size ?? "",
-                  total_qty: item.total_qty ?? "",
-              }
-            : "",
-    );
+    const [product, setProduct] = useState(itemDetail);
+    const [processing, setProcessing] = useState(false);
+    const productRef = useRef(null);
+
     const {
-        control,
         register,
         handleSubmit,
         setValue,
+        setError,
         setFocus,
         watch,
-        formState: { errors },
         reset,
-    } = useForm({ defaultValues: product });
-    const [processing, setProcessing] = useState(false);
-    const updateValue = (item) => {
-        setProduct(item);
-        const { is_box, name, finish } = { ...item };
+        control,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            voucher_no: item.voucher_no ?? '',
+            product: itemDetail,
+            unit: item.unit ?? '',
+            qty: item.qty ?? '',
+            size: item.size ?? '',
+            total_qty: item.total_qty ?? '',
+        },
+    });
 
-        setValue("unit", is_box ? "Box" : "Thaan", { shouldDirty: true });
-        setValue("name", name ?? "", { shouldDirty: true });
-        setValue("finish", finish ?? "", { shouldDirty: true });
-        setFocus("qty");
+    const { unit, qty, size, total_qty } = watch();
+    const isThaan = unit === UNIT_THAAN;
+
+    const selectProduct = (selected) => {
+        setProduct(selected);
+        if (!selected) {
+            return;
+        }
+
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setTimeout(() => setFocus('qty'), 0);
     };
-    const { unit } = watch();
-    const handleClose = () => {
-        onClose();
+
+    const resetForm = (data = {}) => {
+        setProduct(null);
+        reset({
+            voucher_no: data.voucher_no ?? '',
+            product: null,
+            unit: '',
+            qty: '',
+            size: '',
+            total_qty: '',
+        });
+        setTimeout(() => productRef.current?.focus(), 0);
     };
+
     const sendRequest = async (data) => {
         setProcessing(true);
         axios({
-            method: "post",
+            method: 'post',
             url: fabricReceivingAjax.item(orderId).url,
             data: { ...data, order_id: item.order_id, item_id: item.id },
         })
             .then((res) => {
                 setItems(res.data.items);
+                notifyMessage({ title: 'Success', type: 'success', message: isEdit ? 'Item updated' : 'Item added' });
 
-                notifyMessage({ title: "Success", type: "success", message: "Items saved successfully" });
-                if (item.id > 0) {
+                if (isEdit) {
                     onClose();
                 } else {
                     resetForm(data);
                 }
             })
-            .finally((res) => {
-                setProcessing(false);
-            })
             .catch((error) => {
+                const fieldErrors = error.response?.data?.errors ?? {};
+                Object.entries(fieldErrors).forEach(([field, messages]) => {
+                    setError(field, { type: 'server', message: messages[0] });
+                });
                 serverSideError(error);
+            })
+            .finally(() => {
+                setProcessing(false);
             });
     };
 
-    const resetForm = (data) => {
-        reset({
-            ...data,
-        });
-    };
+    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
+    const meters = isThaan ? toNumber(total_qty) : toNumber(qty) * toNumber(size);
 
-    const isSizeRequired = () => {
-        return parseInt(product.is_box) === 1 || unit === UNIT_SUIT;
-    };
-    const units = packingUnits.filter((val) => {
-        if (product.is_box) return val === "Box";
-        else return val !== "Box";
-    });
     return (
-        <Modal show={true} backdrop="static" size={"lg"} keyboard={true}>
-            <Modal.Header>
-                <Modal.Title>Manage Fabric Receiving Product</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <form action="" className="" onSubmit={handleSubmit(sendRequest)}>
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Voucher No:</Form.Label>
+        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+            <form onSubmit={handleSubmit(sendRequest)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{isEdit ? 'Edit Item' : 'Add Item'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="hf-item-form">
+                    <Row className="g-3">
+                        <Col sm={4}>
+                            <FormField label="Voucher no" htmlFor="voucher_no" required>
                                 <Form.Control
-                                    defaultValue={product.voucher_no ?? ""}
-                                    {...register("voucher_no", { required: true })}
+                                    id="voucher_no"
+                                    {...register('voucher_no', { required: true })}
                                     isInvalid={errors.voucher_no}
+                                    placeholder="Voucher no"
                                 />
-                            </Form.Group>
+                            </FormField>
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Product SKU:</Form.Label>
+                        <Col sm={8}>
+                            <FormField label="Product" required>
                                 <Controller
                                     render={({ field }) => (
                                         <StyledSelect
                                             {...field}
                                             options={products}
-                                            onChange={(e) => {
-                                                field.onChange(e);
-                                                updateValue(e);
+                                            onChange={(selected) => {
+                                                field.onChange(selected);
+                                                selectProduct(selected);
                                             }}
-                                            defaultValue={product}
-                                            getOptionValue={(option) => option["product_id"]}
-                                            getOptionLabel={(option) => option["product_info"]}
+                                            getOptionValue={(option) => option['product_id']}
+                                            getOptionLabel={(option) => option['product_info']}
+                                            placeholder="Search product by name, finish or brand..."
+                                            isClearable
+                                            autoFocus={!isEdit}
+                                            ref={productRef}
                                         />
                                     )}
                                     control={control}
-                                    name={"product"}
+                                    name="product"
+                                    rules={{ required: true }}
                                 />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={8}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Name:</Form.Label>
-                                <Form.Control
-                                    defaultValue={product.name ?? ""}
-                                    {...register("name", { required: true })}
-                                    isInvalid={errors.name}
-                                    readOnly={true}
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Finish:</Form.Label>
-                                <Form.Control {...register("finish", { required: true })} readOnly={true} />
-                            </Form.Group>
+                                {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                            </FormField>
                         </Col>
                     </Row>
 
-                    <Row>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Unit:</Form.Label>
-                                <Form.Select
-                                    {...register("unit", { required: true })}
-                                 
-                                >
-                                    {units &&
-                                        units.map((item, index) => {
-                                            return <option key={index}>{item}</option>;
-                                        })}
-                                </Form.Select>
-                            </Form.Group>
+                    {product && (
+                        <div className="hf-item-product">
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                <span className="hf-cell-title">{product.name}</span>
+                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                            </div>
+                        </div>
+                    )}
+
+                    <Row className="g-3 mt-1">
+                        <Col md={12}>
+                            <FormField label="Unit" required>
+                                <div>
+                                    <SegmentedControl
+                                        name="unit"
+                                        register={(name) => register(name, { required: true })}
+                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                    />
+                                </div>
+                            </FormField>
                         </Col>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Qty:</Form.Label>
+                        <Col sm={6} xs={6}>
+                            <FormField label="Qty" htmlFor="qty" required>
                                 <Form.Control
-                                    {...register("qty", { required: true, min: 1 })}
+                                    id="qty"
+                                    type="number"
+                                    step="any"
+                                    min={1}
+                                    inputMode="decimal"
+                                    {...register('qty', { required: true, min: 1 })}
                                     isInvalid={errors.qty}
-                                    defaultValue={product.qty ?? ""}
-                                    placeholder={"Qty"}
+                                    placeholder="0"
                                 />
-                            </Form.Group>
+                            </FormField>
                         </Col>
-                        {isSizeRequired() && (
-                            <Col md={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Size:</Form.Label>
-                                    <Form.Control
-                                        {...register("size", { required: true })}
-                                        isInvalid={errors.size}
-                                        placeholder={"size"}
-                                    />
-                                </Form.Group>
+                        {isThaan ? (
+                            <Col sm={6} xs={6}>
+                                <FormField label="Total meters" htmlFor="total_qty" required>
+                                    <InputGroup className="hf-amount">
+                                        <Form.Control
+                                            id="total_qty"
+                                            type="number"
+                                            step="any"
+                                            min={0}
+                                            inputMode="decimal"
+                                            {...register('total_qty', { required: true })}
+                                            isInvalid={errors.total_qty}
+                                            placeholder="0"
+                                        />
+                                        <InputGroup.Text>m</InputGroup.Text>
+                                    </InputGroup>
+                                </FormField>
                             </Col>
-                        )}
-
-                        {!isSizeRequired() && (
-                            <Col md={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Total Meters:</Form.Label>
-                                    <Form.Control
-                                        {...register("total_qty", { required: true })}
-                                        isInvalid={errors.total_qty}
-                                        placeholder={"total meters"}
-                                    />
-                                </Form.Group>
+                        ) : (
+                            <Col sm={6} xs={6}>
+                                <FormField label="Size" htmlFor="size" required>
+                                    <InputGroup className="hf-amount">
+                                        <Form.Control
+                                            id="size"
+                                            type="number"
+                                            step="any"
+                                            min={0}
+                                            inputMode="decimal"
+                                            {...register('size', { required: true })}
+                                            isInvalid={errors.size}
+                                            placeholder="0"
+                                        />
+                                        <InputGroup.Text>m</InputGroup.Text>
+                                    </InputGroup>
+                                </FormField>
                             </Col>
                         )}
                     </Row>
-                </form>
-            </Modal.Body>
-            <Modal.Footer>
-                <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>
-                    Save
-                </LoadingButton>
-                <Button variant="white" onClick={handleClose}>
-                    Close
-                </Button>
-            </Modal.Footer>
+
+                    {errors.qty?.message && (
+                        <div className="hf-item-warning">{errors.qty.message}</div>
+                    )}
+
+                    <div className="hf-item-preview">
+                        <div className="is-total">
+                            <span>Meters</span>
+                            <strong><NumberFormat displayType="text" value={meters} thousandSeparator decimalScale={2} /> m</strong>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    {!isEdit && <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>}
+                    {!isEdit && (
+                        <Button variant="link" className="text-muted" onClick={() => resetForm()}>
+                            Clear
+                        </Button>
+                    )}
+                    <Button variant="white" onClick={onClose}>
+                        {isEdit ? 'Cancel' : 'Done'}
+                    </Button>
+                    <LoadingButton type="submit" processing={processing}>
+                        {isEdit ? 'Update item' : 'Save & add next'}
+                    </LoadingButton>
+                </Modal.Footer>
+            </form>
         </Modal>
     );
 };

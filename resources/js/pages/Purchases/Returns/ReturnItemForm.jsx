@@ -1,207 +1,240 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useMemo, useRef, useState } from 'react';
+import { Icon } from '@iconify/react';
+import { Button, Col, Form, InputGroup, Modal, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
-import { notifyMessage, serverSideError, usePackingUnits } from '@/util/util';
+import { FormField, SegmentedControl } from '@/components/form/FormSection';
+import { NumberFormat } from '@/util/NumberFormat';
+import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
 import returnAjax from '@/routes/ajax/return';
 
-export const ReturnItemForm = ({returnId, onClose, setItems, products}) => {
+const UNIT_ICONS = {
+    [UNIT_BOX]: 'solar:box-bold-duotone',
+    [UNIT_SUIT]: 'solar:t-shirt-bold-duotone',
+    [UNIT_THAAN]: 'solar:layers-bold-duotone',
+};
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+function Money({ value }) {
+    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+}
+
+export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
     const packingUnits = usePackingUnits();
-    const [product] = useState({})
-    const [validationErrors, setValidationErrors] = useState(undefined)
+    const [product, setProduct] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const productRef = useRef(null);
+
     const {
         register,
         handleSubmit,
         setValue,
+        setError,
+        setFocus,
         watch,
+        reset,
         control,
-        formState: {errors},
-        reset
-    } = useForm();
-    const [processing, setProcessing] = useState(false);
+        formState: { errors },
+    } = useForm({
+        defaultValues: { product: null, unit: '', qty: '', size: '', rate: '' },
+    });
 
-    const [isBox, setIsBox] = useState(false)
-    const updateValue = (item) => {
-        const {is_box, name, finish, purchased_price} = {...item}
-        setIsBox(is_box ? true : false)
-        setValue('unit', is_box ? 'Box' : 'Thaan', {shouldDirty: true})
-        setValue('name', name, {shouldDirty: true})
-        setValue('finish', finish, {shouldDirty: true})
-        setValue('rate', purchased_price, {shouldDirty: true})
-    }
+    const { unit, qty, size, rate } = watch();
 
-    const handleClose = () => {
-        onClose()
-    }
+    const selectProduct = (selected) => {
+        setProduct(selected);
+        if (!selected) {
+            return;
+        }
+
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setValue('size', selected.size ?? '', { shouldDirty: true });
+        setValue('rate', selected.purchased_price ?? '', { shouldDirty: true });
+        setTimeout(() => setFocus('qty'), 0);
+    };
+
+    const resetForm = () => {
+        setProduct(null);
+        reset({ product: null, unit: '', qty: '', size: '', rate: '' });
+        setTimeout(() => productRef.current?.focus(), 0);
+    };
+
     const sendRequest = async (data) => {
         setProcessing(true);
-        axios.post(
-            returnAjax.item.save(returnId).url,
-            {...data, product_id: data?.product?.product_id}
-        )
-            .then(res => {
-                setItems(res.data.items)
-                notifyMessage({
-                    title: "Success",
-                    type: 'success',
-                    message: "Items saved successfully"
-                })
-                resetForm(data)
-            })
-            .finally((res) => {
-                setProcessing(false)
+        axios
+            .post(returnAjax.item.save(returnId).url, { ...data, product_id: data?.product?.product_id })
+            .then((res) => {
+                setItems(res.data.items);
+                notifyMessage({ title: 'Success', type: 'success', message: 'Item added' });
+                resetForm();
             })
             .catch((error) => {
-                serverSideError(error)
-                if (error.response.status === 422) {
-                    setValidationErrors(error.response.data)
-                }
+                const fieldErrors = error.response?.data?.errors ?? {};
+                Object.entries(fieldErrors).forEach(([field, messages]) => {
+                    setError(field, { type: 'server', message: messages[0] });
+                });
+                serverSideError(error);
             })
-    }
-    const resetForm = (data) => {
-        reset({
-            ...data,
-            qty: '',
-            size: ''
-        })
-    }
-    const units = packingUnits
+            .finally(() => {
+                setProcessing(false);
+            });
+    };
+
+    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
+
+    const line = useMemo(() => {
+        const meters = Math.trunc(toNumber(qty) * toNumber(size));
+        const amount = unit === UNIT_BOX ? toNumber(qty) * toNumber(rate) : meters * toNumber(rate);
+
+        return { meters, amount };
+    }, [unit, qty, size, rate]);
+
+    const stockError = errors.product?.message || errors.qty?.message;
 
     return (
-        <Modal show={true} backdrop="static" size={'lg'} keyboard={true}>
-            <Modal.Header>
-                <Modal.Title>Add Return Product</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {!_.isEmpty(validationErrors) && (
-                    <div className="note alert-danger mb-2">
-                        <div className="note-content">
-                            <h4><b>There is an error with your submission:</b></h4>
-                            {Object.entries(validationErrors.errors).map(([key, error]) => {
-                                return (
-                                    <div key={key} className="d-flex gap-2">
-                                        <div className="field fw-bold">{key} &#8594;</div>
-                                        <div className="field">
-                                            {error}
-                                        </div>
-                                    </div>
-                                )
-                            })}
+        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+            <form onSubmit={handleSubmit(sendRequest)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add Item</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="hf-item-form">
+                    <FormField label="Product" required>
+                        <Controller
+                            render={({ field }) => (
+                                <StyledSelect
+                                    {...field}
+                                    options={products}
+                                    onChange={(selected) => {
+                                        field.onChange(selected);
+                                        selectProduct(selected);
+                                    }}
+                                    getOptionValue={(option) => option['product_id']}
+                                    getOptionLabel={(option) => option['product_info']}
+                                    placeholder="Search product by name or finish..."
+                                    isClearable
+                                    autoFocus
+                                    ref={productRef}
+                                />
+                            )}
+                            control={control}
+                            name="product"
+                            rules={{ required: true }}
+                        />
+                        {errors.product?.type === 'required' && (
+                            <div className="invalid-feedback d-block">Please select a product.</div>
+                        )}
+                    </FormField>
+
+                    {product && (
+                        <div className="hf-item-product">
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                <span className="hf-cell-title">{product.name}</span>
+                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                {product.purchased_price && (
+                                    <span className="ms-auto hf-item-product__prices">
+                                        Purchased <strong>Rs <Money value={product.purchased_price} /></strong>
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <Row className="g-3 mt-1">
+                        <Col md={12}>
+                            <FormField label="Unit" required>
+                                <div>
+                                    <SegmentedControl
+                                        name="unit"
+                                        register={(name) => register(name, { required: true })}
+                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                    />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col sm={4} xs={6}>
+                            <FormField label="Qty" htmlFor="qty" required>
+                                <Form.Control
+                                    id="qty"
+                                    type="number"
+                                    step="1"
+                                    min={1}
+                                    inputMode="numeric"
+                                    {...register('qty', { required: true, min: 1 })}
+                                    isInvalid={errors.qty}
+                                    placeholder="0"
+                                />
+                            </FormField>
+                        </Col>
+                        <Col sm={4} xs={6}>
+                            <FormField label={unit === UNIT_THAAN ? 'Meters per thaan' : 'Size'} htmlFor="size" required>
+                                <InputGroup className="hf-amount">
+                                    <Form.Control
+                                        id="size"
+                                        type="number"
+                                        step="any"
+                                        min={0}
+                                        inputMode="decimal"
+                                        {...register('size', { required: true })}
+                                        isInvalid={errors.size}
+                                        placeholder="0"
+                                    />
+                                    <InputGroup.Text>m</InputGroup.Text>
+                                </InputGroup>
+                            </FormField>
+                        </Col>
+                        <Col sm={4} xs={6}>
+                            <FormField label={unit === UNIT_BOX ? 'Rate / box' : 'Rate / meter'} htmlFor="rate" required>
+                                <InputGroup className="hf-amount">
+                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                    <Form.Control
+                                        id="rate"
+                                        type="number"
+                                        step="any"
+                                        min={0}
+                                        inputMode="decimal"
+                                        {...register('rate', { required: true })}
+                                        isInvalid={errors.rate}
+                                        placeholder="0"
+                                    />
+                                </InputGroup>
+                            </FormField>
+                        </Col>
+                    </Row>
+
+                    {stockError && (
+                        <div className="hf-item-warning">
+                            <Icon icon="solar:danger-triangle-bold-duotone" />
+                            {stockError}
+                        </div>
+                    )}
+
+                    <div className="hf-item-preview">
+                        <div>
+                            <span>Meters</span>
+                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator /> m</strong>
+                        </div>
+                        <div className="is-total">
+                            <span>Line total</span>
+                            <strong>Rs <Money value={line.amount} /></strong>
                         </div>
                     </div>
-                )}
-
-                <form action="" className="" onSubmit={handleSubmit(sendRequest)}>
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Product SKU:</Form.Label>
-                                <Controller
-                                    render={({field}) => (
-                                        <StyledSelect
-                                            {...field}
-                                            options={products}
-                                            onChange={(e) => {
-                                                field.onChange(e)
-                                                updateValue(e)
-                                            }}
-                                            getOptionValue={option => option['product_id']}
-                                            getOptionLabel={option => option['product_info']}
-                                        />
-                                    )}
-                                    control={control}
-                                    name={'product'}
-
-                                />
-
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={8}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Name:</Form.Label>
-                                <Form.Control size={'sm'}
-                                              defaultValue={product?.name ?? ''}
-                                              {...register('name', {required: true})}
-                                              isInvalid={errors.name}
-                                              readOnly={true}/>
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Finish:</Form.Label>
-                                <Form.Control size={'sm'}
-                                              {...register('finish', {required: true})}
-
-                                              readOnly={true}/>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-
-
-                    <Row>
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Unit:</Form.Label>
-                                <Form.Control
-                                    className={'form-select form-select-sm'}
-                                    as={'select'}
-                                    {...register('unit', {required: true})}
-                                    size={'sm'}
-                                >
-                                    {units && units.map((item, index) => {
-                                        return (
-                                            <option key={index}>{item}</option>
-                                        )
-                                    })}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Qty:</Form.Label>
-                                <Form.Control size={'sm'}
-                                              {...register('qty', {required: true, min: 1})}
-                                              isInvalid={errors.qty}
-                                              defaultValue={product.qty ?? ''}
-                                              placeholder={'Qty'}/>
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Size:</Form.Label>
-                                <Form.Control size={'sm'}
-                                              {...register('size', {required: true})}
-                                              isInvalid={errors.size}
-                                              placeholder={'size'}/>
-                            </Form.Group>
-                        </Col>
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Rate:</Form.Label>
-                                <Form.Control size={'sm'}
-                                              {...register('rate', {required: true})}
-                                              isInvalid={errors.rate}
-                                              defaultValue={product.rate ?? ''}
-                                              placeholder={'Rate'}/>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                </form>
-            </Modal.Body>
-            <Modal.Footer>
-
-                <Button variant="white" onClick={handleClose}>
-                    Close
-                </Button>
-                <LoadingButton processing={processing} onClick={handleSubmit(sendRequest)}>
-                    Save
-                </LoadingButton>
-            </Modal.Footer>
+                </Modal.Body>
+                <Modal.Footer>
+                    <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>
+                    <Button variant="link" className="text-muted" onClick={resetForm}>
+                        Clear
+                    </Button>
+                    <Button variant="white" onClick={onClose}>
+                        Done
+                    </Button>
+                    <LoadingButton type="submit" processing={processing}>
+                        Save & add next
+                    </LoadingButton>
+                </Modal.Footer>
+            </form>
         </Modal>
     );
 };

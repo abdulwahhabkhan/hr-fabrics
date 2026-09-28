@@ -175,10 +175,6 @@
     input:focus-visible + span { box-shadow: var(--hf-ring); }
   }
 
-  &.is-debit-credit {
-    .hf-segmented__option:first-child input:checked + span { color: #1f3470; }
-    .hf-segmented__option:last-child input:checked + span { color: #8d6a2a; }
-  }
 }
 
 // From → To transfer layout (journal voucher)
@@ -211,6 +207,37 @@
 // Currency-prefixed amount inputs
 .hf-amount .input-group-text { min-width: 40px; justify-content: center; font-weight: 500; }
 .hf-amount .form-control { font-variant-numeric: tabular-nums; }
+.hf-amount.is-debit .input-group-text { background: #e7f4ee; color: #1d7a50; }
+.hf-amount.is-credit .input-group-text { background: #fcebe8; color: #b3392a; }
+
+// Dr / Cr lines shown before posting a single entry voucher
+.hf-posting-preview {
+  padding: .6rem .9rem;
+  border: 1px dashed var(--hf-border-strong);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+  font-size: .8125rem;
+
+  &__title { margin-bottom: .35rem; font-size: .68rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--hf-text-3); }
+
+  &__line { display: flex; align-items: center; gap: .6rem; padding: .2rem 0; }
+  &__line.is-cr { padding-left: 1.5rem; } // accounting convention: credit line indented
+
+  &__side {
+    flex: none;
+    width: 28px;
+    padding: .05rem 0;
+    border-radius: 4px;
+    font-size: .68rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  &__line.is-dr &__side { background: #e7f4ee; color: #1d7a50; }
+  &__line.is-cr &__side { background: #fcebe8; color: #b3392a; }
+
+  &__name { flex: 1; min-width: 0; color: var(--hf-text); }
+  &__amount { flex: none; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--hf-text); }
+}
 
 // Attachment drop zone inside a section (plugin styles use !important)
 .hf-form-section .dropzone,
@@ -297,6 +324,30 @@
   gap: .6rem;
 
   &.is-invalid .hf-option-card__box { border-color: #e3a79c; }
+
+  // Debit / Credit picker (single entry voucher): green for Dr, red for Cr
+  &.is-debit-credit {
+    max-width: 520px;
+
+    .hf-option-card__box { padding: .8rem .9rem; }
+    .hf-option-card__icon { width: 36px; height: 36px; border-radius: 10px; }
+
+    @each $position, $color, $bg in (first-child, #1d7a50, #e7f4ee), (last-child, #b3392a, #fcebe8) {
+      .hf-option-card:#{$position} {
+        .hf-option-card__icon { color: $color; }
+
+        input:checked + .hf-option-card__box {
+          border-color: rgba($color, .55);
+          background: $bg;
+          box-shadow: inset 0 0 0 1px rgba($color, .3);
+        }
+
+        input:checked + .hf-option-card__box .hf-option-card__icon { background: #fff; color: $color; }
+        input:checked + .hf-option-card__box .hf-option-card__title,
+        input:checked + .hf-option-card__box .hf-option-card__check { color: $color; }
+      }
+    }
+  }
 }
 
 .hf-option-card {

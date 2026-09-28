@@ -34,6 +34,9 @@ test('sales return inventory detail page can be rendered', function () {
         ->where('inventories.0.lot_no', '')
         ->where('back_url', route('sales.returns.index'))
         ->where('page_header', 'Sale Return: Inventory Detail')
+        ->where('parent.reference_no', $return->invoice_no)
+        ->where('parent.party.name', $return->customer->name)
+        ->where('parent.url', route('sales.returns.show', $return))
     );
 });
 

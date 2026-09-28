@@ -14,16 +14,58 @@ import { FileDetail, FileUpload } from '@/components/File';
 import axios from 'axios';
 import { NumberFormat } from '@/util/NumberFormat';
 import Back from '@/components/button/back';
-import { FormActions, FormField, FormSection, SegmentedControl } from '@/components/form/FormSection';
+import { FormActions, FormField, FormSection, OptionCards } from '@/components/form/FormSection';
 import journals, { singleStore } from '@/routes/accounts/journals';
 import accountsModule from '@/routes/accounts/accounts';
 
 const accountLabel = (option) => [option['name'], option['address']?.['city']].filter(Boolean).join(' · ');
 
+/** Every single entry is balanced against the cash account on the opposite side. */
 const ENTRY_TYPES = [
-    { value: 'debit', label: 'Debit', icon: 'solar:arrow-left-down-linear' },
-    { value: 'credit', label: 'Credit', icon: 'solar:arrow-right-up-linear' },
+    {
+        value: 'debit',
+        label: 'Debit (Dr)',
+        description: 'Debit this account, credit cash',
+        icon: 'solar:arrow-left-down-bold-duotone',
+    },
+    {
+        value: 'credit',
+        label: 'Credit (Cr)',
+        description: 'Credit this account, debit cash',
+        icon: 'solar:arrow-right-up-bold-duotone',
+    },
 ];
+
+/** Two-line Dr / Cr preview of what will be posted. */
+function PostingPreview({ type, account, amount }) {
+    const accountName = account?.name || 'Selected account';
+    const lines =
+        type === 'credit'
+            ? [
+                  { side: 'Dr', name: 'Cash' },
+                  { side: 'Cr', name: accountName },
+              ]
+            : [
+                  { side: 'Dr', name: accountName },
+                  { side: 'Cr', name: 'Cash' },
+              ];
+
+    return (
+        <div className="hf-posting-preview">
+            <div className="hf-posting-preview__title">Posting preview</div>
+            {lines.map(({ side, name }) => (
+                <div key={side} className={`hf-posting-preview__line is-${side.toLowerCase()}`}>
+                    <span className="hf-posting-preview__side">{side}</span>
+                    <span className="hf-posting-preview__name text-truncate">{name}</span>
+                    <span className="hf-posting-preview__amount">
+                        <span className="hf-currency">Rs</span>
+                        <NumberFormat displayType={'text'} value={Number(amount) || 0} thousandSeparator={true} />
+                    </span>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 const JournalSingleForm = () => {
     const { errors: serverErrors, accounts, directory } = usePage().props;
@@ -46,6 +88,8 @@ const JournalSingleForm = () => {
         },
     };
     const selectedAccount = watch('account');
+    const entryType = watch('type');
+    const amount = watch('amount');
     const sendRequest = async (data) => {
         const post_data = { ...data, file: file };
         setProcessing(true);
@@ -125,13 +169,13 @@ const JournalSingleForm = () => {
                             <FormSection
                                 icon="solar:document-text-bold-duotone"
                                 title="Entry details"
-                                description="Direction, amount, posting date and a short narration."
+                                description="Choose debit or credit, then the amount, date and a short narration. Cash takes the opposite side."
                             >
                                 <Row className="g-3">
                                     <Col md={12}>
                                         <FormField label="Entry type" required>
                                             <div>
-                                                <SegmentedControl
+                                                <OptionCards
                                                     name="type"
                                                     options={ENTRY_TYPES}
                                                     register={register}
@@ -142,7 +186,7 @@ const JournalSingleForm = () => {
                                     </Col>
                                     <Col md={6}>
                                         <FormField label="Amount" htmlFor="amount" required>
-                                            <InputGroup className="hf-amount">
+                                            <InputGroup className={`hf-amount is-${entryType}`}>
                                                 <InputGroup.Text>Rs</InputGroup.Text>
                                                 <Form.Control
                                                     id="amount"
@@ -171,6 +215,9 @@ const JournalSingleForm = () => {
                                                 )}
                                             />
                                         </FormField>
+                                    </Col>
+                                    <Col md={12}>
+                                        <PostingPreview type={entryType} account={selectedAccount} amount={amount} />
                                     </Col>
                                     <Col md={12}>
                                         <FormField label="Narration" htmlFor="detail" required>

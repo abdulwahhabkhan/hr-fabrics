@@ -1,76 +1,87 @@
 import React, { useState } from 'react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
-import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
+import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
-import { ErrorPanel } from '@/components/panel/ErrorPanel';
+import ValidationErrors from '@/components/ValidationErrors';
 import BackButton from '@/components/button/back';
+import { FormActions, FormField, FormSection } from '@/components/form/FormSection';
 import pos from '@/routes/purchases/pos';
 
 const PurchaseFormNew = () => {
-    const { stocks, errors: serverErrors } = usePage().props;
+    const { stocks, errors: serverSideError } = usePage().props;
 
     const [processing, setProcessing] = useState(false);
 
-    const { handleSubmit, control, setError, setValue, formState: { errors } } = useForm();
+    const {
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm();
+
     const options = {
         onFinish: () => {
             setProcessing(false);
-        }
+        },
     };
     const sendRequest = async (data) => {
-        const stock = { ...data.stock };
-        const post_data = { stock: stock };
         setProcessing(true);
-        Inertia.post(pos.store(), post_data, options);
+        Inertia.post(pos.store(), { stock: { ...data.stock } }, options);
     };
 
     return (
         <>
-            <Head title="Create Purchase" />
-            <PageHeader title="Create Purchase" buttons={<>
-                <BackButton href={pos.index()} />
-            </>} />
+            <Head title="New Fabric Purchase" />
+            <PageHeader
+                title="New Fabric Purchase"
+                description="Pick the fabric receivings to invoice"
+                buttons={<BackButton href={pos.index()} label="Purchases" />}
+            />
+
             <PageContent>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={"Create Voucher"} buttons={(
-                        <>
-                            <LoadingButton className={"btn-xs"} processing={processing}
-                                           onClick={handleSubmit(sendRequest)}>
-                                Create Voucher
-                            </LoadingButton>
-                        </>
-                    )} />
-                    <PanelBody>
-                        <ErrorPanel errors={serverErrors} />
-                        <Row>
-                            <Col lg={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Purchase Order:</Form.Label>
+                <ValidationErrors errors={serverSideError} />
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Panel className="hf-form-panel">
+                        <PanelBody>
+                            <FormSection
+                                icon="solar:delivery-bold-duotone"
+                                title="Fabric receivings"
+                                description="The purchase is created as a draft from the selected receivings. You can review items, prices and bill details on the next step."
+                            >
+                                <FormField label="Receivings" required hint="Search by ref no, bilti no or lot no.">
                                     <Controller
                                         render={({ field }) => (
                                             <StyledSelect
                                                 {...field}
                                                 isMulti
                                                 options={stocks}
-                                                getOptionValue={option => option["id"]}
-                                                getOptionLabel={option => option["invoice_no"] + " " + option["bilti_no"] + " " + option["lot_no"]}
+                                                getOptionValue={(option) => option['id']}
+                                                getOptionLabel={(option) =>
+                                                    option['invoice_no'] + ' ' + option['bilti_no'] + ' ' + option['lot_no']
+                                                }
+                                                placeholder="Select receivings..."
                                                 isClearable
+                                                autoFocus
                                             />
                                         )}
                                         control={control}
-                                        name={"stock"}
+                                        name="stock"
                                         rules={{ required: true }}
                                     />
-                                </Form.Group>
-                            </Col>
-
-                        </Row>
-                    </PanelBody>
-                </Panel>
+                                    {errors.stock && <div className="invalid-feedback d-block">Please select at least one receiving.</div>}
+                                </FormField>
+                            </FormSection>
+                        </PanelBody>
+                        <FormActions hint={<><span className="hf-required">*</span> Required fields</>}>
+                            <BackButton href={pos.index()} label="Cancel" />
+                            <LoadingButton type="submit" variant="theme" processing={processing}>
+                                Create purchase
+                            </LoadingButton>
+                        </FormActions>
+                    </Panel>
+                </form>
             </PageContent>
         </>
     );

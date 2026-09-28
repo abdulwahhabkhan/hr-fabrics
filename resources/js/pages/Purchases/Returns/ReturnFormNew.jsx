@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
-import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
+import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import BackButton from '@/components/button/back';
+import { FormActions, FormField, FormSection } from '@/components/form/FormSection';
 import axios from 'axios';
-import { notifyMessage } from '@/util/util.jsx';
+import { notifyMessage, serverSideError } from '@/util/util.jsx';
 import por from '@/routes/purchases/por';
 
 const ReturnFormNew = () => {
@@ -16,61 +16,76 @@ const ReturnFormNew = () => {
 
     const [processing, setProcessing] = useState(false);
 
-    const { handleSubmit, control, formState: { errors } } = useForm();
+    const {
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm();
 
     const sendRequest = async (data) => {
         setProcessing(true);
-        axios.post(por.store().url, data)
-            .then(res => {
-                const { data: { message, redirect } } = res;
-                notifyMessage({ title: "Success", type: 'success', message: message });
+        axios
+            .post(por.store().url, data)
+            .then((res) => {
+                const {
+                    data: { message, redirect },
+                } = res;
+                notifyMessage({ title: 'Success', type: 'success', message: message });
                 Inertia.visit(redirect);
             })
-            .catch(() => {
+            .catch((error) => {
+                serverSideError(error);
                 setProcessing(false);
             });
     };
 
     return (
         <>
-            <Head title="Create Fabric Return" />
-            <PageHeader title="Create Fabric Return" />
+            <Head title="New Fabric Return" />
+            <PageHeader
+                title="New Fabric Return"
+                description="Pick a supplier to start a draft return"
+                buttons={<BackButton href={por.index()} label="Returns" />}
+            />
+
             <PageContent>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={"Fabric Return"} buttons={(
-                        <>
-                            <LoadingButton className={"btn-xs"} processing={processing}
-                                           onClick={handleSubmit(sendRequest)}>
-                                Create Return
-                            </LoadingButton>
-                            <BackButton href={por.index()} size="xs" />
-                        </>
-                    )} />
-                    <PanelBody>
-                        <Row>
-                            <Col lg={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Supplier:</Form.Label>
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Panel className="hf-form-panel">
+                        <PanelBody>
+                            <FormSection
+                                icon="solar:undo-left-round-bold-duotone"
+                                title="Supplier"
+                                description="The return is created as a draft. You can add items, bilti and bill details on the next step."
+                            >
+                                <FormField label="Supplier" required hint="Search by supplier name.">
                                     <Controller
                                         render={({ field }) => (
                                             <StyledSelect
                                                 {...field}
                                                 options={suppliers}
-                                                getOptionValue={option => option["supplier_id"]}
-                                                getOptionLabel={option => option["supplier_name"]}
+                                                getOptionValue={(option) => option['supplier_id']}
+                                                getOptionLabel={(option) => option['supplier_name']}
+                                                placeholder="Select supplier..."
                                                 isClearable
+                                                autoFocus
                                             />
                                         )}
                                         control={control}
-                                        name={"supplier"}
+                                        name="supplier"
                                         rules={{ required: true }}
                                     />
-                                </Form.Group>
-                            </Col>
-
-                        </Row>
-                    </PanelBody>
-                </Panel>
+                                    {errors.supplier && <div className="invalid-feedback d-block">Please select a supplier.</div>}
+                                </FormField>
+                            </FormSection>
+                        </PanelBody>
+                        <FormActions hint={<><span className="hf-required">*</span> Required fields</>}>
+                            <BackButton href={por.index()} label="Cancel" />
+                            <LoadingButton type="submit" variant="theme" processing={processing}>
+                                Create return
+                            </LoadingButton>
+                        </FormActions>
+                    </Panel>
+                </form>
             </PageContent>
         </>
     );

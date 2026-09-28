@@ -28,6 +28,9 @@ test('receipt inventory detail page can be rendered', function () {
         ->has('inventories')
         ->has('back_url')
         ->has('page_header')
+        ->where('parent.reference_no', $receipt->invoice_no)
+        ->where('parent.party.name', $receipt->supplier->name)
+        ->where('parent.url', route('purchases.pos.show', $receipt))
     );
 });
 

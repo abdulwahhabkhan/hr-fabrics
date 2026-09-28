@@ -19,6 +19,7 @@ class PurchaseInventoryController extends Controller
                 },
             ])
             ->get();
+        $receipt->load('supplier:id,name,address');
 
         return Inertia::render('Inventory/StockInventoryView', [
             'back_url' => $returnUrl,
@@ -29,6 +30,25 @@ class PurchaseInventoryController extends Controller
                 return $r;
             }),
             'page_header' => 'Fabric Receiving Invoice: Inventory Detail',
+            'parent' => [
+                'label' => 'Fabric purchase',
+                'reference_no' => $receipt->invoice_no,
+                'url' => route('purchases.pos.show', $receipt),
+                'status' => $receipt->status?->value,
+                'party' => [
+                    'label' => 'Supplier',
+                    'name' => $receipt->supplier?->name,
+                    'address' => $receipt->supplier?->address,
+                ],
+                'details' => [
+                    ['label' => 'Date', 'value' => $receipt->transaction_date?->toDateString(), 'type' => 'date'],
+                    ['label' => 'Bilti no', 'value' => $receipt->bilti_no],
+                    ['label' => 'Lot no', 'value' => $receipt->lot_no],
+                    ['label' => 'Bill no', 'value' => $receipt->bill_no],
+                    ['label' => 'Total qty', 'value' => $receipt->total_qty, 'type' => 'number'],
+                    ['label' => 'Total amount', 'value' => $receipt->total, 'type' => 'number'],
+                ],
+            ],
         ]);
     }
 }

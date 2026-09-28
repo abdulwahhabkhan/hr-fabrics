@@ -25,6 +25,9 @@ test('order inventory detail page can be rendered', function () {
         ->has('inventories')
         ->has('back_url')
         ->has('page_header')
+        ->where('parent.reference_no', $order->invoice_no)
+        ->where('parent.party.name', $order->customer->name)
+        ->where('parent.url', route('sales.orders.show', $order))
     );
 });
 

@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import cx from 'classnames';
 import { Icon } from '@iconify/react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
@@ -23,6 +22,7 @@ import ValidationErrors from '@/components/ValidationErrors';
 import Back from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import SummaryStat from '@/components/SummaryStat.jsx';
 import {
     FormActions,
     FormField,
@@ -52,20 +52,6 @@ function Money({ value }) {
             thousandSeparator
             decimalScale={2}
         />
-    );
-}
-
-function SummaryStat({ icon, label, children, tone }) {
-    return (
-        <div className={cx('hf-order-stat', tone && `is-${tone}`)}>
-            <span className="hf-order-stat__icon">
-                <Icon icon={icon} />
-            </span>
-            <div className="min-w-0">
-                <div className="hf-order-stat__label">{label}</div>
-                <div className="hf-order-stat__value">{children}</div>
-            </div>
-        </div>
     );
 }
 

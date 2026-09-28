@@ -24,7 +24,7 @@ class PurchaseLedgerController extends Controller
             'source_info' => null,
             'detail' => $journal->detail,
             'reference_no' => $receipt->invoice_no,
-            'page_header' => 'Fabric Receiving Invoice: Ledger Detail',
+            'page_header' => 'Fabric Purchase: Ledger Detail',
         ]);
     }
 }

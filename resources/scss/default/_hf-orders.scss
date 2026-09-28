@@ -233,3 +233,10 @@
 }
 
 .hf-item-preview--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+// Inventory detail: parent document card on the right (Pages/Inventory/StockInventoryView)
+.hf-inventory-parent-sticky {
+  @media (min-width: 992px) { position: sticky; top: 1rem; }
+}
+
+.hf-inventory-parent__caption { font-size: .72rem; color: var(--hf-text-3); }

@@ -1,55 +1,73 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useMemo, useRef, useState } from 'react';
+import { Button, Col, Form, InputGroup, Modal, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
-import { notifyMessage, serverSideError } from '@/util/util.jsx';
+import { FormField, SegmentedControl } from '@/components/form/FormSection';
+import { NumberFormat } from '@/util/NumberFormat';
+import { notifyMessage, serverSideError, UNIT_BOX, UNIT_THAAN } from '@/util/util.jsx';
 import poAjax from '@/routes/ajax/po';
 
-export const PurchaseItemForm = ({
-    item,
-    receiptId,
-    onClose,
-    setItems,
-    products,
-}) => {
-    const itemDetail =
-        _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
-    const [product, setProduct] = useState(
-        itemDetail
-            ? {
-                  ...itemDetail,
-                  qty: item.qty ?? '',
-                  voucher_no: item.voucher_no ?? '',
-                  price: item.price ?? 0,
-                  unit: item.unit ?? '',
-                  size: item.size ?? '',
-                  total_qty: item.total_qty ?? '',
-              }
-            : '',
-    );
+const UNIT_ICONS = {
+    [UNIT_BOX]: 'solar:box-bold-duotone',
+    [UNIT_THAAN]: 'solar:layers-bold-duotone',
+};
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+function Money({ value }) {
+    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+}
+
+export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products }) => {
+    const isEdit = item.id > 0;
+    const itemDetail = _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
+    const [product, setProduct] = useState(itemDetail);
+    const [processing, setProcessing] = useState(false);
+    const productRef = useRef(null);
+
     const {
         register,
         handleSubmit,
         setValue,
+        setError,
+        setFocus,
+        watch,
+        reset,
         control,
         formState: { errors },
-        reset,
-    } = useForm({ defaultValues: product });
-    const [processing, setProcessing] = useState(false);
-    const updateValue = (item) => {
-        setProduct(item);
-        const { is_box, unit_price, suit_price, name, finish } = { ...item };
+    } = useForm({
+        defaultValues: {
+            voucher_no: item.voucher_no ?? '',
+            product: itemDetail,
+            unit: item.unit ?? '',
+            qty: item.qty ?? '',
+            size: item.size ?? '',
+            total_qty: item.total_qty ?? '',
+            price: item.price ?? '',
+        },
+    });
 
-        setValue('unit', is_box ? 'Box' : 'Thaan', { shouldDirty: true });
-        setValue('name', name ?? '', { shouldDirty: true });
-        setValue('finish', finish ?? '', { shouldDirty: true });
+    const { qty, size, total_qty, price } = watch();
+    const isBox = parseInt(product?.is_box) === 1;
+
+    const selectProduct = (selected) => {
+        setProduct(selected);
+        if (!selected) {
+            return;
+        }
+
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setTimeout(() => setFocus('qty'), 0);
     };
 
-    const handleClose = () => {
-        onClose();
+    const resetForm = () => {
+        setProduct(null);
+        reset({ voucher_no: '', product: null, unit: '', qty: '', size: '', total_qty: '', price: '' });
+        setTimeout(() => productRef.current?.focus(), 0);
     };
+
     const sendRequest = async (data) => {
         setProcessing(true);
         axios({
@@ -59,198 +77,198 @@ export const PurchaseItemForm = ({
         })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({
-                    title: 'Success',
-                    type: 'success',
-                    message: 'Items saved successfully',
-                });
-                if (item.id > 0) {
+                notifyMessage({ title: 'Success', type: 'success', message: isEdit ? 'Item updated' : 'Item added' });
+
+                if (isEdit) {
                     onClose();
                 } else {
-                    resetForm(data);
+                    resetForm();
                 }
             })
-            .finally((res) => {
-                setProcessing(false);
-            })
             .catch((error) => {
+                const fieldErrors = error.response?.data?.errors ?? {};
+                Object.entries(fieldErrors).forEach(([field, messages]) => {
+                    setError(field, { type: 'server', message: messages[0] });
+                });
                 serverSideError(error);
+            })
+            .finally(() => {
+                setProcessing(false);
             });
     };
 
-    const resetForm = (data) => {
-        reset({
-            ...data,
-            qty: '',
-            size: '',
-            voucher_no: '',
-            total_qty: '',
-            price: '',
-        });
-    };
+    const line = useMemo(() => {
+        const meters = isBox ? toNumber(qty) * toNumber(size) : toNumber(total_qty);
+        const amount = isBox ? toNumber(qty) * toNumber(price) : meters * toNumber(price);
 
-    const isBox = parseInt(product.is_box) === 1;
+        return { meters, amount };
+    }, [isBox, qty, size, total_qty, price]);
 
-    const isLoading = () => {
-        return processing;
-    };
+    const unitOptions = product ? [isBox ? UNIT_BOX : UNIT_THAAN] : [];
+
     return (
-        <Modal show={true} backdrop="static" size={'lg'} keyboard={true}>
-            <Modal.Header>
-                <Modal.Title>Product</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <form
-                    action=""
-                    className=""
-                    onSubmit={handleSubmit(sendRequest)}
-                >
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Voucher No:</Form.Label>
+        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+            <form onSubmit={handleSubmit(sendRequest)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{isEdit ? 'Edit Item' : 'Add Item'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="hf-item-form">
+                    <Row className="g-3">
+                        <Col sm={4}>
+                            <FormField label="Voucher no" htmlFor="voucher_no" required>
                                 <Form.Control
-                                    defaultValue={product.voucher_no ?? ''}
-                                    {...register('voucher_no', {
-                                        required: true,
-                                    })}
+                                    id="voucher_no"
+                                    {...register('voucher_no', { required: true })}
                                     isInvalid={errors.voucher_no}
+                                    placeholder="Voucher no"
                                 />
-                            </Form.Group>
+                            </FormField>
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Product SKU:</Form.Label>
+                        <Col sm={8}>
+                            <FormField label="Product" required>
                                 <Controller
                                     render={({ field }) => (
                                         <StyledSelect
                                             {...field}
                                             options={products}
-                                            onChange={(e) => {
-                                                field.onChange(e);
-                                                updateValue(e);
+                                            onChange={(selected) => {
+                                                field.onChange(selected);
+                                                selectProduct(selected);
                                             }}
-                                            defaultValue={product}
-                                            getOptionValue={(option) =>
-                                                option['product_id']
-                                            }
-                                            getOptionLabel={(option) =>
-                                                option['product_info']
-                                            }
+                                            getOptionValue={(option) => option['product_id']}
+                                            getOptionLabel={(option) => option['product_info']}
+                                            placeholder="Search product by name, finish or brand..."
+                                            isClearable
+                                            autoFocus={!isEdit}
+                                            ref={productRef}
                                         />
                                     )}
                                     control={control}
-                                    name={'product'}
+                                    name="product"
+                                    rules={{ required: true }}
                                 />
-                            </Form.Group>
-                        </Col>
-
-                        <Col md={8}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Name:</Form.Label>
-                                <Form.Control
-                                    defaultValue={product.name ?? ''}
-                                    {...register('name', { required: true })}
-                                    isInvalid={errors.name}
-                                    readOnly={true}
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Finish:</Form.Label>
-                                <Form.Control
-                                    {...register('finish', { required: true })}
-                                    readOnly={true}
-                                />
-                            </Form.Group>
+                                {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                            </FormField>
                         </Col>
                     </Row>
 
-                    <Row>
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Unit:</Form.Label>
-                                <Form.Control
-                                    {...register('unit', { required: true })}
-                                    isInvalid={errors.unit}
-                                    readOnly={true}
-                                    placeholder={'unit'}
-                                />
-                            </Form.Group>
-                        </Col>
-                        {isBox && (
-                            <Col md={3}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Size:</Form.Label>
-                                    <Form.Control
-                                        {...register('size', {
-                                            required: true,
-                                        })}
-                                        isInvalid={errors.size}
-                                        placeholder={'size'}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        )}
+                    {product && (
+                        <div className="hf-item-product">
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                <span className="hf-cell-title">{product.name}</span>
+                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                            </div>
+                        </div>
+                    )}
 
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Qty:</Form.Label>
+                    <Row className="g-3 mt-1">
+                        <Col md={12}>
+                            <FormField label="Unit" required>
+                                <div>
+                                    <SegmentedControl
+                                        name="unit"
+                                        register={(name) => register(name, { required: true })}
+                                        options={unitOptions.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                    />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col sm={4} xs={6}>
+                            <FormField label="Qty" htmlFor="qty" required>
                                 <Form.Control
-                                    {...register('qty', {
-                                        required: true,
-                                        min: 1,
-                                    })}
+                                    id="qty"
+                                    type="number"
+                                    step="any"
+                                    min={1}
+                                    inputMode="decimal"
+                                    {...register('qty', { required: true, min: 1 })}
                                     isInvalid={errors.qty}
-                                    defaultValue={product.qty ?? ''}
-                                    placeholder={'Qty'}
+                                    placeholder="0"
                                 />
-                            </Form.Group>
+                            </FormField>
                         </Col>
-                        {!isBox && (
-                            <Col md={3}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Meters:</Form.Label>
-                                    <Form.Control
-                                        {...register('total_qty', {
-                                            required: true,
-                                        })}
-                                        isInvalid={errors.total_qty}
-                                        defaultValue={product.total_qty ?? ''}
-                                        placeholder={'total meters'}
-                                    />
-                                </Form.Group>
+                        {isBox ? (
+                            <Col sm={4} xs={6}>
+                                <FormField label="Size" htmlFor="size" required>
+                                    <InputGroup className="hf-amount">
+                                        <Form.Control
+                                            id="size"
+                                            type="number"
+                                            step="any"
+                                            min={0}
+                                            inputMode="decimal"
+                                            {...register('size', { required: true })}
+                                            isInvalid={errors.size}
+                                            placeholder="0"
+                                        />
+                                        <InputGroup.Text>m</InputGroup.Text>
+                                    </InputGroup>
+                                </FormField>
+                            </Col>
+                        ) : (
+                            <Col sm={4} xs={6}>
+                                <FormField label="Meters" htmlFor="total_qty" required>
+                                    <InputGroup className="hf-amount">
+                                        <Form.Control
+                                            id="total_qty"
+                                            type="number"
+                                            step="any"
+                                            min={0}
+                                            inputMode="decimal"
+                                            {...register('total_qty', { required: true })}
+                                            isInvalid={errors.total_qty}
+                                            placeholder="0"
+                                        />
+                                        <InputGroup.Text>m</InputGroup.Text>
+                                    </InputGroup>
+                                </FormField>
                             </Col>
                         )}
-
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Price:</Form.Label>
-                                <Form.Control
-                                    {...register('price', { required: true })}
-                                    isInvalid={errors.price}
-                                    defaultValue={product.price ?? ''}
-                                    placeholder={'Cost'}
-                                />
-                            </Form.Group>
+                        <Col sm={4} xs={6}>
+                            <FormField label={isBox ? 'Price / box' : 'Price / meter'} htmlFor="price" required>
+                                <InputGroup className="hf-amount">
+                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                    <Form.Control
+                                        id="price"
+                                        type="number"
+                                        step="any"
+                                        min={0}
+                                        inputMode="decimal"
+                                        {...register('price', { required: true })}
+                                        isInvalid={errors.price}
+                                        placeholder="0"
+                                    />
+                                </InputGroup>
+                            </FormField>
                         </Col>
                     </Row>
-                </form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="white" onClick={handleClose}>
-                    Close
-                </Button>
-                <LoadingButton
-                    processing={processing}
-                    onClick={handleSubmit(sendRequest)}
-                >
-                    Save
-                </LoadingButton>
-            </Modal.Footer>
+
+                    <div className="hf-item-preview">
+                        <div>
+                            <span>Meters</span>
+                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator decimalScale={2} /> m</strong>
+                        </div>
+                        <div className="is-total">
+                            <span>Line total</span>
+                            <strong>Rs <Money value={line.amount} /></strong>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    {!isEdit && <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>}
+                    {!isEdit && (
+                        <Button variant="link" className="text-muted" onClick={resetForm}>
+                            Clear
+                        </Button>
+                    )}
+                    <Button variant="white" onClick={onClose}>
+                        {isEdit ? 'Cancel' : 'Done'}
+                    </Button>
+                    <LoadingButton type="submit" processing={processing}>
+                        {isEdit ? 'Update item' : 'Save & add next'}
+                    </LoadingButton>
+                </Modal.Footer>
+            </form>
         </Modal>
     );
 };

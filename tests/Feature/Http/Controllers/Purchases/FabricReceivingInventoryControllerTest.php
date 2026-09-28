@@ -26,6 +26,9 @@ test('stock inventory detail page can be rendered', function () {
         ->has('inventories', 1)
         ->has('back_url')
         ->has('page_header')
+        ->where('parent.reference_no', $stock->invoice_no)
+        ->where('parent.party.name', $stock->supplier->name)
+        ->where('parent.url', route('purchases.fabric-receivings.show', $stock))
     );
 });
 

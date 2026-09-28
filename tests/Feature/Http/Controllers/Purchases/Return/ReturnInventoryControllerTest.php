@@ -25,6 +25,9 @@ test('po return inventory detail page can be rendered', function () {
         ->has('inventories')
         ->has('back_url')
         ->has('page_header')
+        ->where('parent.reference_no', $return->invoice_no)
+        ->where('parent.party.name', $return->supplier->name)
+        ->where('parent.url', route('purchases.por.show', $return))
     );
 });
 

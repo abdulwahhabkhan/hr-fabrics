@@ -1,23 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Icon } from '@iconify/react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Icon } from '@iconify/react';
 import { Col, Form, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
-import { updateErrors } from '@/components/panel/ErrorPanel';
-import { settings } from '@/config/page-settings';
 import { useForm } from 'react-hook-form';
+import { settings } from '@/config/page-settings';
 import Moment from '@/components/Moment';
-import { DeleteAjax, Edit } from '@/components/Actions';
+import { NumberFormat } from '@/util/NumberFormat';
+import { DeleteAjax } from '@/components/Actions';
 import { PurchaseItemForm } from './PurchaseItemForm';
 import { getPOUnit, notifyMessage, STATUS_OPEN } from '@/util/util';
-import { NumberFormat } from '@/util/NumberFormat';
-import BackButton from '@/components/button/back';
+import { confirmSwal } from '@/util/swal';
+import ValidationErrors from '@/components/ValidationErrors';
+import Back from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import SummaryStat from '@/components/SummaryStat.jsx';
+import { FormActions, FormField } from '@/components/form/FormSection';
 import pos from '@/routes/purchases/pos';
 import poAjax from '@/routes/ajax/po';
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+function Money({ value }) {
+    return (
+        <NumberFormat
+            displayType="text"
+            value={value}
+            thousandSeparator
+            decimalScale={2}
+        />
+    );
+}
 
 const PurchaseForm = () => {
     const {
@@ -26,272 +42,420 @@ const PurchaseForm = () => {
         products,
         items: orderItems,
         status_open,
-        status_close
+        status_close,
     } = usePage().props;
     const [processing, setProcessing] = useState(false);
     const [items, setItems] = useState(orderItems.data);
-    const [itemsLoading, setItemsLoading] = useState(false);
     const [addItem, setAddItem] = useState(false);
     const [item, setItem] = useState({});
-    const [reset, setReset] = useState(false);
-    const [voucherFiles, setVoucherFiles] = useState([
-        {
-            "directory": "po-voucher",
-            "file_path": "po-voucher/lnVWKo_bg-1.png",
-            "file_name": "bg-1.png",
-            "file_thumbnail": "/storage/po-voucher/thumbnail/lnVWKo_bg-1.png"
-        },
-        {
-            "directory": "po-voucher",
-            "file_path": "po-voucher/rcAarQ_bg-2.png",
-            "file_name": "bg-1.png",
-            "file_thumbnail": "/storage/po-voucher/thumbnail/rcAarQ_bg-2.png"
-        }
-    ]);
-    const [biltiFile, setBiltiFile] = useState(null);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isDirty },
+    } = useForm({ defaultValues: order });
+    const isLocked = order.status !== STATUS_OPEN;
 
-    const { register, handleSubmit, setError, formState: { errors, isDirty } } = useForm({ defaultValues: order });
     const options = {
-        onError: () => {
+        onFinish: () => {
             setProcessing(false);
         },
-        onSuccess: () => {
-            setProcessing(false);
-        }
     };
     const sendRequest = async (data) => {
-        const post_data = { ...data, status: status_open };
         setProcessing(true);
-
-        Inertia.put(pos.update(order["id"]), post_data, options);
+        Inertia.put(pos.update(order['id']), { ...data, status: status_open }, options);
     };
     const confirmRequest = async (data) => {
-        const post_data = { ...data, status: status_close };
-        setProcessing(true);
+        if (items.length === 0) {
+            notifyMessage({
+                title: 'No items',
+                type: 'warning',
+                message: 'Add at least one item before confirming.',
+            });
+            return;
+        }
 
-        Inertia.put(pos.update(order["id"]), post_data, options);
+        const { isConfirmed } = await confirmSwal({
+            title: 'Confirm this purchase?',
+            text: 'Stock and the supplier ledger will be updated and the purchase will be locked for editing.',
+            confirmButtonText: 'Yes, confirm',
+            confirmButtonStyle: 'success',
+        });
+        if (!isConfirmed) {
+            return;
+        }
+
+        setProcessing(true);
+        Inertia.put(pos.update(order['id']), { ...data, status: status_close }, options);
     };
-    const updateItem = (item) => {
-        setItem(item);
+
+    const openItemForm = (row) => {
+        setItem(row);
         setAddItem(true);
     };
 
-    const addVoucherFile = (file) => {
-        //setVoucherFiles({...voucherFiles, file})
-        setVoucherFiles(voucherFiles.concat(file));
-    };
-
-
-    const handleClose = () => {
-        setAddItem(false);
+    const addNewItem = () => {
+        openItemForm({
+            order_id: order.id,
+            id: 0,
+        });
     };
 
     const deleteItem = (id) => {
         axios({
-            method: "delete",
-            url: poAjax.item.destroy(id).url
-        }).then(res => {
-            setItems(res.data.items);
-            notifyMessage({ title: "Success", type: "success", message: "Items deleted successfully" });
-            setAddItem(false);
-        }).finally((res) => {
-            setItemsLoading(false);
-        }).catch((error) => {
-            console.error(error);
-        });
+            method: 'delete',
+            url: poAjax.item.destroy(id).url,
+        })
+            .then((res) => {
+                setItems(res.data.items);
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: 'Item removed',
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     };
 
-    useEffect(() => {
-        if (!_.isEmpty(serverErrors)) {
-            updateErrors(serverErrors, setError);
-        }
-    }, [serverErrors]);
+    const totals = useMemo(() => {
+        const sum = (key) =>
+            items.reduce((total, row) => total + toNumber(row[key]), 0);
 
+        return {
+            qty: sum('qty'),
+            meters: sum('total_qty'),
+            total: sum('total'),
+        };
+    }, [items]);
 
-    const canModify = order.status === STATUS_OPEN;
-    const getTotalQTY = () => {
-        return items.reduce((s, item) => {
-            return s + item.total_qty;
-        }, 0);
-    };
     return (
         <>
-            <Head title="Purchase Update" />
-            <PageHeader title="Purchase Update" buttons={(<>
-                <PreviewButton href={pos.show(order.id)} />
-                <BackButton href={pos.index()} />
-            </>)} />
-            <PageContent>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={(
-                        <>
-                            Order Information : {order.invoice_no} &nbsp; &nbsp;
-                            <Moment
-                                format={settings.FULL_DATE_FORMAT}
-                                date={order.created_at} />
-                        </>
-                    )} buttons={(
-                        <>
-                            <LoadingButton variant="danger" className={"btn-xs"}
-                                           processing={processing} onClick={handleSubmit(confirmRequest)}>
-                                Confirm & Close
-                            </LoadingButton>
-                            <LoadingButton variant="primary" className={"btn-xs"}
-                                           processing={processing} onClick={handleSubmit(sendRequest)}>
-                                Save Changes
-                            </LoadingButton>
-                        </>
-                    )} />
-                    <PanelBody>
-                        <Row>
-                            <Col lg={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Supplier:</Form.Label>
-                                    <Form.Control
-                                        value={order.supplier.name}
-                                        readOnly={true}
-                                        size={"sm"}
-                                        placeholder={"supplier"} />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Bilti No:</Form.Label>
-                                    <Form.Control
-                                        size={"sm"}
-                                        readOnly={true}
-                                        isInvalid={errors.bilti_no}
-                                        {...register("bilti_no")}
-                                        placeholder={"bilti no"} />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Bill No:</Form.Label>
-                                    <Form.Control
-                                        size={"sm"}
-
-                                        isInvalid={errors.bill_no}
-                                        {...register("bill_no", { required: true })}
-                                        placeholder={"bill no"} />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Lot No:</Form.Label>
-                                    <Form.Control
-                                        size={"sm"}
-
-                                        isInvalid={errors.lot_no}
-                                        {...register("lot_no", { required: true })}
-                                        placeholder={"lot no"} />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Remarks:</Form.Label><br />
-                                    <Form.Control
-                                        className={""}
-                                        isInvalid={errors.remarks}
-                                        {...register("remarks")}
-                                        size={"sm"}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </PanelBody>
-                </Panel>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={"Voucher Items"} buttons={(
-                        <>
-                            {
-                                canModify && (
-                                    <>
-                                        <button className="btn btn-xs  btn-primary"
-                                                onClick={() => updateItem({ order_id: order.id, item_id: 0 })}>
-                                            <Icon icon={"solar:add-bold-duotone"} /> Add Item
-                                        </button>
-                                    </>
-                                )
-                            }
-
-                        </>
-                    )} />
-                    <PanelBody>
-                        <table className={"table table-bordered table-hover"}>
-                            <thead>
-                            <tr>
-                                <th className="w-1">#</th>
-                                <th className="w-1">Voucher No</th>
-                                <th>Product</th>
-                                <th className="w-1">Unit</th>
-                                <th className={"num w-1"}>Qty</th>
-                                <th className={"num w-1"}>Price</th>
-                                <th className={"num w-1"}>Total</th>
-                                <th className={"actions w-1"}>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {
-                                items && items.map((row, index) => {
-                                    const {
-                                        id,
-                                        product_name,
-                                        price,
-                                        voucher_no,
-                                        unit,
-                                        size,
-                                        qty,
-                                        total,
-                                        total_qty
-                                    } = row;
-                                    return (
-                                        <tr key={index}>
-                                            <td className="w-1">{index + 1}</td>
-                                            <td className="w-1">{voucher_no}</td>
-                                            <td>{product_name}</td>
-                                            <td className="w-1">{getPOUnit(unit, size, qty)}</td>
-                                            <td className={"num w-1"}>{total_qty}</td>
-                                            <td className={"num w-1"}>{price}</td>
-                                            <td className={"num w-1"}>
-                                                <NumberFormat
-                                                    displayType={"text"}
-                                                    value={total} thousandSeparator={true} />
-
-                                            </td>
-                                            <td className={"actions w-1"}>
-                                                {
-                                                    canModify && (
-                                                        <>
-                                                            <Edit onClick={() => updateItem(row)} />
-                                                            <DeleteAjax onDelete={deleteItem} id={id} />
-                                                        </>
-
-                                                    )
-                                                }
-
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            }
-                            </tbody>
-                        </table>
-                        {items && items.length === 0 && (<NoData label="No purchase items added." />)}
-                    </PanelBody>
-                </Panel>
-                {
-                    addItem && (
-                        <PurchaseItemForm
-                            item={item}
-                            receiptId={order.id}
-                            onClose={handleClose}
-                            setItems={setItems}
-                            products={products.data} />
-                    )
+            <Head title={`Edit Purchase ${order.invoice_no ?? ''}`} />
+            <PageHeader
+                title={`Purchase ${order.invoice_no ?? '#' + order.id}`}
+                description={order.supplier?.name}
+                buttons={
+                    <>
+                        <Back href={pos.index()} label="Purchases" />
+                        <PreviewButton href={pos.show(order.id)} size="sm" />
+                    </>
                 }
-            </PageContent>
+            />
+            <PageContent>
+                <ValidationErrors errors={serverErrors} />
 
+                <div className="hf-order-summary mb-3">
+                    <SummaryStat icon="solar:box-bold-duotone" label="Items">
+                        {items.length}
+                        <span className="hf-price-unit">
+                            <NumberFormat
+                                displayType="text"
+                                value={totals.meters}
+                                thousandSeparator
+                            />{' '}
+                            m
+                        </span>
+                    </SummaryStat>
+                    <SummaryStat icon="solar:layers-bold-duotone" label="Qty">
+                        <NumberFormat
+                            displayType="text"
+                            value={totals.qty}
+                            thousandSeparator
+                        />
+                    </SummaryStat>
+                    <SummaryStat
+                        icon="solar:cart-large-2-bold-duotone"
+                        label="Total"
+                        tone="brand"
+                    >
+                        <span className="hf-currency">Rs</span>
+                        <Money value={totals.total} />
+                    </SummaryStat>
+                </div>
+
+                <Panel theme="default" className="hf-table-panel">
+                    <PanelHeader
+                        heading={
+                            <>
+                                Items{' '}
+                                <span className="hf-muted-value fw-normal">
+                                    ({items.length})
+                                </span>
+                            </>
+                        }
+                        buttons={
+                            !isLocked && (
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-theme"
+                                    onClick={addNewItem}
+                                >
+                                    <Icon icon="solar:add-bold-duotone" /> Add
+                                    item
+                                </button>
+                            )
+                        }
+                    />
+                    <PanelBody>
+                        <div className="table-responsive">
+                            <table className="table table-hover align-middle mb-0 hf-list-table hf-order-items">
+                                <thead>
+                                    <tr>
+                                        <th className="w-1">#</th>
+                                        <th className="w-1">Voucher No</th>
+                                        <th>Product</th>
+                                        <th className="w-1">Unit</th>
+                                        <th className="w-1 text-end">Qty</th>
+                                        <th className="w-1 text-end">Meters</th>
+                                        <th className="w-1 text-end">Price</th>
+                                        <th className="w-1 text-end">Total</th>
+                                        {!isLocked && (
+                                            <th className="w-1 text-end">
+                                                Actions
+                                            </th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map((row, index) => {
+                                        const {
+                                            id,
+                                            product_name,
+                                            price,
+                                            voucher_no,
+                                            unit,
+                                            size,
+                                            qty,
+                                            total,
+                                            total_qty,
+                                        } = row;
+                                        return (
+                                            <tr key={id}>
+                                                <td className="hf-muted-value">
+                                                    {index + 1}
+                                                </td>
+                                                <td className="text-nowrap hf-mono">
+                                                    {voucher_no}
+                                                </td>
+                                                <td>
+                                                    {isLocked ? (
+                                                        <span className="hf-cell-title">
+                                                            {product_name}
+                                                        </span>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-link p-0 hf-cell-title hf-link text-start"
+                                                            onClick={() =>
+                                                                openItemForm(row)
+                                                            }
+                                                        >
+                                                            {product_name}
+                                                        </button>
+                                                    )}
+                                                </td>
+                                                <td className="text-nowrap">
+                                                    {getPOUnit(unit, size, qty)}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    {qty}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    {total_qty}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    {price}
+                                                </td>
+                                                <td className="num text-end hf-mono fw-semibold">
+                                                    <NumberFormat
+                                                        displayType="text"
+                                                        value={total}
+                                                        thousandSeparator
+                                                    />
+                                                </td>
+                                                {!isLocked && (
+                                                    <td className="text-end">
+                                                        <div className="hf-row-actions">
+                                                            <button
+                                                                type="button"
+                                                                className="hf-icon-btn hf-icon-btn--boxed"
+                                                                title="Edit item"
+                                                                aria-label={`Edit ${product_name}`}
+                                                                onClick={() =>
+                                                                    openItemForm(row)
+                                                                }
+                                                            >
+                                                                <Icon icon="solar:pen-2-bold-duotone" />
+                                                            </button>
+                                                            <span
+                                                                className="hf-icon-btn hf-icon-btn--boxed is-danger"
+                                                                title="Remove item"
+                                                            >
+                                                                <DeleteAjax
+                                                                    onDelete={deleteItem}
+                                                                    id={id}
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                                {items.length > 0 && (
+                                    <tfoot>
+                                        <tr>
+                                            <th colSpan={4}>Total</th>
+                                            <th className="num text-end hf-mono">
+                                                {totals.qty}
+                                            </th>
+                                            <th className="num text-end hf-mono">
+                                                <NumberFormat
+                                                    displayType="text"
+                                                    value={totals.meters}
+                                                    thousandSeparator
+                                                />
+                                            </th>
+                                            <th />
+                                            <th className="num text-end hf-mono">
+                                                <Money value={totals.total} />
+                                            </th>
+                                            {!isLocked && <th />}
+                                        </tr>
+                                    </tfoot>
+                                )}
+                            </table>
+                        </div>
+                        {items.length === 0 && (
+                            <div className="text-center">
+                                <NoData label="No items added yet." />
+                                {!isLocked && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-theme mt-2"
+                                        onClick={addNewItem}
+                                    >
+                                        <Icon icon="solar:add-bold-duotone" />{' '}
+                                        Add first item
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </PanelBody>
+                </Panel>
+
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Panel className="hf-order-card mb-0">
+                        <PanelBody>
+                            <div className="hf-order-card__head">
+                                <span className="hf-form-section__icon">
+                                    <Icon icon="solar:document-text-bold-duotone" />
+                                </span>
+                                <div>
+                                    <h2 className="hf-form-section__title">
+                                        Purchase details
+                                    </h2>
+                                    <p className="hf-form-section__desc">
+                                        Created{' '}
+                                        <Moment
+                                            format={settings.FULL_DATE_FORMAT}
+                                            date={order.created_at}
+                                        />
+                                    </p>
+                                </div>
+                            </div>
+                            <Row className="g-3">
+                                <Col sm={4}>
+                                    <FormField label="Bill no" htmlFor="bill_no" required>
+                                        <Form.Control
+                                            id="bill_no"
+                                            isInvalid={errors.bill_no}
+                                            {...register('bill_no', { required: true })}
+                                            placeholder="Bill no"
+                                        />
+                                    </FormField>
+                                </Col>
+                                <Col sm={4}>
+                                    <FormField label="Lot no" htmlFor="lot_no" required>
+                                        <Form.Control
+                                            id="lot_no"
+                                            isInvalid={errors.lot_no}
+                                            {...register('lot_no', { required: true })}
+                                            placeholder="Lot no"
+                                        />
+                                    </FormField>
+                                </Col>
+                                <Col sm={4}>
+                                    <FormField label="Bilti no" htmlFor="bilti_no" hint="Taken from the fabric receiving.">
+                                        <Form.Control
+                                            id="bilti_no"
+                                            readOnly
+                                            {...register('bilti_no')}
+                                        />
+                                    </FormField>
+                                </Col>
+                                <Col sm={12}>
+                                    <FormField label="Remarks" htmlFor="remarks">
+                                        <Form.Control
+                                            id="remarks"
+                                            as="textarea"
+                                            rows={2}
+                                            isInvalid={errors.remarks}
+                                            {...register('remarks')}
+                                            placeholder="Purchase notes"
+                                        />
+                                    </FormField>
+                                </Col>
+                            </Row>
+                        </PanelBody>
+                    </Panel>
+
+                    <FormActions
+                        className="hf-order-actions"
+                        hint={
+                            isDirty ? (
+                                <span className="text-warning fw-semibold">
+                                    <Icon icon="solar:danger-circle-bold-duotone" />{' '}
+                                    Unsaved changes
+                                </span>
+                            ) : (
+                                <>
+                                    {items.length} items · Total{' '}
+                                    <strong>
+                                        Rs <Money value={totals.total} />
+                                    </strong>
+                                </>
+                            )
+                        }
+                    >
+                        <LoadingButton
+                            type="submit"
+                            variant="white"
+                            processing={processing}
+                        >
+                            Save draft
+                        </LoadingButton>
+                        <LoadingButton
+                            processing={processing}
+                            onClick={handleSubmit(confirmRequest)}
+                        >
+                            Confirm & close
+                        </LoadingButton>
+                    </FormActions>
+                </form>
+
+                {addItem && (
+                    <PurchaseItemForm
+                        item={item}
+                        receiptId={order.id}
+                        onClose={() => setAddItem(false)}
+                        setItems={setItems}
+                        products={products.data}
+                    />
+                )}
+            </PageContent>
         </>
     );
 };

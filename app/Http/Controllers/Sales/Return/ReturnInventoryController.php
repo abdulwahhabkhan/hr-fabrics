@@ -19,6 +19,7 @@ class ReturnInventoryController extends Controller
                 },
             ])
             ->get();
+        $return->load('customer:id,name,address');
 
         return Inertia::render('Inventory/StockInventoryView', [
             'back_url' => $returnUrl,
@@ -29,6 +30,22 @@ class ReturnInventoryController extends Controller
                 return $r;
             }),
             'page_header' => 'Sale Return: Inventory Detail',
+            'parent' => [
+                'label' => 'Sales return',
+                'reference_no' => $return->invoice_no,
+                'url' => route('sales.returns.show', $return),
+                'status' => $return->status?->name,
+                'party' => [
+                    'label' => 'Customer',
+                    'name' => $return->customer?->name,
+                    'address' => $return->customer?->address,
+                ],
+                'details' => [
+                    ['label' => 'Date', 'value' => $return->transaction_date?->toDateString(), 'type' => 'date'],
+                    ['label' => 'Total qty', 'value' => $return->total_qty, 'type' => 'number'],
+                    ['label' => 'Total amount', 'value' => $return->total_amount, 'type' => 'number'],
+                ],
+            ],
         ]);
     }
 }

@@ -1,244 +1,45 @@
-import React, { useState } from 'react';
-import { PageContent, PageHeader } from '@/components/page.jsx';
+import React from 'react';
+import { Icon } from '@iconify/react';
+import { PageContent, PageFilters, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody } from '@/components/panel/panel';
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
-import { Icon } from '@iconify/react';
-import {
-    DeleteDropdownItem,
-    InertiaEdit,
-    InertiaView,
-    UnLockDropdownItem,
-} from '@/components/Actions';
-import RowActionsMenu from '@/components/RowActionsMenu';
-import Form from '@/pages/Catalog/Brands/BrandForm';
-import { NumberFormat } from '@/util/NumberFormat';
 import PurchasesPurchaseFilter from '@/components/filters/PurchasesPurchaseFilter';
-import { Date } from '@/components/CustomDate';
 import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import PurchaseTable from '@/components/purchases/PurchaseTable';
 import pos from '@/routes/purchases/pos';
-import { open as openPurchase } from '@/routes/actions/purchase';
 
 const PurchaseIndex = () => {
     const { rows, canAdd } = usePage().props;
     const { data, meta } = rows;
-    const [id, setId] = useState(0);
-    const [show, setShow] = useState(false);
-    const handleClose = () => {
-        setShow(false);
-        setId(0);
-    };
+
     return (
         <>
-            <Head title="Fabric Purchase List" />
+            <Head title="Fabric Purchases" />
             <PageHeader
-                className="mb-1"
-                title="Fabric Purchase List"
+                title="Fabric Purchases"
+                description={meta?.total ? `${meta.total} total` : undefined}
                 buttons={
                     canAdd && (
-                        <InertiaLink
-                            href={pos.create()}
-                            className="btn btn-sm  btn-theme"
-                        >
-                            <Icon icon={'solar:add-bold-duotone'} /> Create
-                            Voucher
+                        <InertiaLink href={pos.create()} className="btn btn-sm btn-theme">
+                            <Icon icon="solar:add-bold-duotone" /> New purchase
                         </InertiaLink>
                     )
                 }
             />
+
+            <PageFilters>
+                <PurchasesPurchaseFilter />
+            </PageFilters>
+
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
-                        <PurchasesPurchaseFilter />
-                        <div className={'table-responsive'}>
-                            <table
-                                className={'table table-bordered table-hover'}
-                            >
-                                <thead>
-                                    <tr>
-                                        <th className="w-1">Id</th>
-                                        <th className="w-1">Ref. No</th>
-                                        <th className="w-1">Bill No</th>
-                                        <th className="w-1">Lot No</th>
-                                        <th className={'w-1'}>Bilti No</th>
-                                        <th>Supplier Name</th>
-                                        <th className="w-1">Created On</th>
-                                        <th className="w-1">
-                                            Transaction Date
-                                        </th>
-                                        <th className="w-1">Status</th>
-                                        <th className="w-1">Total</th>
-                                        <th className="w-1 text-end">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.map(
-                                        (
-                                            {
-                                                id,
-                                                invoice_no,
-                                                supplier_name,
-                                                bill_no,
-                                                lot_no,
-                                                bilti_no,
-                                                total,
-                                                can,
-                                                created_at,
-                                                transaction_date,
-                                                status,
-                                            },
-                                            index,
-                                        ) => {
-                                            return (
-                                                <tr key={index}>
-                                                    <td className="w-1">
-                                                        {id}
-                                                    </td>
-                                                    <td className="w-1">
-                                                        {invoice_no}
-                                                    </td>
-                                                    <td className="w-1">
-                                                        {bill_no}
-                                                    </td>
-                                                    <td className="w-1">
-                                                        {lot_no}
-                                                    </td>
-                                                    <td className="w-1">
-                                                        {bilti_no}
-                                                    </td>
-                                                    <td>{supplier_name}</td>
-                                                    <td className="w-1">
-                                                        <Date
-                                                            date={created_at}
-                                                        />
-                                                    </td>
-                                                    <td className="w-1">
-                                                        <Date
-                                                            date={
-                                                                transaction_date
-                                                            }
-                                                        />
-                                                    </td>
-                                                    <td className="w-1">
-                                                        {status}
-                                                    </td>
-                                                    <td className={'num'}>
-                                                        <NumberFormat
-                                                            displayType={'text'}
-                                                            value={total}
-                                                            thousandSeparator={
-                                                                true
-                                                            }
-                                                        />
-                                                    </td>
-                                                    <td className="w-1 text-end">
-                                                        <div className="hf-row-actions">
-                                                            {can.view && (
-                                                                <InertiaView
-                                                                    href={pos.show(
-                                                                        id,
-                                                                    )}
-                                                                />
-                                                            )}
-                                                            {can.edit && (
-                                                                <InertiaEdit
-                                                                    href={pos.edit(
-                                                                        id,
-                                                                    )}
-                                                                />
-                                                            )}
-                                                            {(can.delete ||
-                                                                can.inventory ||
-                                                                can.ledger ||
-                                                                can.unlock) && (
-                                                                <RowActionsMenu>
-                                                                    {can.inventory && (
-                                                                        <InertiaLink
-                                                                            className={
-                                                                                'dropdown-item border-top'
-                                                                            }
-                                                                            target={
-                                                                                '_blank'
-                                                                            }
-                                                                            href={pos.inventory(
-                                                                                id,
-                                                                            )}
-                                                                        >
-                                                                            <Icon
-                                                                                icon={
-                                                                                    'solar:clipboard-list-bold-duotone'
-                                                                                }
-                                                                            />{' '}
-                                                                            Inventory
-                                                                        </InertiaLink>
-                                                                    )}
-                                                                    {can.ledger && (
-                                                                        <InertiaLink
-                                                                            className={
-                                                                                'dropdown-item border-top'
-                                                                            }
-                                                                            target={
-                                                                                '_blank'
-                                                                            }
-                                                                            href={pos.ledger(
-                                                                                id,
-                                                                            )}
-                                                                        >
-                                                                            <Icon
-                                                                                icon={
-                                                                                    'duo-icons:book-3'
-                                                                                }
-                                                                            />{' '}
-                                                                            View
-                                                                            Ledger
-                                                                        </InertiaLink>
-                                                                    )}
-                                                                    {can.unlock && (
-                                                                        <UnLockDropdownItem
-                                                                            action={
-                                                                                openPurchase
-                                                                            }
-                                                                            id={
-                                                                                id
-                                                                            }
-                                                                        >
-                                                                            Unlock
-                                                                            Record
-                                                                        </UnLockDropdownItem>
-                                                                    )}
-                                                                    {can.delete && (
-                                                                        <DeleteDropdownItem
-                                                                            action={
-                                                                                pos.destroy
-                                                                            }
-                                                                            id={
-                                                                                id
-                                                                            }
-                                                                        >
-                                                                            Delete
-                                                                            Record
-                                                                        </DeleteDropdownItem>
-                                                                    )}
-                                                                </RowActionsMenu>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        },
-                                    )}
-                                </tbody>
-                            </table>
-                            {data.length === 0 && (
-                                <NoData label="No fabric purchases found." />
-                            )}
-                        </div>
+                        <PurchaseTable purchases={data} />
+                        {data.length === 0 && <NoData label="No fabric purchases found." />}
                         <PaginationFull meta={meta} />
                     </PanelBody>
                 </Panel>
-                <Form id={id} show={show} callback={handleClose} />
             </PageContent>
         </>
     );

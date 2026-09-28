@@ -1,248 +1,496 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Icon } from '@iconify/react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Icon } from '@iconify/react';
-import { Col, Form, Row } from 'react-bootstrap';
+import { Col, Form, InputGroup, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { useForm } from 'react-hook-form';
+import { settings } from '@/config/page-settings';
+import Moment from '@/components/Moment';
+import { NumberFormat } from '@/util/NumberFormat';
 import { DeleteAjax } from '@/components/Actions';
 import { ReturnItemForm } from './ReturnItemForm';
-import { NumberFormat } from '@/util/NumberFormat';
-import { ErrorPanel } from '@/components/panel/ErrorPanel';
-import FormLabel from '@/components/FormLabel.jsx';
-import BackButton from '@/components/button/back';
 import { notifyMessage } from '@/util/util.jsx';
+import { confirmSwal } from '@/util/swal';
+import ValidationErrors from '@/components/ValidationErrors';
+import Back from '@/components/button/back';
+import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
+import SummaryStat from '@/components/SummaryStat.jsx';
+import { FormActions, FormField } from '@/components/form/FormSection';
 import por from '@/routes/purchases/por';
 import porAjax from '@/routes/ajax/por';
 
+const RETURN_CLOSED = 1;
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+function Money({ value }) {
+    return (
+        <NumberFormat
+            displayType="text"
+            value={value}
+            thousandSeparator
+            decimalScale={2}
+        />
+    );
+}
 
 const ReturnForm = () => {
-    const {
-        por: porData,
-        errors: serverErrors,
-        products
-    } = usePage().props;
+    const { por: porData, errors: serverErrors, products } = usePage().props;
     const [processing, setProcessing] = useState(false);
     const [items, setItems] = useState(porData.items_with_product ?? []);
     const [addItem, setAddItem] = useState(false);
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors, isDirty },
+    } = useForm({ defaultValues: porData });
+    const { expenses, discount } = watch();
+    const isLocked = porData.status === RETURN_CLOSED;
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm({ defaultValues: porData });
     const options = {
-        onError: () => {
-            setProcessing(false);
-        },
         onFinish: () => {
             setProcessing(false);
-        }
+        },
     };
     const sendRequest = async (data) => {
-        data.info = { ...data.info };
-        const post_data = { ...data, items: items };
-        postData(post_data);
-        //
-    };
-    const postData = (post_data) => {
         setProcessing(true);
-        if (porData.id)
-            Inertia.put(por.update(porData.id), post_data, options);
-        else
-            Inertia.post(por.store(), post_data, options);
+        Inertia.put(por.update(porData.id), { ...data, info: { ...data.info } }, options);
     };
-
     const confirmRequest = async (data) => {
-        data.info = { ...data.info };
-        const post_data = { ...data, items: items, status: 1 };
-        postData(post_data);
-    };
+        if (items.length === 0) {
+            notifyMessage({
+                title: 'No items',
+                type: 'warning',
+                message: 'Add at least one item before confirming.',
+            });
+            return;
+        }
 
-    const updateItem = () => {
-        setAddItem(true);
-    };
+        const { isConfirmed } = await confirmSwal({
+            title: 'Confirm this return?',
+            text: 'Stock and the supplier ledger will be updated and the return will be locked for editing.',
+            confirmButtonText: 'Yes, confirm',
+            confirmButtonStyle: 'success',
+        });
+        if (!isConfirmed) {
+            return;
+        }
 
-    const handleClose = () => {
-        setAddItem(false);
+        setProcessing(true);
+        Inertia.put(
+            por.update(porData.id),
+            { ...data, info: { ...data.info }, status: RETURN_CLOSED },
+            options,
+        );
     };
 
     const deleteItem = (itemId) => {
         axios({
-            method: "delete",
-            url: porAjax.item.destroy({ return: porData.id, item: itemId }).url
+            method: 'delete',
+            url: porAjax.item.destroy({ return: porData.id, item: itemId }).url,
         })
-            .then(res => {
+            .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({ title: "Success", type: "success", message: "Items deleted successfully" });
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: 'Item removed',
+                });
+            })
+            .catch((error) => {
+                console.error(error);
             });
     };
 
+    const totals = useMemo(() => {
+        const sum = (key) =>
+            items.reduce((total, row) => total + toNumber(row[key]), 0);
+        const subTotal = sum('total_amount');
+
+        return {
+            qty: sum('qty'),
+            meters: sum('total_qty'),
+            subTotal,
+            net: subTotal - toNumber(discount) + toNumber(expenses),
+        };
+    }, [items, expenses, discount]);
 
     return (
         <>
-            <Head title="Fabric Return Update" />
-            <PageHeader title="Fabric Return Update" buttons={
-                <>
-
-                    <BackButton href={por.index()} />
-                </>
-                                                     } />
-            <PageContent>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={(
-                        <>
-                            Order Information : {porData.invoice_no} &nbsp; &nbsp;
-
-                        </>
-                    )} buttons={(
-                        <>
-                            <LoadingButton variant="primary" className={"btn-xs"}
-                                           processing={processing} onClick={handleSubmit(confirmRequest)}>
-                                Confirm & Close
-                            </LoadingButton>
-                            <LoadingButton variant="white" className={"btn-xs"}
-                                           processing={processing} onClick={handleSubmit(sendRequest)}>
-                                Save Changes
-                            </LoadingButton>
-                        </>
-                    )} />
-                    <PanelBody>
-                        <ErrorPanel errors={serverErrors} />
-                        <Row>
-                            <Col lg={6}>
-                                <FormLabel label="Supplier" value={porData.supplier?.name} />
-
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Bilti No:</Form.Label>
-                                    <Form.Control
-                                        {...register("bilti_no", { required: true })}
-                                        isInvalid={errors.bilti_no}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Bill No:</Form.Label>
-                                    <Form.Control
-                                        {...register("bill_no", { required: true })}
-                                        isInvalid={errors.bill_no}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={1}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Expenses:</Form.Label>
-                                    <Form.Control
-                                        {...register("expenses", { required: true })}
-                                        isInvalid={errors.expenses}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={1}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Discount:</Form.Label>
-                                    <Form.Control
-                                        {...register("discount", { required: true })}
-                                        isInvalid={errors.discount}
-                                    />
-                                </Form.Group>
-                            </Col>
-
-                            <Col lg={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Remarks:</Form.Label><br />
-                                    <Form.Control
-                                        className={""}
-                                        {...register("info.remarks", { required: true })}
-                                        size={"sm"}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-
-                        </Row>
-                    </PanelBody>
-                </Panel>
-                <Panel theme={"default"}>
-                    <PanelHeader heading={"Order Items"} buttons={(
-                        <>
-                            <button className="btn btn-xs  btn-primary"
-                                    onClick={() => updateItem({})}>
-                                <Icon icon={"solar:add-bold-duotone"} /> Add Item
-                            </button>
-
-                        </>
-                    )} />
-                    <PanelBody>
-                        <table className={"table table-bordered table-hover"}>
-                            <thead>
-                            <tr>
-                                <th className={"w-1"}>#</th>
-                                <th>Product</th>
-                                <th className={"w-1"}>Unit</th>
-                                <th className={"num w-1"}>Qty</th>
-                                <th className={"num w-1"}>Meters</th>
-                                <th className={"num w-1"}>Rate</th>
-                                <th className={"num w-1"}>Total</th>
-                                <th className={"actions w-1"}>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {
-                                items && items.map((row, index) => {
-                                    const {
-                                        id,
-                                        product_name,
-                                        rate,
-                                        unit,
-                                        size,
-                                        qty,
-                                        total_qty,
-                                        total_amount
-                                    } = row;
-                                    return (
-                                        <tr key={id}>
-                                            <td>{index + 1}</td>
-                                            <td>{product_name}</td>
-                                            <td>{unit}</td>
-                                            <td className={"num"}>{qty}</td>
-                                            <td className={"num"}>{total_qty}</td>
-                                            <td className={"num"}>
-                                                <NumberFormat
-                                                    displayType={"text"}
-                                                    value={rate} thousandSeparator={true} />
-                                            </td>
-                                            <td className={"num"}>
-                                                <NumberFormat
-                                                    displayType={"text"}
-                                                    decimalScale={2}
-                                                    value={total_amount} thousandSeparator={true} />
-                                            </td>
-                                            <td className={"actions"}>
-                                                <DeleteAjax onDelete={deleteItem} id={id} />
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            }
-                            </tbody>
-                        </table>
-                        {items && items.length === 0 && (<NoData label="No return items added." />)}
-                    </PanelBody>
-                </Panel>
-                {
-                    addItem && (
-                        <ReturnItemForm
-                            onClose={handleClose}
-                            returnId={por.id}
-                            setItems={setItems}
-                            products={products.data} />
-                    )
+            <Head title={`Edit Return ${porData.invoice_no ?? ''}`} />
+            <PageHeader
+                title={`Return ${porData.invoice_no ?? '#' + porData.id}`}
+                description={porData.supplier?.name}
+                buttons={
+                    <>
+                        <Back href={por.index()} label="Returns" />
+                        <PreviewButton href={por.show(porData.id)} size="sm" />
+                    </>
                 }
-            </PageContent>
+            />
+            <PageContent>
+                <ValidationErrors errors={serverErrors} />
 
+                <div className="hf-order-summary mb-3">
+                    <SummaryStat icon="solar:box-bold-duotone" label="Items">
+                        {items.length}
+                        <span className="hf-price-unit">
+                            <NumberFormat
+                                displayType="text"
+                                value={totals.meters}
+                                thousandSeparator
+                            />{' '}
+                            m
+                        </span>
+                    </SummaryStat>
+                    <SummaryStat icon="solar:layers-bold-duotone" label="Qty">
+                        <NumberFormat
+                            displayType="text"
+                            value={totals.qty}
+                            thousandSeparator
+                        />
+                    </SummaryStat>
+                    <SummaryStat
+                        icon="solar:cart-large-2-bold-duotone"
+                        label="Net total"
+                        tone="brand"
+                    >
+                        <span className="hf-currency">Rs</span>
+                        <Money value={totals.net} />
+                    </SummaryStat>
+                </div>
+
+                <Panel theme="default" className="hf-table-panel">
+                    <PanelHeader
+                        heading={
+                            <>
+                                Items{' '}
+                                <span className="hf-muted-value fw-normal">
+                                    ({items.length})
+                                </span>
+                            </>
+                        }
+                        buttons={
+                            !isLocked && (
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-theme"
+                                    onClick={() => setAddItem(true)}
+                                >
+                                    <Icon icon="solar:add-bold-duotone" /> Add
+                                    item
+                                </button>
+                            )
+                        }
+                    />
+                    <PanelBody>
+                        <div className="table-responsive">
+                            <table className="table table-hover align-middle mb-0 hf-list-table hf-order-items">
+                                <thead>
+                                    <tr>
+                                        <th className="w-1">#</th>
+                                        <th>Product</th>
+                                        <th className="w-1">Unit</th>
+                                        <th className="w-1 text-end">Qty</th>
+                                        <th className="w-1 text-end">Meters</th>
+                                        <th className="w-1 text-end">Rate</th>
+                                        <th className="w-1 text-end">Total</th>
+                                        {!isLocked && (
+                                            <th className="w-1 text-end">
+                                                Actions
+                                            </th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map((row, index) => {
+                                        const {
+                                            id,
+                                            product_name,
+                                            rate,
+                                            unit,
+                                            qty,
+                                            total_qty,
+                                            total_amount,
+                                        } = row;
+                                        return (
+                                            <tr key={id}>
+                                                <td className="hf-muted-value">
+                                                    {index + 1}
+                                                </td>
+                                                <td>
+                                                    <span className="hf-cell-title">
+                                                        {product_name}
+                                                    </span>
+                                                </td>
+                                                <td className="text-nowrap">
+                                                    {unit}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    {qty}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    {total_qty}
+                                                </td>
+                                                <td className="num text-end hf-mono">
+                                                    <NumberFormat
+                                                        displayType="text"
+                                                        value={rate}
+                                                        thousandSeparator
+                                                    />
+                                                </td>
+                                                <td className="num text-end hf-mono fw-semibold">
+                                                    <Money value={total_amount} />
+                                                </td>
+                                                {!isLocked && (
+                                                    <td className="text-end">
+                                                        <div className="hf-row-actions">
+                                                            <span
+                                                                className="hf-icon-btn hf-icon-btn--boxed is-danger"
+                                                                title="Remove item"
+                                                            >
+                                                                <DeleteAjax
+                                                                    onDelete={deleteItem}
+                                                                    id={id}
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                                {items.length > 0 && (
+                                    <tfoot>
+                                        <tr>
+                                            <th colSpan={3}>Total</th>
+                                            <th className="num text-end hf-mono">
+                                                {totals.qty}
+                                            </th>
+                                            <th className="num text-end hf-mono">
+                                                <NumberFormat
+                                                    displayType="text"
+                                                    value={totals.meters}
+                                                    thousandSeparator
+                                                />
+                                            </th>
+                                            <th />
+                                            <th className="num text-end hf-mono">
+                                                <Money value={totals.subTotal} />
+                                            </th>
+                                            {!isLocked && <th />}
+                                        </tr>
+                                    </tfoot>
+                                )}
+                            </table>
+                        </div>
+                        {items.length === 0 && (
+                            <div className="text-center">
+                                <NoData label="No items added yet." />
+                                {!isLocked && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-theme mt-2"
+                                        onClick={() => setAddItem(true)}
+                                    >
+                                        <Icon icon="solar:add-bold-duotone" />{' '}
+                                        Add first item
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </PanelBody>
+                </Panel>
+
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Row className="g-3">
+                        <Col lg={6}>
+                            <Panel className="hf-order-card h-100 mb-0">
+                                <PanelBody>
+                                    <div className="hf-order-card__head">
+                                        <span className="hf-form-section__icon">
+                                            <Icon icon="solar:document-text-bold-duotone" />
+                                        </span>
+                                        <div>
+                                            <h2 className="hf-form-section__title">
+                                                Return details
+                                            </h2>
+                                            <p className="hf-form-section__desc">
+                                                Created{' '}
+                                                <Moment
+                                                    format={settings.FULL_DATE_FORMAT}
+                                                    date={porData.created_at}
+                                                />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Row className="g-3">
+                                        <Col sm={6}>
+                                            <FormField label="Bilti no" htmlFor="bilti_no" required>
+                                                <Form.Control
+                                                    id="bilti_no"
+                                                    {...register('bilti_no', { required: true })}
+                                                    isInvalid={errors.bilti_no}
+                                                    placeholder="Bilti no"
+                                                />
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={6}>
+                                            <FormField label="Bill no" htmlFor="bill_no" required>
+                                                <Form.Control
+                                                    id="bill_no"
+                                                    {...register('bill_no', { required: true })}
+                                                    isInvalid={errors.bill_no}
+                                                    placeholder="Bill no"
+                                                />
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={12}>
+                                            <FormField label="Remarks" htmlFor="remarks" required>
+                                                <Form.Control
+                                                    id="remarks"
+                                                    as="textarea"
+                                                    rows={2}
+                                                    {...register('info.remarks', { required: true })}
+                                                    isInvalid={errors.info?.remarks}
+                                                    placeholder="Return notes"
+                                                />
+                                            </FormField>
+                                        </Col>
+                                    </Row>
+                                </PanelBody>
+                            </Panel>
+                        </Col>
+                        <Col lg={6}>
+                            <Panel className="hf-order-card h-100 mb-0">
+                                <PanelBody>
+                                    <div className="hf-order-card__head">
+                                        <span className="hf-form-section__icon">
+                                            <Icon icon="solar:ticket-sale-bold-duotone" />
+                                        </span>
+                                        <div>
+                                            <h2 className="hf-form-section__title">
+                                                Discount & charges
+                                            </h2>
+                                            <p className="hf-form-section__desc">
+                                                Applied to the return total.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Row className="g-3">
+                                        <Col sm={6}>
+                                            <FormField label="Expenses" htmlFor="expenses" required>
+                                                <InputGroup className="hf-amount">
+                                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                                    <Form.Control
+                                                        id="expenses"
+                                                        type="number"
+                                                        step="any"
+                                                        min={0}
+                                                        {...register('expenses', { required: true })}
+                                                        isInvalid={errors.expenses}
+                                                        placeholder="0"
+                                                    />
+                                                </InputGroup>
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={6}>
+                                            <FormField label="Discount" htmlFor="discount" required>
+                                                <InputGroup className="hf-amount">
+                                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                                    <Form.Control
+                                                        id="discount"
+                                                        type="number"
+                                                        step="any"
+                                                        min={0}
+                                                        {...register('discount', { required: true })}
+                                                        isInvalid={errors.discount}
+                                                        placeholder="0"
+                                                    />
+                                                </InputGroup>
+                                            </FormField>
+                                        </Col>
+                                    </Row>
+
+                                    <dl className="hf-order-breakdown">
+                                        <div>
+                                            <dt>Items subtotal</dt>
+                                            <dd>
+                                                <Money value={totals.subTotal} />
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>Discount</dt>
+                                            <dd>
+                                                − <Money value={toNumber(discount)} />
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>Expenses</dt>
+                                            <dd>
+                                                + <Money value={toNumber(expenses)} />
+                                            </dd>
+                                        </div>
+                                        <div className="is-total">
+                                            <dt>Net total</dt>
+                                            <dd>
+                                                Rs <Money value={totals.net} />
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </PanelBody>
+                            </Panel>
+                        </Col>
+                    </Row>
+
+                    <FormActions
+                        className="hf-order-actions"
+                        hint={
+                            isDirty ? (
+                                <span className="text-warning fw-semibold">
+                                    <Icon icon="solar:danger-circle-bold-duotone" />{' '}
+                                    Unsaved changes
+                                </span>
+                            ) : (
+                                <>
+                                    {items.length} items · Net total{' '}
+                                    <strong>
+                                        Rs <Money value={totals.net} />
+                                    </strong>
+                                </>
+                            )
+                        }
+                    >
+                        <LoadingButton
+                            type="submit"
+                            variant="white"
+                            processing={processing}
+                        >
+                            Save draft
+                        </LoadingButton>
+                        <LoadingButton
+                            processing={processing}
+                            onClick={handleSubmit(confirmRequest)}
+                        >
+                            Confirm & close
+                        </LoadingButton>
+                    </FormActions>
+                </form>
+
+                {addItem && (
+                    <ReturnItemForm
+                        returnId={porData.id}
+                        onClose={() => setAddItem(false)}
+                        setItems={setItems}
+                        products={products.data}
+                    />
+                )}
+            </PageContent>
         </>
     );
 };

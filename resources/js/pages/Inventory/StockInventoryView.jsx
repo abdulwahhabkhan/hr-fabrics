@@ -1,127 +1,125 @@
-import { Head, usePage } from '@inertiajs/react';
-import { NumberFormat } from '@/util/NumberFormat.jsx';
 import React from 'react';
+import { Col, Row } from 'react-bootstrap';
+import { Head, usePage } from '@/util/Inertia';
+import { PageContent, PageHeader } from '@/components/page.jsx';
+import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
+import { NumberFormat } from '@/util/NumberFormat.jsx';
 import { getPOUnit } from '@/util/util.jsx';
 import Moment from '@/components/Moment.jsx';
 import NoData from '@/components/NoData.jsx';
 import BackButton from '@/components/button/back.tsx';
 import Print from '@/components/button/Print.jsx';
+import SummaryStat from '@/components/SummaryStat';
+import InventoryParentCard from '@/components/inventory/InventoryParentCard';
+
+const Num = ({ value }) => <NumberFormat displayType="text" value={value} thousandSeparator />;
 
 const StockInventoryView = () => {
-    const {page_header, back_url, inventories} = usePage().props
-    const totalQty = inventories.reduce((acc, item) => acc + item.qty, 0)
-    const totalMeters = inventories.reduce((acc, item) => acc + item.meters, 0)
-    return (
-        <>
-            <Head title="Inventory View" />
-            <div className="d-flex mb-lg-3 mb-2 hidden-print">
-                <div className="page-header mb-0 flex-1">{page_header}</div>
-                <div className="d-flex gap-2 align-items-center">
-                    <BackButton href={back_url} />
-                    <Print  />
-                </div>
-            </div>
-            <div className="invoice p-0 rounded-3 overflow-hidden">
+    const { page_header, back_url, inventories = [], parent } = usePage().props;
+    const totalQty = inventories.reduce((sum, item) => sum + item.qty, 0);
+    const totalMeters = inventories.reduce((sum, item) => sum + item.meters, 0);
+    const inStock = inventories.filter((item) => !item.outbound_on).length;
+    const showReference = !parent;
 
-                <div className="table-responsive mb-0">
-                    <table className="table table-card mb-0">
+    const table = (
+        <Panel className="hf-table-panel mb-0">
+            <PanelHeader heading={`Inventory (${inventories.length})`} />
+            <PanelBody>
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0 hf-list-table hf-order-items">
                         <thead>
-                        <tr>
-                            <th className='w-1'>Reference No</th>
-                            <th>Product</th>
-                            <th className="w-1">Inbound On</th>
-                            <th className="w-1">Outbound On</th>
-                            <th className="text-center w-1">Unit</th>
-                            <th className="num w-1">Unit Cost</th>
-                            <th className="num w-1">Qty</th>
-                            <th className="num w-1">Meters</th>
-
-                        </tr>
+                            <tr>
+                                {showReference && <th className="w-1 text-nowrap">Reference no</th>}
+                                <th>Product</th>
+                                <th className="w-1 text-nowrap">Inbound on</th>
+                                <th className="w-1 text-nowrap">Outbound on</th>
+                                <th className="w-1 text-center">Unit</th>
+                                <th className="num w-1 text-nowrap">Unit cost</th>
+                                <th className="num w-1">Qty</th>
+                                <th className="num w-1">Meters</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {
-                            inventories && inventories.map((inventory, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <td className='w-1'>{inventory.reference_no}</td>
-                                        <td>
-                                            {inventory.product && inventory.product.name}
-                                        </td>
-                                        <td className="w-1"><Moment date={inventory.transaction_date}/></td>
-                                        <td className=" w-1">
-                                            {inventory.outbound_on && (
-                                                <Moment date={inventory.outbound_on}/>
-                                            )}
-                                            {!inventory.outbound_on && (
-                                                <span className="text-muted">In Stock</span>
-                                            )}
-                                        </td>
-                                        <td className="text-center  w-1">
-                                            {getPOUnit(inventory.unit, inventory.size, inventory.qty)}
-                                        </td>
-                                        <td className="num  w-1">
-                                            <NumberFormat
-                                                displayType={'text'}
-                                                value={inventory.cost}
-                                                thousandSeparator={true}/>
-                                        </td>
-                                        <td className="num w-1">
-                                            {
-                                                inventory.qty > 0 ?
-                                                    <NumberFormat
-                                                        displayType={'text'}
-                                                        value={inventory.qty}
-                                                        thousandSeparator={true}/>
-                                                    : ''
-                                            }
-
-                                        </td>
-                                        <td className="num  w-1">
-                                            <NumberFormat
-                                                displayType={'text'}
-                                                value={inventory.meters}
-                                                thousandSeparator={true}/>
-                                        </td>
-                                    </tr>
-                                )
-                            })
-                        }
-                        </tbody>
-                        {
-                            inventories && inventories.length > 0 && (
-                                <tfoot>
-                                <tr className="bg-light fw-bold">
-                                    <td colSpan={6}>Total</td>
-                                    <td className='num'>
-                                        <NumberFormat
-                                            displayType={'text'}
-                                            value={totalQty}
-                                            thousandSeparator={true}/>
+                            {inventories.map((inventory, index) => (
+                                <tr key={inventory.id ?? index}>
+                                    {showReference && <td className="text-nowrap">{inventory.reference_no}</td>}
+                                    <td className="fw-semibold">{inventory.product?.name}</td>
+                                    <td className="text-nowrap"><Moment date={inventory.transaction_date} /></td>
+                                    <td className="text-nowrap">
+                                        {inventory.outbound_on ? (
+                                            <Moment date={inventory.outbound_on} />
+                                        ) : (
+                                            <span className="hf-pill tone-green">In stock</span>
+                                        )}
                                     </td>
-                                    <td className='num'>
-                                        <NumberFormat
-                                            displayType={'text'}
-                                            value={totalMeters}
-                                            thousandSeparator={true}/>
+                                    <td className="text-center text-nowrap">
+                                        {getPOUnit(inventory.unit, inventory.size, inventory.qty)}
                                     </td>
+                                    <td className="num"><Num value={inventory.cost} /></td>
+                                    <td className="num">{inventory.qty > 0 ? <Num value={inventory.qty} /> : ''}</td>
+                                    <td className="num"><Num value={inventory.meters} /></td>
                                 </tr>
-                                </tfoot>
-                            )
-                        }
+                            ))}
+                        </tbody>
+                        {inventories.length > 0 && (
+                            <tfoot>
+                                <tr>
+                                    <th colSpan={showReference ? 6 : 5}>Total</th>
+                                    <th className="num"><Num value={totalQty} /></th>
+                                    <th className="num"><Num value={totalMeters} /></th>
+                                </tr>
+                            </tfoot>
+                        )}
                     </table>
-                    {
-                        inventories && inventories.length === 0 && (
-                            <>
-                                <NoData label={'No Data Found!'}/>
-
-                            </>
-
-                        )
-                    }
+                    {inventories.length === 0 && <NoData label="No inventory found." />}
                 </div>
-            </div>
-        </>
-    )
-}
+            </PanelBody>
+        </Panel>
+    );
 
-export default StockInventoryView
+    return (
+        <>
+            <Head title={parent ? `Inventory: ${parent.reference_no}` : 'Inventory View'} />
+            <PageHeader
+                title={page_header}
+                buttons={
+                    <>
+                        <BackButton href={back_url} />
+                        <Print />
+                    </>
+                }
+            />
+            <PageContent>
+                <div className="hf-order-summary mb-3">
+                    <SummaryStat icon="solar:box-bold-duotone" label="Items">
+                        <Num value={inventories.length} />
+                    </SummaryStat>
+                    <SummaryStat icon="solar:layers-bold-duotone" label="Total qty">
+                        <Num value={totalQty} />
+                    </SummaryStat>
+                    <SummaryStat icon="solar:ruler-bold-duotone" label="Total meters" tone="brand">
+                        <Num value={totalMeters} />
+                    </SummaryStat>
+                    <SummaryStat icon="solar:archive-check-bold-duotone" label="In stock">
+                        <Num value={inStock} /> / <Num value={inventories.length} />
+                    </SummaryStat>
+                </div>
+
+                {parent ? (
+                    <Row className="g-3">
+                        <Col xl={8} lg={7}>{table}</Col>
+                        <Col xl={4} lg={5}>
+                            <div className="hf-inventory-parent-sticky">
+                                <InventoryParentCard parent={parent} />
+                            </div>
+                        </Col>
+                    </Row>
+                ) : (
+                    table
+                )}
+            </PageContent>
+        </>
+    );
+};
+
+export default StockInventoryView;
