@@ -1,7 +1,7 @@
 import React from 'react';
 import DropdownProfile from './dropdown/profile.jsx';
 import { AppSubName, PageSettings } from '@/config/page-settings.jsx';
-import logo from '@/img/logo-2.png';
+import logo from '@/img/brand/hr-fabrics-monogram.svg';
 import Navbar from 'react-bootstrap/Navbar';
 
 class Header extends React.Component {

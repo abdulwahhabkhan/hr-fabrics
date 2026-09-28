@@ -119,6 +119,9 @@
   margin-bottom: 1.75rem;
 
   img { display: block; height: 42px; width: auto; }
+
+  // brand panel already shows the logo
+  @include media-breakpoint-up(lg) { display: none; }
 }
 
 .hf-auth-header {

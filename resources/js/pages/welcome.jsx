@@ -1,6 +1,6 @@
 import React from "react";
 import homeBg from "@/img/bg/bg-home.jpg";
-import logo from "@/img/logo-2.png";
+import logo from "@/img/brand/hr-fabrics-monogram.svg";
 import LoginLink from "@/components/LoginLink/LoginLink.jsx";
 import { Head, usePage } from "@/util/Inertia.jsx";
 import { dashboard, login } from '@/routes';
