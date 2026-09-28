@@ -4,6 +4,7 @@ import { InertiaLink } from '@/util/Inertia';
 import { Moment } from '@/components/Moment';
 import { settings } from '@/config/page-settings';
 import ledgers from '@/routes/accounts/ledgers';
+import { Edit } from '@/components/Actions.jsx';
 
 const formatAddress = (address) =>
     [address?.address, address?.city, address?.region]
@@ -59,15 +60,14 @@ export default function SupplierTable({ suppliers, onEdit }) {
                                     >
                                         <Icon icon="stash:billing-info-duotone" />
                                     </InertiaLink>
-                                    <button
-                                        type="button"
-                                        className="hf-icon-btn hf-icon-btn--boxed border-0"
+                                    <Edit
+                                        onClick={() => onEdit(id)}
+
                                         title="Edit supplier"
                                         aria-label="Edit supplier"
-                                        onClick={() => onEdit(id)}
                                     >
                                         <Icon icon="solar:pen-2-bold-duotone" />
-                                    </button>
+                                    </Edit>
                                 </div>
                             </td>
                         </tr>

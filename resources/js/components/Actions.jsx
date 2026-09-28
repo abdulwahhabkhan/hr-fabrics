@@ -247,7 +247,7 @@ export const DeleteAction = ({ onDelete, id }) => {
 export const Edit = (props) => {
     return (
         <>
-            <button className={'btn btn-link p-0 '} {...props}>
+            <button className={'hf-icon-btn hf-icon-btn--boxed'} {...props}>
                 <OverlayTrigger
                     placement={'bottom'}
                     overlay={<Tooltip>Edit</Tooltip>}
