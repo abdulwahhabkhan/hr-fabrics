@@ -126,10 +126,13 @@ class SalesReturn extends Model implements Journalable, Logable
             $query->where('order_no', 'like', '%'.$search.'%');
         });
         $query->when($request['ref_no'] ?? null, function ($query, $search) {
-            $query->where('ref_no', 'like', '%'.$search.'%');
+            $query->where('invoice_no', 'like', '%'.$search.'%');
         });
         $query->when($request['customer_name'] ?? null, function ($query, $search) {
             $query->where('name', 'like', '%'.$search.'%');
+        });
+        $query->when(($request['status'] ?? '') !== '', function ($query) use ($request) {
+            $query->where($this->qualifyColumn('status'), $request['status']);
         });
 
         $query->orderBy($this->qualifyColumn('updated_at'), 'desc');

@@ -17,7 +17,12 @@ class SupplierController extends Controller
     public function index(Request $request): Response
     {
         $rows = Account::query()->suppliers()
-            ->filterContain('name', $request->input('search'))
+            ->when($request->input('search'), function ($query, $search) {
+                $query->whereRaw(
+                    "LOWER(CONCAT(name, ' ', COALESCE(JSON_VALUE(address, '$.\"city\"'), ''))) LIKE ?",
+                    ['%'.mb_strtolower($search).'%']
+                );
+            })
             ->orderby('updated_at', 'desc')
             ->paginate()->appends($request->all());
 

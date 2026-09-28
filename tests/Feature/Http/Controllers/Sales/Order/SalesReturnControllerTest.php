@@ -80,6 +80,56 @@ test('sale return edit page can be rendered', function () {
     );
 });
 
+test('sale return edit page includes saved items', function () {
+    $user = $this->getAdmin();
+    $return = SalesReturn::factory()->create();
+    $item = SalesReturnItem::factory()->create(['sales_return_id' => $return->id]);
+
+    $response = $this->actingAs($user)->get(route('sales.returns.edit', $return->id));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Returns/ReturnForm')
+        ->has('items', 1)
+        ->where('items.0.product.product_id', $item->product_id)
+        ->where('items.0.unit', PackingType::Thaan->value)
+        ->where('items.0.qty', $item->qty)
+        ->where('items.0.rate', $item->rate)
+    );
+});
+
+test('sale returns can be filtered by ref no', function () {
+    $user = $this->getAdmin();
+    $match = SalesReturn::factory()->create(['invoice_no' => 'SOR-2609001']);
+    SalesReturn::factory()->create(['invoice_no' => 'SOR-2608999']);
+
+    $response = $this->actingAs($user)->get(route('sales.returns.index', ['ref_no' => '2609001']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('rows.data', 1)
+        ->where('rows.data.0.id', $match->id)
+    );
+});
+
+test('sale returns can be filtered by status', function (ReturnStatus $status) {
+    $user = $this->getAdmin();
+    $open = SalesReturn::factory()->create();
+    $closed = SalesReturn::factory()->closed()->create();
+    $expected = $status === ReturnStatus::Open ? $open : $closed;
+
+    $response = $this->actingAs($user)->get(route('sales.returns.index', ['status' => (string) $status->value]));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('rows.data', 1)
+        ->where('rows.data.0.id', $expected->id)
+    );
+})->with([
+    'open' => [ReturnStatus::Open],
+    'closed' => [ReturnStatus::Closed],
+]);
+
 test('sale return can be deleted', function () {
     // Arrange
     $user = $this->getAdmin();

@@ -1,172 +1,224 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap';
+import { useMemo, useRef } from 'react';
+import { Icon } from '@iconify/react';
+import { Button, Col, Form, InputGroup, Modal, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
-import { usePackingUnits } from '@/util/util';
+import { FormField, SegmentedControl } from '@/components/form/FormSection';
+import { NumberFormat } from '@/util/NumberFormat';
+import { UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
 
-export const ReturnItemForm = ({onClose, onSave, products, show, loading, commission}) => {
+const UNIT_ICONS = {
+    [UNIT_BOX]: 'solar:box-bold-duotone',
+    [UNIT_SUIT]: 'solar:t-shirt-bold-duotone',
+    [UNIT_THAAN]: 'solar:layers-bold-duotone',
+};
+
+const EMPTY_ITEM = { product: null, unit: '', size: '', qty: '', rate: '', commission: '' };
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+/**
+ * Returned item editor. Items are kept on the page and saved together with the return,
+ * so this only hands the entered values back through `onSave`.
+ */
+export const ReturnItemForm = ({ item, onClose, onSave, products, commission }) => {
     const packingUnits = usePackingUnits();
-    const {register, handleSubmit, setValue, watch, control, formState: {errors}} = useForm();
-    const [processing, setProcessing] = useState(false);
-    const [product, setProduct] = useState({});
-    const updateValue = (item) => {
-        setProduct(item)
-        const {is_box, name, finish, brand_id} = {...item}
-        setValue('unit', is_box ? 'Box' : '', {shouldDirty: true})
-        setValue('name', name, {shouldDirty: true})
-        setValue('finish', finish, {shouldDirty: true})
-        setValue('commission', getCommission(brand_id) ?? 0, {shouldDirty: true})
-    }
-    const {unit} = watch()
-    const handleClose = () => {
-        onClose()
-    }
-    const sendRequest = async (data) => {
-        onSave({...data})
-    }
+    const isEdit = Boolean(item);
+    const productRef = useRef(null);
 
-    const isLoading = () => {
-        return processing;
-    }
-    const getCommission = (brand_id) => {
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        setFocus,
+        watch,
+        reset,
+        control,
+        formState: { errors },
+    } = useForm({ defaultValues: item ? { ...EMPTY_ITEM, ...item } : EMPTY_ITEM });
 
-        return _.find(commission, (id, index) => {
-            return 'brand_' + brand_id === index
-        })
-    }
-    const units = packingUnits.filter((val) => {
-        if (product.is_box)
-            return val === 'Box'
-        else
-            return val !== 'Box'
-    })
+    const { product, unit, size, qty, rate } = watch();
+
+    const getCommission = (brand_id) => _.find(commission, (value, key) => 'brand_' + brand_id === key);
+
+    const selectProduct = (selected) => {
+        if (!selected) {
+            return;
+        }
+
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setValue('size', selected.size ?? '', { shouldDirty: true });
+        setValue('commission', getCommission(selected.brand_id) ?? 0, { shouldDirty: true });
+        setTimeout(() => setFocus('qty'), 0);
+    };
+
+    const sendRequest = (data) => {
+        onSave({ ...data, name: data.product?.name ?? data.name });
+
+        if (isEdit) {
+            onClose();
+            return;
+        }
+
+        reset(EMPTY_ITEM);
+        setTimeout(() => productRef.current?.focus(), 0);
+    };
+
+    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
+    const line = useMemo(() => {
+        const meters = toNumber(qty) * toNumber(size);
+
+        return { meters, amount: meters * toNumber(rate) };
+    }, [qty, size, rate]);
+
     return (
-        <Modal show={show} backdrop="static" size={'lg'} keyboard={true}>
-            <Modal.Header>
-                <Modal.Title>Product</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <form action="" className="" onSubmit={handleSubmit(sendRequest)}>
-                    <Row>
-                        <Col md={12}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Product SKU:</Form.Label>
-                                <Controller
-                                    render={({field}) => (
-                                        <StyledSelect
-                                            {...field}
-                                            options={products}
-                                            onChange={(e) => {
-                                                field.onChange(e)
-                                                updateValue(e)
-                                            }}
-                                            getOptionValue={option => option['product_id']}
-                                            getOptionLabel={option => option['product_info']}
-                                        />
-                                    )}
-                                    control={control}
-                                    name={'product'}
-
+        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+            <form onSubmit={handleSubmit(sendRequest)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{isEdit ? 'Edit Returned Item' : 'Add Returned Item'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="hf-item-form">
+                    <FormField label="Product" required>
+                        <Controller
+                            render={({ field }) => (
+                                <StyledSelect
+                                    {...field}
+                                    options={products}
+                                    onChange={(selected) => {
+                                        field.onChange(selected);
+                                        selectProduct(selected);
+                                    }}
+                                    getOptionValue={(option) => option['product_id']}
+                                    getOptionLabel={(option) => option['product_info']}
+                                    placeholder="Search product by name, finish or brand..."
+                                    autoFocus={!isEdit}
+                                    ref={productRef}
                                 />
+                            )}
+                            control={control}
+                            name="product"
+                            rules={{ required: true }}
+                        />
+                        {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                    </FormField>
 
-                            </Form.Group>
-                        </Col>
+                    {product && (
+                        <div className="hf-item-product">
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                <span className="hf-cell-title">{product.name}</span>
+                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                {product.unit_price !== undefined && (
+                                    <span className="ms-auto hf-item-product__prices">
+                                        {product.is_box ? 'Box' : 'Thaan'} <strong>Rs <NumberFormat displayType="text" value={product.unit_price} thousandSeparator /></strong>
+                                        {!product.is_box && product.suit_price ? (
+                                            <span className="hf-dot-sep ms-2">
+                                                Suit <strong>Rs <NumberFormat displayType="text" value={product.suit_price} thousandSeparator /></strong>
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
-                        <Col md={8}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Name:</Form.Label>
-                                <Form.Control
-                                    defaultValue={product.name ?? ''}
-                                    {...register('name', {required: true})}
-                                    isInvalid={errors.name}
-                                    readOnly={true}/>
-                            </Form.Group>
+                    <Row className="g-3 mt-1">
+                        <Col md={12}>
+                            <FormField label="Unit" required>
+                                <div>
+                                    <SegmentedControl
+                                        name="unit"
+                                        register={(name) => register(name, { required: true })}
+                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                    />
+                                </div>
+                                {errors.unit && <div className="invalid-feedback d-block">Please pick a unit.</div>}
+                            </FormField>
                         </Col>
-                        <Col md={4}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Finish:</Form.Label>
+                        <Col sm={commission ? 3 : 4} xs={6}>
+                            <FormField label="Qty" htmlFor="qty" required>
                                 <Form.Control
-                                    defaultValue={product.finish ?? ''}
-                                    readOnly={true}/>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-
-
-                    <Row>
-                        <Col md={3}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Unit:</Form.Label>
-                                <Form.Control
-                                    className={'form-select form-select-sm'}
-                                    as={'select'}
-                                    {...register('unit', {required: true})}
-                                    size={'sm'}
-                                >
-                                    {units && units.map((item, index) => {
-                                        return (
-                                            <option key={index}>{item}</option>
-                                        )
-                                    })}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                        <Col md={2}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Size:</Form.Label>
-                                <Form.Control
-                                    {...register('size', {required: true})}
-                                    isInvalid={errors.size}
-                                    placeholder={'size'}/>
-                            </Form.Group>
-                        </Col>
-                        <Col md={2}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Qty:</Form.Label>
-                                <Form.Control
-                                    {...register('qty', {required: true, min: 1})}
+                                    id="qty"
+                                    type="number"
+                                    step="any"
+                                    min={1}
+                                    inputMode="decimal"
+                                    {...register('qty', { required: true, min: 1 })}
                                     isInvalid={errors.qty}
-                                    defaultValue={product.qty ?? ''}
-                                    placeholder={'Qty'}/>
-                            </Form.Group>
+                                    placeholder="0"
+                                />
+                            </FormField>
                         </Col>
-                        {
-                            commission && (
-                                <Col md={3}>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Commission Rate:</Form.Label>
-                                        <Form.Control
-                                            {...register('commission', {required: true, min: 0})}
-                                            isInvalid={errors.commission}
-                                            defaultValue={product.commission ?? ''}
-                                            placeholder={'Commission'}/>
-                                    </Form.Group>
-                                </Col>
-                            )
-                        }
-                        <Col md={2}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Rate:</Form.Label>
-                                <Form.Control
-                                    {...register('rate', {required: true})}
-                                    isInvalid={errors.rate}
-                                    defaultValue={product.rate ?? ''}
-                                    placeholder={'Rate'}/>
-                            </Form.Group>
+                        <Col sm={commission ? 3 : 4} xs={6}>
+                            <FormField label={unit === UNIT_THAAN ? 'Meters per thaan' : 'Size'} htmlFor="size" required>
+                                <InputGroup className="hf-amount">
+                                    <Form.Control
+                                        id="size"
+                                        type="number"
+                                        step="any"
+                                        min={0}
+                                        inputMode="decimal"
+                                        {...register('size', { required: true, min: 0.01 })}
+                                        isInvalid={errors.size}
+                                        placeholder="0"
+                                    />
+                                    <InputGroup.Text>m</InputGroup.Text>
+                                </InputGroup>
+                            </FormField>
                         </Col>
+                        <Col sm={commission ? 3 : 4} xs={6}>
+                            <FormField label="Rate / meter" htmlFor="rate" required hint="As charged on the invoice">
+                                <InputGroup className="hf-amount">
+                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                    <Form.Control
+                                        id="rate"
+                                        type="number"
+                                        step="any"
+                                        min={0}
+                                        inputMode="decimal"
+                                        {...register('rate', { required: true, min: 0.01 })}
+                                        isInvalid={errors.rate}
+                                        placeholder="0"
+                                    />
+                                </InputGroup>
+                            </FormField>
+                        </Col>
+                        {commission && (
+                            <Col sm={3} xs={6}>
+                                <FormField label="Commission" htmlFor="commission" hint="Per meter, or % of amount">
+                                    <Form.Control id="commission" {...register('commission')} placeholder="0" />
+                                </FormField>
+                            </Col>
+                        )}
                     </Row>
-                </form>
-            </Modal.Body>
-            <Modal.Footer>
-                <LoadingButton processing={loading} onClick={handleSubmit(sendRequest)}>
-                    Save
-                </LoadingButton>
-                <Button variant="white" onClick={handleClose}>
-                    Close
-                </Button>
-            </Modal.Footer>
+
+                    <div className="hf-item-preview hf-item-preview--2">
+                        <div>
+                            <span>Meters</span>
+                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator decimalScale={2} /> m</strong>
+                        </div>
+                        <div className="is-total">
+                            <span>Line total</span>
+                            <strong>Rs <NumberFormat displayType="text" value={line.amount} thousandSeparator decimalScale={2} /></strong>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    {!isEdit && (
+                        <span className="me-auto hf-field-hint mt-0">
+                            <Icon icon="solar:keyboard-bold-duotone" className="me-1" />
+                            Enter adds the item and starts the next one.
+                        </span>
+                    )}
+                    <Button variant="white" onClick={onClose}>
+                        {isEdit ? 'Cancel' : 'Done'}
+                    </Button>
+                    <LoadingButton type="submit">
+                        {isEdit ? 'Update item' : 'Add & next'}
+                    </LoadingButton>
+                </Modal.Footer>
+            </form>
         </Modal>
     );
 };

@@ -213,7 +213,8 @@
 .hf-amount .form-control { font-variant-numeric: tabular-nums; }
 
 // Attachment drop zone inside a section (plugin styles use !important)
-.hf-form-section .dropzone {
+.hf-form-section .dropzone,
+.hf-order-card .dropzone {
   min-height: 0;
   padding: 1.25rem 1rem;
   border: 1.5px dashed var(--hf-border-strong) !important;

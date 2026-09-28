@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Icon } from '@iconify/react';
+import round from 'lodash/round';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Head, Inertia, usePage } from '@/util/Inertia';
-import { Icon } from '@iconify/react';
-import { Col, Form, Row } from 'react-bootstrap';
+import { Col, Form, InputGroup, Row } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { ErrorPanel } from '@/components/panel/ErrorPanel';
 import { settings } from '@/config/page-settings';
@@ -11,392 +12,414 @@ import { useForm } from 'react-hook-form';
 import Moment from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions';
 import { ReturnItemForm } from './ReturnItemForm';
-import { getTotalQty, getUnit } from '@/util/util';
+import { getTotalQty, getUnit, notifyMessage } from '@/util/util';
+import { confirmSwal } from '@/util/swal';
 import { NumberFormat } from '@/util/NumberFormat';
 import { FileUpload } from '@/components/File';
 import BackButton from '@/components/button/back';
-import round from 'lodash';
 import NoData from '@/components/NoData.jsx';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
+import { FormActions, FormField, OptionCards } from '@/components/form/FormSection';
 import returns from '@/routes/sales/returns';
 
+const STATUS_OPEN = 0;
+const STATUS_CLOSED = 1;
+
+const toNumber = (value) => parseFloat(value) || 0;
+
+function Money({ value }) {
+    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+}
+
+function SummaryStat({ icon, label, children, tone }) {
+    return (
+        <div className={'hf-order-stat' + (tone ? ` is-${tone}` : '')}>
+            <span className="hf-order-stat__icon"><Icon icon={icon} /></span>
+            <div className="min-w-0">
+                <div className="hf-order-stat__label">{label}</div>
+                <div className="hf-order-stat__value">{children}</div>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Agent commission for a returned line: a "%" rate applies to the amount, otherwise it is per meter.
+ */
+const getAgentCommission = (meters, amount, commissionRate) => {
+    const rate = String(commissionRate ?? '');
+    if (!parseFloat(rate)) {
+        return 0;
+    }
+    if (rate.includes('%')) {
+        return round((amount * parseFloat(rate.replace('%', ''))) / 100, 2);
+    }
+
+    return round(meters * parseFloat(rate), 2);
+};
+
+const REFUND_OPTIONS = [
+    { value: 'Cash', label: 'Cash', icon: 'solar:wallet-money-bold-duotone', description: 'Refunded from cash' },
+    { value: 'Credit', label: 'Credit', icon: 'solar:card-bold-duotone', description: 'Adjusted in customer balance' },
+];
+
 const ReturnForm = () => {
-    const {
-        return: order,
-        errors: serverErrors,
-        products,
-        customers,
-        file_info,
-        customer: return_customer,
-    } = usePage().props;
+    const { return: order, items: savedItems, errors: serverErrors, products, file_info } = usePage().props;
+    const customer = order.customer;
     const [processing, setProcessing] = useState(false);
-    const [items, setItems] = useState(order.items ?? []);
-    const [itemsLoading, setItemsLoading] = useState(false);
-    const [addItem, setAddItem] = useState(false);
-    const [file, setFile] = useState(file_info);
+    const [items, setItems] = useState(savedItems ?? []);
+    const [editing, setEditing] = useState(null);
+    const [file, setFile] = useState(file_info?.file_path ? file_info : null);
     const {
         register,
         handleSubmit,
-        setError,
-        control,
-        formState: { errors },
+        watch,
+        formState: { errors, isDirty },
     } = useForm({ defaultValues: order });
+    const { discount, expenses } = watch();
+
     const options = {
-        onError: () => {
+        onFinish: () => {
             setProcessing(false);
         },
     };
     const saveData = (data, status) => {
-        data.info = { ...data.info, file: file };
-        const post_data = { ...data, items: items, status: status };
         setProcessing(true);
         Inertia.put(
-            returns.update(order['id']),
-            post_data,
+            returns.update(order.id),
+            { ...data, info: { ...data.info, file }, items, status },
             options,
         );
     };
 
-    const sendRequest = async (data) => {
-        saveData(data, 0);
+    const sendRequest = (data) => {
+        if (items.length === 0) {
+            notifyMessage({ title: 'No items', type: 'warning', message: 'Add at least one returned item before saving.' });
+            return;
+        }
+        saveData(data, STATUS_OPEN);
     };
 
     const confirmRequest = async (data) => {
-        saveData(data, 1);
-    };
-    const getAgentCommission = (qty, amount, commission_rate) => {
-        let commission = parseFloat(commission_rate);
-        if (!commission) {
-            return 0;
+        if (items.length === 0) {
+            notifyMessage({ title: 'No items', type: 'warning', message: 'Add at least one returned item before confirming.' });
+            return;
         }
-        if (commission_rate.search('%') != -1) {
-            commission_rate = commission_rate.replace('%', '');
-            return round(
-                (parseFloat(amount) * parseFloat(commission_rate)) / 100,
-                2,
-            );
-        } else {
-            return round(parseFloat(qty) * parseFloat(commission_rate), 2);
-        }
-    };
 
-    const updateItem = () => {
-        setAddItem(true);
+        const { isConfirmed } = await confirmSwal({
+            title: 'Confirm this return?',
+            text: 'Stock and the customer ledger will be updated and the return will be locked for editing.',
+            confirmButtonText: 'Yes, confirm',
+            confirmButtonStyle: 'success',
+        });
+        if (isConfirmed) {
+            saveData(data, STATUS_CLOSED);
+        }
     };
 
     const saveItem = (item) => {
-        setItemsLoading(true);
-        let newItems = [...items];
-        let totalQty = getTotalQty(item.unit, item.size, item.qty);
-        let totalAmount = totalQty * item.rate;
-        let totalCommission = getAgentCommission(
-            totalQty,
-            totalAmount,
-            item.commission,
-        );
-        newItems.push({
+        const totalQty = getTotalQty(item.unit, item.size, item.qty);
+        const totalAmount = round(totalQty * toNumber(item.rate), 2);
+        const row = {
             ...item,
             total_qty: totalQty,
             total_amount: totalAmount,
-            total_commission: totalCommission,
-        });
-        setItems(newItems);
-        setItemsLoading(false);
-    };
+            total_commission: getAgentCommission(totalQty, totalAmount, item.commission),
+        };
 
-    const handleClose = () => {
-        setAddItem(false);
+        setItems((current) => {
+            if (editing?.index === undefined) {
+                return [...current, row];
+            }
+            const next = [...current];
+            next[editing.index] = row;
+
+            return next;
+        });
     };
 
     const deleteItem = (index) => {
-        let orderItems = [...items];
-        let item = orderItems[index];
-        if (item) {
-            orderItems.splice(index, 1);
-            setItems(orderItems);
-        }
+        setItems((current) => current.filter((_row, i) => i !== index));
     };
 
-    useEffect(() => {}, [serverErrors]);
+    const totals = useMemo(() => {
+        const sum = (key) => items.reduce((total, row) => total + toNumber(row[key]), 0);
+        const subTotal = sum('total_amount');
 
-    const canModify = order.status == 'open';
+        return {
+            meters: sum('total_qty'),
+            commission: sum('total_commission'),
+            subTotal,
+            net: subTotal - toNumber(discount) + toNumber(expenses),
+        };
+    }, [items, discount, expenses]);
+
+    const itemsChanged = JSON.stringify(items) !== JSON.stringify(savedItems ?? []);
+    const hasUnsavedChanges = isDirty || itemsChanged;
 
     return (
         <>
-            <Head title="Sales Return Update" />
+            <Head title={`Edit Return ${order.invoice_no}`} />
             <PageHeader
-                title="Sales Return Update"
+                title={`Return ${order.invoice_no}`}
+                description={
+                    <>
+                        {customer.name}
+                        {customer.address?.city ? `, ${customer.address.city}` : ''}
+                    </>
+                }
                 buttons={
                     <>
-                        <PreviewButton
-                            href={returns.show(order.id)}
-                        />
-                        <BackButton
-                            label={'Returns'}
-                            href={returns.index()}
-                        />
+                        <BackButton href={returns.index()} label="Returns" />
+                        <PreviewButton href={returns.show(order.id)} />
                     </>
                 }
             />
             <PageContent>
-                <Panel theme={'default'}>
+                <ErrorPanel errors={serverErrors} />
+
+                <div className="hf-order-summary mb-3">
+                    <SummaryStat icon="solar:box-bold-duotone" label="Items">
+                        {items.length}
+                        <span className="hf-price-unit">
+                            <NumberFormat displayType="text" value={totals.meters} thousandSeparator decimalScale={2} /> m
+                        </span>
+                    </SummaryStat>
+                    <SummaryStat icon="solar:hand-money-bold-duotone" label="Agent commission">
+                        <Money value={totals.commission} />
+                    </SummaryStat>
+                    <SummaryStat icon="solar:undo-left-round-bold-duotone" label="Net refund" tone="brand">
+                        <span className="hf-currency">Rs</span>
+                        <Money value={totals.net} />
+                    </SummaryStat>
+                </div>
+
+                <Panel theme="default">
                     <PanelHeader
                         heading={
                             <>
-                                Order Information : {order.invoice_no} &nbsp;
-                                &nbsp;
-                                <Moment
-                                    format={settings.FULL_DATE_FORMAT}
-                                    date={order.created_at}
-                                />
+                                Returned items <span className="hf-muted-value fw-normal">({items.length})</span>
                             </>
                         }
                         buttons={
-                            <>
-                                {order.id && (
-                                    <LoadingButton
-                                        variant="primary"
-                                        className={'btn-xs'}
-                                        processing={processing}
-                                        onClick={handleSubmit(confirmRequest)}
-                                    >
-                                        Confirm & close
-                                    </LoadingButton>
+                            <button type="button" className="btn btn-xs btn-theme" onClick={() => setEditing({})}>
+                                <Icon icon="solar:add-bold-duotone" /> Add item
+                            </button>
+                        }
+                    />
+                    <PanelBody>
+                        <div className="table-responsive">
+                            <table className="table table-hover align-middle mb-0 hf-list-table hf-order-items">
+                                <thead>
+                                    <tr>
+                                        <th className="w-1">#</th>
+                                        <th>Product</th>
+                                        <th className="w-1">Unit</th>
+                                        <th className="w-1 text-end">Meters</th>
+                                        <th className="w-1 text-end">Rate</th>
+                                        <th className="w-1 text-end">Commission</th>
+                                        <th className="w-1 text-end">Total</th>
+                                        <th className="w-1 text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {items.map((row, index) => (
+                                        <tr key={index}>
+                                            <td className="hf-muted-value">{index + 1}</td>
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-link p-0 hf-cell-title hf-link text-start"
+                                                    onClick={() => setEditing({ index, item: row })}
+                                                >
+                                                    {row.name}
+                                                </button>
+                                            </td>
+                                            <td className="text-nowrap">{getUnit(row.unit, row.size, row.qty)}</td>
+                                            <td className="num text-end hf-mono">
+                                                <NumberFormat displayType="text" value={row.total_qty} thousandSeparator decimalScale={2} />
+                                            </td>
+                                            <td className="num text-end hf-mono"><Money value={row.rate} /></td>
+                                            <td className="num text-end hf-mono"><Money value={row.total_commission} /></td>
+                                            <td className="num text-end hf-mono fw-semibold"><Money value={row.total_amount} /></td>
+                                            <td className="text-end">
+                                                <div className="hf-row-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="hf-icon-btn hf-icon-btn--boxed"
+                                                        title="Edit item"
+                                                        aria-label={`Edit ${row.name}`}
+                                                        onClick={() => setEditing({ index, item: row })}
+                                                    >
+                                                        <Icon icon="solar:pen-2-bold-duotone" />
+                                                    </button>
+                                                    <span className="hf-icon-btn hf-icon-btn--boxed is-danger" title="Remove item">
+                                                        <DeleteAjax onDelete={deleteItem} id={index} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                {items.length > 0 && (
+                                    <tfoot>
+                                        <tr>
+                                            <th colSpan={3}>Total</th>
+                                            <th className="num text-end hf-mono">
+                                                <NumberFormat displayType="text" value={totals.meters} thousandSeparator decimalScale={2} />
+                                            </th>
+                                            <th />
+                                            <th className="num text-end hf-mono"><Money value={totals.commission} /></th>
+                                            <th className="num text-end hf-mono"><Money value={totals.subTotal} /></th>
+                                            <th />
+                                        </tr>
+                                    </tfoot>
                                 )}
-
-                                <LoadingButton
-                                    variant="primary"
-                                    className={'btn-xs'}
-                                    processing={processing}
-                                    onClick={handleSubmit(sendRequest)}
-                                >
-                                    Save Changes
-                                </LoadingButton>
-                            </>
-                        }
-                    />
-                    <PanelBody>
-                        <ErrorPanel errors={serverErrors} />
-                        <Row>
-                            <Col lg={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Customer:</Form.Label>
-                                    <Form.Control
-                                        defaultValue={
-                                            order.customer.name +
-                                            ' ' +
-                                            order.customer.address.city
-                                        }
-                                        readOnly={true}
-                                        size={'sm'}
-                                        placeholder={'customer name'}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={4}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Order No:</Form.Label>
-                                    <Form.Control
-                                        size={'sm'}
-                                        control={control}
-                                        {...register('order_no', {
-                                            required: true,
-                                        })}
-                                        isInvalid={errors.order_no}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Payment Mode:</Form.Label>
-                                    <Form.Select
-                                        className={''}
-
-                                        {...register('payment_mode', {
-                                            required: true,
-                                        })}
-                                        size={'sm'}
-                                    >
-                                        <option value={''}>Select</option>
-                                        <option>Cash</option>
-                                        <option>Credit</option>
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col lg={8}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Remarks:</Form.Label>
-                                    <br />
-                                    <Form.Control
-                                        isInvalid={
-                                            errors.info ? errors.info : ''
-                                        }
-                                        {...register('info.remarks', {
-                                            required: true,
-                                        })}
-                                        size={'sm'}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Discount:</Form.Label>
-                                    <Form.Control
-                                        size={'sm'}
-                                        control={control}
-                                        {...register('discount', {
-                                            required: true,
-                                        })}
-                                        isInvalid={errors.discount}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col lg={2}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Expenses:</Form.Label>
-                                    <Form.Control
-                                        size={'sm'}
-                                        control={control}
-                                        {...register('expenses', {
-                                            required: true,
-                                        })}
-                                        isInvalid={errors.expenses}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md={file ? 8 : 12}>
-                                <FileUpload
-                                    directory={'so-return'}
-                                    progress={setProcessing}
-                                    updated={setFile}
-                                />
-                            </Col>
-                            {file && (
-                                <Col md={4}>
-                                    <img
-                                        src={
-                                            file.file_thumbnail_url ??
-                                            file.thumbnail_url ??
-                                            file.file_thumbnail
-                                        }
-                                        className={'height-150'}
-                                        alt={file.file_name}
-                                    />
-                                </Col>
-                            )}
-                        </Row>
-                    </PanelBody>
-                </Panel>
-                <Panel theme={'default'}>
-                    <PanelHeader
-                        heading={'Order Items'}
-                        buttons={
-                            <>
-                                <button
-                                    className="btn btn-xs  btn-primary"
-                                    onClick={() => updateItem({})}
-                                >
-                                    <Icon icon={'solar:add-bold-duotone'} /> Add
-                                    Item
+                            </table>
+                        </div>
+                        {items.length === 0 && (
+                            <div className="text-center">
+                                <NoData label="No returned items added yet." />
+                                <button type="button" className="btn btn-sm btn-theme mt-2" onClick={() => setEditing({})}>
+                                    <Icon icon="solar:add-bold-duotone" /> Add first item
                                 </button>
-                            </>
-                        }
-                    />
-                    <PanelBody>
-                        <table className={'table table-bordered table-hover'}>
-                            <thead>
-                                <tr>
-                                    <th width={'40'}>#</th>
-                                    <th>Product</th>
-                                    <th width={'120px'}>Unit</th>
-                                    <th width={'70px'} className={'num'}>
-                                        Qty
-                                    </th>
-                                    <th width={'70px'} className={'num'}>
-                                        Rate
-                                    </th>
-                                    <th width={'100px'} className={'num'}>
-                                        Commission
-                                    </th>
-                                    <th width={'100px'} className={'num'}>
-                                        Total
-                                    </th>
-                                    <th width={'100'} className={'actions'}>
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {items &&
-                                    items.map((row, index) => {
-                                        const {
-                                            id,
-                                            name,
-                                            rate,
-                                            unit,
-                                            size,
-                                            qty,
-                                            total_qty,
-                                            total_commission,
-                                            total_amount,
-                                        } = row;
-                                        return (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{name}</td>
-                                                <td>
-                                                    {getUnit(unit, size, qty)}
-                                                </td>
-                                                <td className={'num'}>
-                                                    {total_qty}
-                                                </td>
-                                                <td className={'num'}>
-                                                    <NumberFormat
-                                                        displayType={'text'}
-                                                        value={rate}
-                                                        thousandSeparator={true}
-                                                    />
-                                                </td>
-                                                <td className={'num'}>
-                                                    <NumberFormat
-                                                        displayType={'text'}
-                                                        value={total_commission}
-                                                        thousandSeparator={true}
-                                                    />
-                                                </td>
-                                                <td className={'num'}>
-                                                    <NumberFormat
-                                                        displayType={'text'}
-                                                        value={total_amount}
-                                                        thousandSeparator={true}
-                                                    />
-                                                </td>
-                                                <td className={'actions'}>
-                                                    <DeleteAjax
-                                                        onDelete={deleteItem}
-                                                        id={index}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                        {items && items.length === 0 && (
-                            <NoData label="No return items added." />
+                            </div>
                         )}
                     </PanelBody>
                 </Panel>
-                {addItem && (
+
+                <form onSubmit={handleSubmit(sendRequest)}>
+                    <Row className="g-3">
+                        <Col lg={6}>
+                            <Panel className="hf-order-card h-100 mb-0">
+                                <PanelBody>
+                                    <div className="hf-order-card__head">
+                                        <span className="hf-form-section__icon"><Icon icon="solar:document-text-bold-duotone" /></span>
+                                        <div>
+                                            <h2 className="hf-form-section__title">Return details</h2>
+                                            <p className="hf-form-section__desc">
+                                                Created <Moment format={settings.FULL_DATE_FORMAT} date={order.created_at} />
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Row className="g-3">
+                                        <Col sm={12}>
+                                            <FormField label="Order no" htmlFor="order_no" required hint="Invoice the goods were sold on.">
+                                                <Form.Control
+                                                    id="order_no"
+                                                    {...register('order_no', { required: true, maxLength: 20 })}
+                                                    isInvalid={errors.order_no}
+                                                    placeholder="e.g. 2609021"
+                                                />
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={12}>
+                                            <FormField label="Refund mode" required>
+                                                <OptionCards
+                                                    name="payment_mode"
+                                                    register={(name) => register(name, { required: true })}
+                                                    options={REFUND_OPTIONS}
+                                                    invalid={Boolean(errors.payment_mode)}
+                                                />
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={12}>
+                                            <FormField label="Remarks" htmlFor="remarks" required hint="Reason for the return.">
+                                                <Form.Control
+                                                    id="remarks"
+                                                    as="textarea"
+                                                    rows={2}
+                                                    {...register('info.remarks', { required: true })}
+                                                    isInvalid={errors.info?.remarks}
+                                                    placeholder="e.g. Damaged thaan, colour mismatch"
+                                                />
+                                            </FormField>
+                                        </Col>
+                                    </Row>
+                                </PanelBody>
+                            </Panel>
+                        </Col>
+                        <Col lg={6}>
+                            <Panel className="hf-order-card h-100 mb-0">
+                                <PanelBody>
+                                    <div className="hf-order-card__head">
+                                        <span className="hf-form-section__icon"><Icon icon="solar:calculator-bold-duotone" /></span>
+                                        <div>
+                                            <h2 className="hf-form-section__title">Adjustments & attachment</h2>
+                                            <p className="hf-form-section__desc">Discount and expenses change the net refund.</p>
+                                        </div>
+                                    </div>
+                                    <Row className="g-3">
+                                        <Col sm={6}>
+                                            <FormField label="Discount" htmlFor="discount" hint="Subtracted from refund">
+                                                <InputGroup className="hf-amount">
+                                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                                    <Form.Control id="discount" type="number" step="any" min={0} {...register('discount')} placeholder="0" />
+                                                </InputGroup>
+                                            </FormField>
+                                        </Col>
+                                        <Col sm={6}>
+                                            <FormField label="Expenses" htmlFor="expenses" hint="Added to refund">
+                                                <InputGroup className="hf-amount">
+                                                    <InputGroup.Text>Rs</InputGroup.Text>
+                                                    <Form.Control id="expenses" type="number" step="any" min={0} {...register('expenses')} placeholder="0" />
+                                                </InputGroup>
+                                            </FormField>
+                                        </Col>
+                                    </Row>
+
+                                    <dl className="hf-order-breakdown">
+                                        <div><dt>Items total</dt><dd><Money value={totals.subTotal} /></dd></div>
+                                        <div><dt>Discount</dt><dd>− <Money value={toNumber(discount)} /></dd></div>
+                                        <div><dt>Expenses</dt><dd>+ <Money value={toNumber(expenses)} /></dd></div>
+                                        <div className="is-total"><dt>Net refund</dt><dd>Rs <Money value={totals.net} /></dd></div>
+                                    </dl>
+
+                                    <div className="hf-field mt-3">
+                                        <label className="form-label">Attachment</label>
+                                        <Row className="g-2">
+                                            <Col xs={file ? 8 : 12}>
+                                                <FileUpload directory="so-return" progress={setProcessing} updated={setFile} />
+                                            </Col>
+                                            {file && (
+                                                <Col xs={4}>
+                                                    <div className="hf-attachment-preview">
+                                                        <img
+                                                            src={file.file_thumbnail_url ?? file.thumbnail_url ?? file.file_thumbnail}
+                                                            alt={file.file_name}
+                                                        />
+                                                    </div>
+                                                </Col>
+                                            )}
+                                        </Row>
+                                    </div>
+                                </PanelBody>
+                            </Panel>
+                        </Col>
+                    </Row>
+
+                    <FormActions
+                        className="hf-order-actions"
+                        hint={
+                            hasUnsavedChanges
+                                ? <span className="text-warning fw-semibold"><Icon icon="solar:danger-circle-bold-duotone" /> Unsaved changes</span>
+                                : <>{items.length} items · Net refund <strong>Rs <Money value={totals.net} /></strong></>
+                        }
+                    >
+                        <LoadingButton type="submit" variant="white" processing={processing}>
+                            Save draft
+                        </LoadingButton>
+                        <LoadingButton processing={processing} onClick={handleSubmit(confirmRequest)}>
+                            Confirm & close
+                        </LoadingButton>
+                    </FormActions>
+                </form>
+
+                {editing && (
                     <ReturnItemForm
-                        show={addItem}
-                        onClose={handleClose}
+                        item={editing.item}
+                        onClose={() => setEditing(null)}
                         onSave={saveItem}
-                        loading={itemsLoading}
                         commission={order.agent_rate}
                         products={products.data}
                     />

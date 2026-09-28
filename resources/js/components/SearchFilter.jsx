@@ -5,7 +5,7 @@ import pickBy from "lodash/pickBy";
 import { FormControl, InputGroup } from "react-bootstrap";
 import FilterButton from "@/components/button/FilterButton.jsx";
 
-export default () => {
+export default ({ placeholder = "Search..." }) => {
     const { filters } = usePage().props;
 
     const [values, setValues] = useState({
@@ -46,7 +46,7 @@ export default () => {
             <div>
                 <InputGroup className="mb-4">
                     <FormControl
-                        placeholder="Search..."
+                        placeholder={placeholder}
                         type="text"
                         name={"search"}
                         className="input-white"

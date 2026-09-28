@@ -33,7 +33,7 @@ const OrderIndex = () => {
             </PageFilters>
 
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <OrderTable orders={data} />
                         {data.length === 0 && <NoData label="No sales invoices found." />}

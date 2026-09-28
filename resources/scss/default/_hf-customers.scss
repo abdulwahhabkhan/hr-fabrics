@@ -48,3 +48,6 @@
   > tbody > tr.is-suspended > td:first-child { box-shadow: inset 3px 0 0 #c9503f; }
   > tbody > tr > td:first-child, > thead > tr > th:first-child { padding-left: .9rem; }
 }
+
+// Suppliers table reuses .hf-cust-table; address stays on one line.
+.hf-supplier-address { max-width: 0; width: 100%; color: var(--hf-text-3); font-size: .75rem; }

@@ -41,6 +41,23 @@ test('filter list supplier', function (): void {
     );
 });
 
+test('search suppliers by city', function (): void {
+    $user = $this->getAdmin();
+    Account::factory()->supplier()->count(2)->create();
+    $match = Account::factory()->supplier()->create([
+        'address' => ['address' => 'Mill Road', 'city' => 'Faisalabad', 'region' => 'Punjab'],
+    ]);
+
+    $response = $this->actingAs($user)->get(route('purchases.suppliers.index', ['search' => 'faisalabad']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Purchases/Suppliers/SupplierIndex')
+        ->has('rows.data', 1)
+        ->where('rows.data.0.id', $match->id)
+    );
+});
+
 test('add supplier', function (): void {
     // Arrange
     $user = $this->getAdmin();

@@ -82,7 +82,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 48px;
+  min-height: 52px; // same brand row height expanded + collapsed, keeps toggle centred
   padding: 0 .5rem 1rem;
   margin-bottom: .5rem;
   border-bottom: 1px solid var(--hf-sidebar-divider);
@@ -100,7 +100,7 @@
 // Collapse toggle --------------------------------------------------------------
 .hf-sidebar-toggle {
   position: absolute;
-  top: 1.75rem;
+  top: calc(1rem + (52px - 1rem) / 2 - 13px); // vertical middle of brand row
   right: -13px;
   z-index: 2;
   display: grid;
@@ -387,7 +387,6 @@
     .hf-sidebar-head { justify-content: center; padding-inline: 0; }
     .hf-brand-logo { display: none; }
     .hf-brand-monogram { display: block; height: auto; width: 46px; }
-    .hf-sidebar-toggle { top: 4.25rem; }
 
     .hf-nav-text,
     .hf-nav-caret,

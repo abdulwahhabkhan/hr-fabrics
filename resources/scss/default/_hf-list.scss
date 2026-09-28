@@ -209,3 +209,36 @@
 
 button.hf-icon-btn { padding: 0; }
 .hf-icon-btn.has-file { color: var(--hf-navy); border-color: rgba(var(--hf-brand-rgb), .35); background: var(--hf-brand-50); }
+
+// ---------------------------------------------------------------------------
+// Flush list panel: table rows run edge to edge of the panel while cell
+// content keeps its usual inset (panel padding + cell padding).
+// ---------------------------------------------------------------------------
+.hf-table-panel {
+  --hf-flush-inset: 1.25rem;
+
+  overflow: hidden;
+
+  > .panel-body {
+    padding: 0 0 var(--hf-flush-inset);
+
+    > :not(.table-responsive) { margin-inline: var(--hf-flush-inset); }
+    > .table-responsive + :not(.no-data) { margin-top: var(--hf-flush-inset); }
+  }
+
+  .table {
+    > :not(caption) > * > *:first-child { padding-left: calc(var(--hf-flush-inset) + .9rem); }
+    > :not(caption) > * > *:last-child { padding-right: calc(var(--hf-flush-inset) + .7rem); }
+  }
+
+  .table-responsive + .no-data {
+    margin-top: 0;
+    border-width: 0 0 1px !important;
+    border-radius: 0 !important;
+    margin-inline: 0;
+  }
+
+  @media (max-width: 767.98px) {
+    --hf-flush-inset: 1rem;
+  }
+}

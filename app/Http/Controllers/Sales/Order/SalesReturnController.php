@@ -12,6 +12,7 @@ use App\Http\Resources\Catalog\ProductACResource;
 use App\Http\Resources\Sales\SalesReturnResource;
 use App\Models\Accounts\Account;
 use App\Models\Sales\SalesReturn;
+use App\Models\Sales\SalesReturnItem;
 use App\Services\ProductService;
 use DB;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,7 @@ class SalesReturnController extends Controller
      */
     public function index(Request $request): Response
     {
-        $filters = $this->filterSession($request, ['ref_no', 'order_no', 'customer_name']);
+        $filters = $this->filterSession($request, ['ref_no', 'order_no', 'customer_name', 'status']);
 
         $data = SalesReturn::SORList($filters)->paginate()->appends($filters);
 
@@ -129,10 +130,33 @@ class SalesReturnController extends Controller
         $fileInfo = $return->info['file'] ?? null;
         $fileInfo['thumbnail_url'] = generate_thumbnail($fileInfo['file_path'] ?? null);
 
+        $items = $return->returnItems()
+            ->with('product.brand')
+            ->get()
+            ->map(fn (SalesReturnItem $item): array => [
+                'product' => [
+                    'product_id' => $item->product_id,
+                    'name' => $item->product?->name,
+                    'finish' => $item->product?->finish,
+                    'is_box' => (int) $item->product?->is_box,
+                    'product_info' => $item->product?->name.' '.$item->product?->finish.' ('.$item->product?->brand?->name.')',
+                ],
+                'name' => $item->product?->name,
+                'unit' => $item->unit->value,
+                'size' => $item->size,
+                'qty' => $item->qty,
+                'rate' => $item->rate,
+                'commission' => $item->commission ?: '0',
+                'total_commission' => $item->total_commission,
+                'total_qty' => (float) $item->total_qty,
+                'total_amount' => $item->total_amount,
+            ]);
+
         return Inertia::render(
             'Sales/Returns/ReturnForm',
             [
                 'return' => $return->load('customer'),
+                'items' => $items,
                 'file_info' => $fileInfo,
                 'products' => ProductACResource::collection($products),
             ]
