@@ -103,15 +103,13 @@ const Brands = () => {
                                                     <td className="w-1 text-end">
                                                         <div className="hf-row-actions">
                                                             {canUpdate && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <Edit
-                                                                        onClick={() =>
-                                                                            handleEdit(
-                                                                                id,
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                </span>
+                                                                <Edit
+                                                                    onClick={() =>
+                                                                        handleEdit(
+                                                                            id,
+                                                                        )
+                                                                    }
+                                                                />
                                                             )}
                                                             {/*{
                                                     canDelete && (

@@ -120,7 +120,7 @@
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
         ],
-        "test:code-coverage": "pest --coverage --compact --min=71",
+        "test:code-coverage": "pest --coverage --compact --min=78.6",
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
