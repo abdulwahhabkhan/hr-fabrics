@@ -1,60 +1,64 @@
 import React from 'react';
 import { usePage } from '@/util/Inertia.jsx';
-import loginBg from '@/img/bg/auth-bg.webp';
-import logo from '@/img/logo-2.png';
+import authBg from '@/img/bg/auth-weave.svg';
+import logoReverse from '@/img/brand/hr-fabrics-logo-reverse.svg';
+import logo from '@/img/brand/hr-fabrics-logo-horizontal.svg';
 
+/**
+ * Split-screen auth shell: navy woven-fabric brand panel on the left,
+ * form card on the right. Below `lg` the brand panel is hidden and the
+ * horizontal logo sits above the form instead.
+ */
 export default function AuthLayout({ children, title, description }) {
     const { appName, store } = usePage().props;
-    return (
-        <div className="login login-with-news-feed">
-            <div className="news-feed">
-                <div
-                    className="news-image"
-                    style={{ backgroundImage: `url(${loginBg})` }}
-                ></div>
+    const brandName = appName || 'HR Fabrics International';
 
-                <div className="news-caption">
-                    <a href="/">
-                        <img
-                            src={logo}
-                            className="z-3 w-70px top-0 pb-20px"
-                            alt={appName || 'Logo'}
-                        />
+    return (
+        <div className="hf-auth">
+            <aside
+                className="hf-auth-brand"
+                style={{ backgroundImage: `url(${authBg})` }}
+            >
+                <a href="/" className="hf-auth-brand-logo">
+                    <img src={logoReverse} alt={brandName} />
+                </a>
+
+                <div className="hf-auth-brand-copy">
+                    <span className="hf-auth-eyebrow">
+                        Fabric trading suite
+                    </span>
+                    <h2>Every roll, order and ledger — woven together.</h2>
+                    <p>
+                        Sales, purchases, stock and accounts for{' '}
+                        {store?.branch_name
+                            ? `the ${store.branch_name} branch`
+                            : 'your branch'}
+                        , in one place.
+                    </p>
+                </div>
+
+                <div className="hf-auth-brand-footer">
+                    © {new Date().getFullYear()} {brandName}
+                    {store?.branch_name && <span> · {store.branch_name}</span>}
+                </div>
+            </aside>
+
+            <main className="hf-auth-main">
+                <div className="hf-auth-card">
+                    <a href="/" className="hf-auth-logo">
+                        <img src={logo} alt={brandName} />
                     </a>
 
-                    <h4 className="caption-title">{appName}</h4>
-                    {store?.branch_name && <p>{store.branch_name}</p>}
-                </div>
-            </div>
-            <div className="login-container">
-                <div className="my-auto w-100">
-                    <div className="d-block d-md-none text-center mb-4">
-                        <a href="/" className="d-inline-block mb-2">
-                            <img
-                                src={logo}
-                                className="w-60px"
-                                alt={appName || 'Logo'}
-                            />
-                        </a>
-                        {appName && <h3 className="mb-1">{appName}</h3>}
-                        {store?.branch_name && (
-                            <p className="text-muted small mb-0">
-                                {store.branch_name}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="login-header mb-4">
-                        <div className="w-100 text-center text-md-start">
-                            {title && <h1 className="h3 mb-2">{title}</h1>}
-                            {description && (
-                                <p className="text-muted mb-0">{description}</p>
-                            )}
+                    {(title || description) && (
+                        <div className="hf-auth-header">
+                            {title && <h1>{title}</h1>}
+                            {description && <p>{description}</p>}
                         </div>
-                    </div>
-                    <div className="login-content">{children}</div>
+                    )}
+
+                    <div className="hf-auth-content">{children}</div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

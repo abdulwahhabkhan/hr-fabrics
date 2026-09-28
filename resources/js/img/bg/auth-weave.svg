@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMid slice">
+    <defs>
+        <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#132a5c"/>
+            <stop offset=".55" stop-color="#0d1e45"/>
+            <stop offset="1" stop-color="#081530"/>
+        </linearGradient>
+        <radialGradient id="glow" cx=".82" cy=".12" r=".7">
+            <stop offset="0" stop-color="#c09748" stop-opacity=".30"/>
+            <stop offset=".45" stop-color="#c09748" stop-opacity=".06"/>
+            <stop offset="1" stop-color="#c09748" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="shade" cx=".1" cy=".95" r=".8">
+            <stop offset="0" stop-color="#040b1c" stop-opacity=".65"/>
+            <stop offset="1" stop-color="#040b1c" stop-opacity="0"/>
+        </radialGradient>
+
+        <!-- Plain weave: warp and weft strips alternating over/under -->
+        <pattern id="weave" width="48" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+            <rect width="48" height="48" fill="none"/>
+            <g fill="#ffffff">
+                <rect x="2" y="0" width="20" height="24" opacity=".055"/>
+                <rect x="26" y="24" width="20" height="24" opacity=".055"/>
+                <rect x="0" y="26" width="24" height="20" opacity=".03"/>
+                <rect x="24" y="2" width="24" height="20" opacity=".03"/>
+            </g>
+            <g stroke="#ffffff" stroke-opacity=".05" stroke-width="1">
+                <path d="M12 0v24M36 24v24M0 36h24M24 12h24"/>
+            </g>
+        </pattern>
+
+        <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity=".25"/>
+            <stop offset=".5" stop-color="#fff" stop-opacity="1"/>
+            <stop offset="1" stop-color="#fff" stop-opacity=".35"/>
+        </linearGradient>
+        <mask id="weave-mask">
+            <rect width="1200" height="1600" fill="url(#fade)"/>
+        </mask>
+
+        <linearGradient id="thread" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#c09748" stop-opacity="0"/>
+            <stop offset=".5" stop-color="#d6b264" stop-opacity=".9"/>
+            <stop offset="1" stop-color="#c09748" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+
+    <rect width="1200" height="1600" fill="url(#base)"/>
+    <rect width="1200" height="1600" fill="url(#weave)" mask="url(#weave-mask)"/>
+
+    <!-- Loose gold threads drifting across the cloth -->
+    <g fill="none" stroke="url(#thread)" stroke-linecap="round">
+        <path d="M-80 1180C220 1060 420 1240 700 1110S1120 900 1300 960" stroke-width="2.2" opacity=".55"/>
+        <path d="M-80 1230C260 1120 460 1300 740 1170S1140 980 1300 1030" stroke-width="1.2" opacity=".35"/>
+        <path d="M-80 1290C300 1190 500 1350 780 1240S1150 1060 1300 1110" stroke-width=".8" opacity=".25"/>
+        <path d="M-60 360C240 300 520 430 820 330S1160 180 1280 220" stroke-width="1.4" opacity=".28"/>
+    </g>
+
+    <rect width="1200" height="1600" fill="url(#glow)"/>
+    <rect width="1200" height="1600" fill="url(#shade)"/>
+</svg>
