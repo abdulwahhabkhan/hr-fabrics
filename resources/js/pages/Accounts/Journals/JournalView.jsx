@@ -34,6 +34,7 @@ const JournalView = () => {
                 <div className="invoice">
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
+                        <span className="float-end">Journal Voucher</span>
                     </div>
                     <div className="invoice-header">
                         <div className="invoice-to">
