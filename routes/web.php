@@ -30,6 +30,7 @@ use App\Http\Controllers\Sales\Order\OrderController;
 use App\Http\Controllers\Sales\Order\OrderInventoryController;
 use App\Http\Controllers\Sales\Order\OrderLedgerController;
 use App\Http\Controllers\Sales\Order\SalesReturnController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\Settings\CityController;
 use App\Http\Controllers\Settings\EmployeeController;
 use App\Http\Controllers\Settings\JobController;
@@ -248,7 +249,11 @@ Route::prefix('settings')->middleware(['auth', 'verified', 'auth.role'])
 // User Profile
 Route::middleware(['auth'])->group(function () {
     Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::put('profile', [ProfileController::class, 'updatePassword'])
+    Route::get('profile/security', [SecurityController::class, 'edit'])
+        ->middleware('password.confirm')
+        ->name('profile.security');
+    Route::put('profile/password', [SecurityController::class, 'updatePassword'])
+        ->middleware('throttle:6,1')
         ->name('profile.password');
 });
 

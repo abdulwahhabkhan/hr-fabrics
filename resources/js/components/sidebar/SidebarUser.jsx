@@ -50,6 +50,9 @@ export default function SidebarUser() {
                 <Dropdown.Item as={InertiaLink} href={profile.index()}>
                     <SidebarGlyph name="user" /> My profile
                 </Dropdown.Item>
+                <Dropdown.Item as={InertiaLink} href={profile.security()}>
+                    <SidebarGlyph name="shield" /> Security
+                </Dropdown.Item>
                 <Dropdown.Divider />
                 <InertiaLink
                     href={logout()}

@@ -4,6 +4,7 @@ export {
     useForm,
     useHttp,
     useRemember,
+    Deferred,
     Head,
     Link, Link as InertiaLink,
     createInertiaApp,

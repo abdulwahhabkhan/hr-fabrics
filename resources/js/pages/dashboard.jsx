@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import cx from 'classnames';
 import { format, parseISO } from 'date-fns';
-import { Head, InertiaLink, usePage } from '@/util/Inertia';
+import { Deferred, Head, InertiaLink, usePage } from '@/util/Inertia';
 import { NumberFormat } from '@/util/NumberFormat';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
@@ -38,6 +38,94 @@ function StatTile({ icon, tone, label, value, footer }) {
             </div>
             <div className="hf-stat-value">{value}</div>
             {footer && <div className="hf-stat-footer">{footer}</div>}
+        </div>
+    );
+}
+
+const STAT_TILES = [
+    {
+        tone: 'navy',
+        icon: 'solar:banknote-2-bold-duotone',
+        label: "Today's sales",
+    },
+    {
+        tone: 'gold',
+        icon: 'solar:ruler-cross-pen-bold-duotone',
+        label: 'Meters sold',
+    },
+    { tone: 'teal', icon: 'solar:bill-list-bold-duotone', label: 'Invoices' },
+    {
+        tone: 'slate',
+        icon: 'solar:box-bold-duotone',
+        label: "Today's purchases",
+    },
+];
+
+function StatGridSkeleton() {
+    return (
+        <div className="hf-stat-grid" aria-busy="true">
+            {STAT_TILES.map((tile) => (
+                <StatTile
+                    key={tile.label}
+                    {...tile}
+                    value={
+                        <span className="hf-skeleton hf-skeleton-value shimmer-loader" />
+                    }
+                    footer={
+                        <span className="hf-skeleton hf-skeleton-line shimmer-loader" />
+                    }
+                />
+            ))}
+        </div>
+    );
+}
+
+function StatGrid({ stats: { sales, purchases, meters } }) {
+    const [salesTile, metersTile, invoicesTile, purchasesTile] = STAT_TILES;
+
+    return (
+        <div className="hf-stat-grid">
+            <StatTile
+                {...salesTile}
+                value={<Amount value={sales.net} />}
+                footer={
+                    <ChangeBadge
+                        current={sales.net}
+                        previous={sales.yesterday}
+                    />
+                }
+            />
+            <StatTile
+                {...metersTile}
+                value={<Amount value={meters.sales.net} />}
+                footer="Confirmed invoices today"
+            />
+            <StatTile
+                {...invoicesTile}
+                value={<Amount value={sales.invoices} />}
+                footer={
+                    sales.invoices ? (
+                        <>
+                            Avg{' '}
+                            <Amount
+                                value={Math.round(sales.net / sales.invoices)}
+                            />{' '}
+                            per invoice
+                        </>
+                    ) : (
+                        'None confirmed yet'
+                    )
+                }
+            />
+            <StatTile
+                {...purchasesTile}
+                value={<Amount value={purchases.net} />}
+                footer={
+                    <>
+                        <Amount value={meters.purchase} /> meters received
+                    </>
+                }
+            />
         </div>
     );
 }
@@ -122,6 +210,38 @@ function SalesTrend({ trend }) {
     );
 }
 
+const SKELETON_BAR_HEIGHTS = [
+    45, 60, 35, 70, 50, 80, 40, 65, 55, 75, 30, 60, 50, 85,
+];
+
+function SalesTrendSkeleton() {
+    return (
+        <Panel className="hf-trend-panel">
+            <PanelHeader
+                heading="Sales — last 14 days"
+                buttons={
+                    <span className="hf-skeleton hf-skeleton-line shimmer-loader" />
+                }
+            />
+            <PanelBody>
+                <div className="hf-trend" aria-busy="true">
+                    {SKELETON_BAR_HEIGHTS.map((height, index) => (
+                        <div key={index} className="hf-trend-col">
+                            <div className="hf-trend-bar-wrap">
+                                <div
+                                    className="hf-trend-bar hf-skeleton shimmer-loader"
+                                    style={{ height: `${height}%` }}
+                                />
+                            </div>
+                            <span className="hf-trend-day">&nbsp;</span>
+                        </div>
+                    ))}
+                </div>
+            </PanelBody>
+        </Panel>
+    );
+}
+
 function RecentOrders({ rows, canView }) {
     return (
         <Panel className="hf-activity-panel">
@@ -196,8 +316,7 @@ function RecentOrders({ rows, canView }) {
 }
 
 const Dashboard = () => {
-    const { sales, purchases, meters, trend, recent_orders, auth } =
-        usePage().props;
+    const { stats, trend, recent_orders, auth } = usePage().props;
     const permissions = auth?.permissions ?? [];
     const can = (name) => permissions.includes(name);
     const firstName = auth?.user?.name?.split(' ')[0];
@@ -207,10 +326,7 @@ const Dashboard = () => {
             <Head title="Dashboard" />
             <PageHeader
                 title={`${greeting()}${firstName ? `, ${firstName}` : ''}`}
-                description={format(
-                    parseISO(trend[trend.length - 1].date),
-                    'EEEE, d MMMM yyyy',
-                )}
+                description={format(new Date(), 'EEEE, d MMMM yyyy')}
                 buttons={
                     <>
                         {can('reports.summary') && (
@@ -244,63 +360,14 @@ const Dashboard = () => {
                 }
             />
             <PageContent>
-                <div className="hf-stat-grid">
-                    <StatTile
-                        tone="navy"
-                        icon="solar:banknote-2-bold-duotone"
-                        label="Today's sales"
-                        value={<Amount value={sales.net} />}
-                        footer={
-                            <ChangeBadge
-                                current={sales.net}
-                                previous={sales.yesterday}
-                            />
-                        }
-                    />
-                    <StatTile
-                        tone="gold"
-                        icon="solar:ruler-cross-pen-bold-duotone"
-                        label="Meters sold"
-                        value={<Amount value={meters.sales.net} />}
-                        footer="Confirmed invoices today"
-                    />
-                    <StatTile
-                        tone="teal"
-                        icon="solar:bill-list-bold-duotone"
-                        label="Invoices"
-                        value={<Amount value={sales.invoices} />}
-                        footer={
-                            sales.invoices ? (
-                                <>
-                                    Avg{' '}
-                                    <Amount
-                                        value={Math.round(
-                                            sales.net / sales.invoices,
-                                        )}
-                                    />{' '}
-                                    per invoice
-                                </>
-                            ) : (
-                                'None confirmed yet'
-                            )
-                        }
-                    />
-                    <StatTile
-                        tone="slate"
-                        icon="solar:box-bold-duotone"
-                        label="Today's purchases"
-                        value={<Amount value={purchases.net} />}
-                        footer={
-                            <>
-                                <Amount value={meters.purchase} /> meters
-                                received
-                            </>
-                        }
-                    />
-                </div>
+                <Deferred data="stats" fallback={<StatGridSkeleton />}>
+                    <StatGrid stats={stats} />
+                </Deferred>
 
                 <div className="hf-dash-grid">
-                    <SalesTrend trend={trend} />
+                    <Deferred data="trend" fallback={<SalesTrendSkeleton />}>
+                        <SalesTrend trend={trend} />
+                    </Deferred>
                     <RecentOrders
                         rows={recent_orders}
                         canView={can('sales.orders.index')}

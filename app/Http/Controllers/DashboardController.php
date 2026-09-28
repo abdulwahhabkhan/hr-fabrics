@@ -21,6 +21,20 @@ class DashboardController extends Controller
     {
         $today = today();
 
+        return Inertia::render('dashboard', [
+            'stats' => Inertia::defer(fn (): array => $this->todayStats($today), 'stats'),
+            'trend' => Inertia::defer(fn (): array => $this->salesTrend($today), 'trend'),
+            'recent_orders' => $this->recentOrders(),
+        ]);
+    }
+
+    /**
+     * Today's confirmed sales and purchase totals for the KPI tiles.
+     *
+     * @return array{sales: array{net: int, yesterday: int, invoices: int}, purchases: array{net: int}, meters: array{purchase: int, sales: array{net: float}}}
+     */
+    protected function todayStats(CarbonInterface $today): array
+    {
         $sales = Order::query()
             ->confirmedOn($today)
             ->selectRaw('COUNT(*) invoices, SUM(net_total) total_amount, SUM(total_qty) total_qty')
@@ -31,7 +45,7 @@ class DashboardController extends Controller
             ->selectRaw('SUM(total) total_amount, SUM(total_qty) total_qty')
             ->first();
 
-        return Inertia::render('dashboard', [
+        return [
             'sales' => [
                 'net' => (int) $sales->total_amount,
                 'yesterday' => (int) Order::query()->confirmedOn($today->copy()->subDay())->sum('net_total'),
@@ -46,9 +60,7 @@ class DashboardController extends Controller
                     'net' => round($sales->total_qty ?? 0, 2),
                 ],
             ],
-            'trend' => $this->salesTrend($today),
-            'recent_orders' => $this->recentOrders(),
-        ]);
+        ];
     }
 
     /**
