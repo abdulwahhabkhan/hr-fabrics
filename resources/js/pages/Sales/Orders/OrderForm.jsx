@@ -294,7 +294,7 @@ const OrderForm = () => {
                     </Alert>
                 )}
 
-                <Panel theme="default">
+                <Panel theme="default" className="hf-table-panel">
                     <PanelHeader
                         heading={
                             <>

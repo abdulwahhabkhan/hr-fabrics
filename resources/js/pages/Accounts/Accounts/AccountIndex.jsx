@@ -31,7 +31,7 @@ const AccountIndex = () => {
                 <SearchFilter />
             </PageFilters>
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <AccountTable
                             accounts={data}

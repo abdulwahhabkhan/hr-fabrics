@@ -43,7 +43,7 @@ const Suppliers = () => {
             </PageFilters>
 
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <SupplierTable suppliers={data} onEdit={openForm} />
                         {data.length === 0 && <NoData label="No suppliers found." />}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import cx from 'classnames';
 
 import { Tooltip } from 'react-bootstrap';
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
@@ -9,7 +10,8 @@ import { confirmDelete, confirmSwal } from '@/util/swal';
 /**
  * Plain anchors need a string href; Wayfinder route helpers return `{ url, method }`.
  */
-const resolveHref = (href) => (href && typeof href === 'object' ? href.url : href);
+const resolveHref = (href) =>
+    href && typeof href === 'object' ? href.url : href;
 
 const resolveAction = (action, id) => {
     if (typeof action === 'function') {
@@ -258,52 +260,46 @@ export const Edit = (props) => {
 };
 /**
  *
+ * @param className
  * @param {React.AnchorHTMLAttributes<HTMLAnchorElement>} props
  * @returns {React.AnchorHTMLAttributes<HTMLAnchorElement>}
  */
-export const InertiaEdit = (props) => {
+export const InertiaEdit = ({ className, ...props }) => {
     return (
-        <>
-            <Link {...props}>
-                <OverlayTrigger
-                    placement={'bottom'}
-                    overlay={<Tooltip>Edit</Tooltip>}
-                >
-                    <Icon icon={'solar:pen-2-bold-duotone'} />
-                </OverlayTrigger>
-            </Link>
-        </>
+        <Link
+            {...props}
+            className={cx('hf-icon-btn hf-icon-btn--boxed', className)}
+        >
+            <OverlayTrigger
+                placement={'bottom'}
+                overlay={<Tooltip>Edit</Tooltip>}
+            >
+                <Icon icon={'solar:pen-2-bold-duotone'} />
+            </OverlayTrigger>
+        </Link>
     );
 };
 /**
  *
+ * @param className
+ * @param icon
+ * @param link_title
  * @param {React.AnchorHTMLAttributes<HTMLAnchorElement>} props
  * @returns {React.AnchorHTMLAttributes<HTMLAnchorElement>}
  */
-export const InertiaView = (props) => {
+export const InertiaView = ({ className, icon, link_title, ...props }) => {
     return (
-        <>
-            <Link {...props}>
-                <OverlayTrigger
-                    placement={'bottom'}
-                    overlay={
-                        <Tooltip>
-                            {props.link_title
-                                ? props.link_title
-                                : 'View Details'}
-                        </Tooltip>
-                    }
-                >
-                    <Icon
-                        icon={
-                            props.icon
-                                ? props.icon
-                                : 'solar:documents-bold-duotone'
-                        }
-                    />
-                </OverlayTrigger>
-            </Link>
-        </>
+        <Link
+            {...props}
+            className={cx('hf-icon-btn hf-icon-btn--boxed', className)}
+        >
+            <OverlayTrigger
+                placement={'bottom'}
+                overlay={<Tooltip>{link_title ?? 'View Details'}</Tooltip>}
+            >
+                <Icon icon={icon ?? 'solar:documents-bold-duotone'} />
+            </OverlayTrigger>
+        </Link>
     );
 };
 

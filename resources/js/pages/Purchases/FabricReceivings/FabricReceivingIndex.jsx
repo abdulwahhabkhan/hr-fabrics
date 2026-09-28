@@ -155,18 +155,14 @@ const FabricReceivingIndex = () => {
                                                     <td className="w-1 text-end">
                                                         <div className="hf-row-actions">
                                                             {can.view && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaView
-                                                                        href={fabricReceivings.show(id)}
-                                                                    />
-                                                                </span>
+                                                                <InertiaView
+                                                                    href={fabricReceivings.show(id)}
+                                                                />
                                                             )}
                                                             {can.edit && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaEdit
-                                                                        href={fabricReceivings.edit(id)}
-                                                                    />
-                                                                </span>
+                                                                <InertiaEdit
+                                                                    href={fabricReceivings.edit(id)}
+                                                                />
                                                             )}
                                                             {can.delete && (
                                                                 <span className="hf-icon-btn hf-icon-btn--boxed is-danger">

@@ -31,7 +31,7 @@ const ProductIndex = () => {
                 <ProductFilter />
             </PageFilters>
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <ProductTable
                             products={data}

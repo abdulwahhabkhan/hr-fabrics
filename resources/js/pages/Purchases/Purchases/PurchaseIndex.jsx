@@ -136,22 +136,18 @@ const PurchaseIndex = () => {
                                                     <td className="w-1 text-end">
                                                         <div className="hf-row-actions">
                                                             {can.view && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaView
-                                                                        href={pos.show(
-                                                                            id,
-                                                                        )}
-                                                                    />
-                                                                </span>
+                                                                <InertiaView
+                                                                    href={pos.show(
+                                                                        id,
+                                                                    )}
+                                                                />
                                                             )}
                                                             {can.edit && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaEdit
-                                                                        href={pos.edit(
-                                                                            id,
-                                                                        )}
-                                                                    />
-                                                                </span>
+                                                                <InertiaEdit
+                                                                    href={pos.edit(
+                                                                        id,
+                                                                    )}
+                                                                />
                                                             )}
                                                             {(can.delete ||
                                                                 can.inventory ||

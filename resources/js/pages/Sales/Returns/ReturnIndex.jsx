@@ -33,7 +33,7 @@ const ReturnIndex = () => {
             </PageFilters>
 
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <ReturnTable returns={data} canView={canView} />
                         {data.length === 0 && <NoData label="No sales returns found." />}

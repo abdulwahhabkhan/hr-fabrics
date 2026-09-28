@@ -104,18 +104,14 @@ const ReturnIndex = () => {
                                                     <td className="w-1 text-end">
                                                         <div className="hf-row-actions">
                                                             {can.view && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaView
-                                                                        href={por.show(id)}
-                                                                    />
-                                                                </span>
+                                                                <InertiaView
+                                                                    href={por.show(id)}
+                                                                />
                                                             )}
                                                             {can.edit && (
-                                                                <span className="hf-icon-btn hf-icon-btn--boxed">
-                                                                    <InertiaEdit
-                                                                        href={por.edit(id)}
-                                                                    />
-                                                                </span>
+                                                                <InertiaEdit
+                                                                    href={por.edit(id)}
+                                                                />
                                                             )}
                                                             {(can.inventory ||
                                                                 can.ledger ||

@@ -220,10 +220,11 @@ button.hf-icon-btn { padding: 0; }
   overflow: hidden;
 
   > .panel-body {
-    padding: 0 0 var(--hf-flush-inset);
+    padding: 0;
 
     > :not(.table-responsive) { margin-inline: var(--hf-flush-inset); }
     > .table-responsive + :not(.no-data) { margin-top: var(--hf-flush-inset); }
+    > :last-child:not(.table-responsive) { padding-bottom: var(--hf-flush-inset); }
   }
 
   .table {

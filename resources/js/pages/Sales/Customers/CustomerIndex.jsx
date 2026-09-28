@@ -34,7 +34,7 @@ const Customers = () => {
             </PageFilters>
 
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <CustomerTable customers={data} canUpdate={canUpdate} />
                         {data.length === 0 && <NoData label="No customers found." />}

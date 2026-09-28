@@ -51,7 +51,7 @@ const JournalIndex = () => {
                 <JournalFilter />
             </PageFilters>
             <PageContent>
-                <Panel>
+                <Panel className="hf-table-panel">
                     <PanelBody>
                         <JournalTable
                             vouchers={data}
