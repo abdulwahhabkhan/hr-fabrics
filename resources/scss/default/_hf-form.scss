@@ -288,3 +288,81 @@
     &__hint { display: none; }
   }
 }
+
+// Radio option cards (components/form/FormSection.jsx OptionCards)
+.hf-option-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: .6rem;
+
+  &.is-invalid .hf-option-card__box { border-color: #e3a79c; }
+}
+
+.hf-option-card {
+  position: relative;
+  margin: 0;
+  cursor: pointer;
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+
+  &__box {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    height: 100%;
+    padding: .6rem .75rem;
+    border: 1px solid var(--hf-border-strong);
+    border-radius: var(--hf-radius);
+    background: var(--hf-surface);
+    box-shadow: var(--hf-shadow-xs);
+    transition: border-color .12s var(--hf-ease), background .12s var(--hf-ease), box-shadow .12s var(--hf-ease);
+  }
+
+  &__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--hf-surface-2);
+    color: var(--hf-text-2);
+    transition: background .12s var(--hf-ease), color .12s var(--hf-ease);
+
+    svg { width: 18px; height: 18px; }
+  }
+
+  &__text { display: flex; flex-direction: column; min-width: 0; }
+  &__title { font-size: .8125rem; font-weight: 600; line-height: 1.3; color: var(--hf-text); }
+  &__desc { font-size: .72rem; line-height: 1.3; color: var(--hf-text-3); }
+
+  &__check {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-left: auto;
+    color: var(--hf-brand);
+    opacity: 0;
+    transform: scale(.6);
+    transition: opacity .12s var(--hf-ease), transform .12s var(--hf-ease);
+  }
+
+  &:hover input:not(:checked) + &__box { border-color: #bfb6a7; background: var(--hf-hover); }
+
+  input:checked + &__box {
+    border-color: rgba(var(--hf-brand-rgb), .6);
+    background: var(--hf-brand-50);
+    box-shadow: inset 0 0 0 1px rgba(var(--hf-brand-rgb), .35);
+  }
+  input:checked + &__box &__icon { background: var(--hf-surface); color: var(--hf-brand); }
+  input:checked + &__box &__check { opacity: 1; transform: scale(1); }
+  input:focus-visible + &__box { box-shadow: var(--hf-ring); }
+
+  &.is-disabled {
+    cursor: not-allowed;
+
+    .hf-option-card__box { border-style: dashed; background: var(--hf-surface-2); box-shadow: none; opacity: .7; }
+    &:hover .hf-option-card__box { border-color: var(--hf-border-strong); background: var(--hf-surface-2); }
+  }
+}

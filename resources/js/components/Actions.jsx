@@ -6,6 +6,11 @@ import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import { Inertia, Link, router } from '@/util/Inertia';
 import { confirmDelete, confirmSwal } from '@/util/swal';
 
+/**
+ * Plain anchors need a string href; Wayfinder route helpers return `{ url, method }`.
+ */
+const resolveHref = (href) => (href && typeof href === 'object' ? href.url : href);
+
 const resolveAction = (action, id) => {
     if (typeof action === 'function') {
         return action(id);
@@ -375,10 +380,11 @@ export const InertiaInventory = (props) => {
  * @param {React.AnchorHTMLAttributes<HTMLAnchorElement>} props
  * @returns {React.AnchorHTMLAttributes<HTMLAnchorElement>}
  */
-export const InertiaInventoryAction = (props) => {
+export const InertiaInventoryAction = ({ href, ...props }) => {
     return (
         <a
             {...props}
+            href={resolveHref(href)}
             className={'dropdown-item border-top justify-content-start'}
         >
             <Icon icon={'solar:clipboard-list-bold-duotone'} /> View Inventory
@@ -406,10 +412,11 @@ export const InertiaLedger = (props) => {
  *
  * @param {React.AnchorHTMLAttributes<HTMLAnchorElement>} props
  */
-export const InertiaLedgerAction = (props) => {
+export const InertiaLedgerAction = ({ href, ...props }) => {
     return (
         <a
             {...props}
+            href={resolveHref(href)}
             className={'dropdown-item border-top justify-content-start'}
         >
             <Icon icon={'stash:billing-info-duotone'} /> View Ledger

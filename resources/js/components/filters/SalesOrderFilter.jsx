@@ -1,45 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { Inertia, usePage } from "@/util/Inertia";
-import { usePrevious } from "react-use";
-import pickBy from "lodash/pickBy";
-import { FormControl, InputGroup } from "react-bootstrap";
-import FilterButton from "@/components/button/FilterButton.jsx";
+import React, { useEffect, useState } from 'react';
+import { Inertia, usePage } from '@/util/Inertia';
+import { usePrevious } from 'react-use';
+import pickBy from 'lodash/pickBy';
+import { FormControl, InputGroup } from 'react-bootstrap';
+import FilterButton from '@/components/button/FilterButton.jsx';
+
+const EMPTY_FILTERS = {
+    invoice_no: '',
+    customer_name: '',
+    customer_city: '',
+    paid: '',
+    status: '',
+};
 
 export default () => {
-    const { filters } = usePage().props;
+    const { filters = {} } = usePage().props;
 
-    const [values, setValues] = useState({
-        customer_name: filters.customer_name || "",
-        customer_city: filters.customer_city || "",
-        invoice_no: filters.invoice_no || "",
-        paid: filters.paid || "",
-        shipped: filters.shipped || "",
-    });
+    const [values, setValues] = useState(
+        Object.fromEntries(Object.keys(EMPTY_FILTERS).map((key) => [key, filters[key] ?? ''])),
+    );
 
     const prevValues = usePrevious(values);
 
     function reset() {
-        setValues({
-            customer_name: "",
-            invoice_no: "",
-            paid: "",
-            shipped: "",
-            customer_city: "",
-        });
+        setValues(EMPTY_FILTERS);
     }
 
     useEffect(() => {
-        // https://reactjs.org/docs/hooks-faq.html#how-to-get-the-previous-props-or-state
         if (prevValues) {
-            const { cancel, token } = axios.CancelToken.source();
+            const { cancel } = axios.CancelToken.source();
             const timeOutId = setTimeout(() => {
-                const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
+                const query = Object.keys(pickBy(values)).length
+                    ? pickBy(values)
+                    : { remember: 'forget' };
                 Inertia.get(window.location.pathname, query, {
                     replace: true,
                     preserveState: true,
                 });
-            }, 500);
-            return () => cancel("No longer latest query") || clearTimeout(timeOutId);
+            }, 400);
+            return () =>
+                cancel('No longer latest query') || clearTimeout(timeOutId);
         }
     }, [values]);
 
@@ -47,47 +47,38 @@ export default () => {
         const key = e.target.name;
         const value = e.target.value;
 
-        setValues((values) => ({
-            ...values,
+        setValues((prev) => ({
+            ...prev,
             [key]: value,
         }));
     }
 
-    function doSearch(e) {
-        e.preventDefault();
-        const query = Object.keys(pickBy(values)).length ? pickBy(values) : { remember: "forget" };
-        Inertia.get(window.location.pathname, query, {
-            replace: true,
-            preserveState: true,
-        });
-    }
-
     return (
-        <div className="default-search">
+        <div className="default-search mb-20px">
             <div>
-                <InputGroup className="mb-20px">
+                <InputGroup>
                     <FormControl
-                        placeholder="invoice no"
+                        placeholder="Invoice no"
                         type="text"
-                        name={"invoice_no"}
+                        name="invoice_no"
                         className="input-150"
                         autoComplete="off"
                         value={values.invoice_no}
                         onChange={handleChange}
                     />
                     <FormControl
-                        placeholder="customer name"
+                        placeholder="Search by customer name..."
                         type="text"
-                        name={"customer_name"}
+                        name="customer_name"
                         className="input-white"
                         autoComplete="off"
                         value={values.customer_name}
                         onChange={handleChange}
                     />
                     <FormControl
-                        placeholder="customer city"
+                        placeholder="City"
                         type="text"
-                        name={"customer_city"}
+                        name="customer_city"
                         className="input-150"
                         autoComplete="off"
                         value={values.customer_city}
@@ -95,46 +86,33 @@ export default () => {
                     />
                     <FormControl
                         as="select"
-                        name={"paid"}
+                        name="paid"
                         className="form-select input-150"
                         autoComplete="off"
                         value={values.paid}
                         onChange={handleChange}
                     >
-                        <option value={""}>Paid</option>
-                        <option value={1}>Yes</option>
-                        <option value={0}>No</option>
+                        <option value="">All Payments</option>
+                        <option value="1">Paid</option>
+                        <option value="0">Credit</option>
                     </FormControl>
-                    {/* <FormControl
-                        as="select"
-                        name={'shipped'}
-                        className="form-select input-150"
-                        autoComplete="off"
-                        value={values.shipped}
-                        onChange={handleChange}
-                    >
-                        <option value={''}>Shipped</option>
-                        <option value={1}>Yes</option>
-                        <option value={0}>No</option>
-                    </FormControl>*/}
                     <FormControl
                         as="select"
-                        name={"status"}
+                        name="status"
                         className="form-select input-150"
                         autoComplete="off"
                         value={values.status}
                         onChange={handleChange}
                     >
-                        <option value={""}>Status</option>
-                        <option value={1}>Close</option>
-                        <option value={0}>Open</option>
-                        <option value={2}>Cancel</option>
+                        <option value="">All Status</option>
+                        <option value="0">Open</option>
+                        <option value="1">Confirmed</option>
+                        <option value="2">Cancelled</option>
                     </FormControl>
-                    {/*<Button variant="primary" type={"submit"} >
-                        <Icon icon={"solar:magnifer-bold-duotone"} />&nbsp;Search
-                    </Button>*/}
 
-                    {Object.keys(pickBy(values)).length > 0 && <FilterButton onClick={reset} />}
+                    {Object.keys(pickBy(values)).length > 0 && (
+                        <FilterButton onClick={reset} />
+                    )}
                 </InputGroup>
             </div>
         </div>

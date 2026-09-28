@@ -58,10 +58,38 @@ export function SegmentedControl({ name, options, register, className }) {
     );
 }
 
-/** Right-aligned footer holding the form's Cancel / Save buttons. */
-export function FormActions({ hint, children }) {
+/**
+ * Radio group rendered as selectable cards (icon, title, description), registered through react-hook-form's `register`.
+ * Options may be `disabled`, e.g. a payment mode not allowed for the customer.
+ */
+export function OptionCards({ name, options, register, invalid = false, className }) {
     return (
-        <div className="hf-form-actions">
+        <div className={cx('hf-option-cards', { 'is-invalid': invalid }, className)} role="radiogroup">
+            {options.map(({ value, label, description, icon, disabled }) => (
+                <label key={value} className={cx('hf-option-card', { 'is-disabled': disabled })}>
+                    <input type="radio" value={value} disabled={disabled} {...register(name)} />
+                    <span className="hf-option-card__box">
+                        {icon && (
+                            <span className="hf-option-card__icon">
+                                <Icon icon={icon} />
+                            </span>
+                        )}
+                        <span className="hf-option-card__text">
+                            <span className="hf-option-card__title">{label}</span>
+                            {description && <span className="hf-option-card__desc">{description}</span>}
+                        </span>
+                        <Icon icon="solar:check-circle-bold" className="hf-option-card__check" />
+                    </span>
+                </label>
+            ))}
+        </div>
+    );
+}
+
+/** Right-aligned footer holding the form's Cancel / Save buttons. */
+export function FormActions({ hint, className, children }) {
+    return (
+        <div className={cx('hf-form-actions', className)}>
             {hint && <span className="hf-form-actions__hint">{hint}</span>}
             <div className="hf-form-actions__buttons">{children}</div>
         </div>

@@ -22,13 +22,13 @@ function Avatar({ user }) {
     );
 }
 
-/** Account button at the bottom of the sidebar; menu opens to the right. */
+/** Account button at the bottom of the sidebar; menu opens above it. */
 export default function SidebarUser() {
     const { auth } = usePage().props;
     const { user } = auth;
 
     return (
-        <Dropdown drop="end" className="hf-user">
+        <Dropdown drop="up" className="hf-user">
             <Dropdown.Toggle as="button" type="button" className="hf-user-toggle" bsPrefix="hf-user-toggle">
                 <Avatar user={user} />
                 <span className="hf-user-meta">

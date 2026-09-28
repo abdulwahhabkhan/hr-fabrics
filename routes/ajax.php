@@ -10,6 +10,7 @@ use App\Http\Controllers\Purchases\Return\DeleteReturnItemController;
 use App\Http\Controllers\Sales\Order\AddOrderItemController;
 use App\Http\Controllers\Sales\Order\DeleteOrderItemController;
 use App\Http\Controllers\Sales\Order\OrderController;
+use App\Http\Controllers\Sales\Order\ProductStockController;
 use App\Http\Controllers\Stock\InventoryController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,8 @@ Route::prefix('ajax')
             ->name('so.item.add');
         Route::delete('sales/items/{item}', DeleteOrderItemController::class)
             ->name('so.item.destroy');
+        Route::get('sales/products/{product}/stock', ProductStockController::class)
+            ->name('so.product.stock');
 
         // PO Item
         Route::get('purchases/items/{order}', [PurchaseController::class, 'orderItems'])
