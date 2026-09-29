@@ -28,9 +28,84 @@ const redirectWhenPasswordConfirmRequired = (httpResponse) => {
 
 const StatusBadge = ({ enabled }) => (
     <span className={`hf-pill ${enabled ? 'tone-green' : 'tone-red'} ms-2`}>
+        <Icon icon={enabled ? 'solar:check-circle-bold' : 'solar:close-circle-bold'} />
         {enabled ? 'Enabled' : 'Disabled'}
     </span>
 );
+
+const strengthLabels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+
+/** Rough 0–4 score from length and character variety; only drives the visual meter. */
+const passwordStrength = (password) => {
+    if (!password) {
+        return 0;
+    }
+
+    const varietyCount = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((pattern) => pattern.test(password)).length;
+    let score = Math.min(varietyCount, 3);
+
+    if (password.length >= 12) {
+        score += 1;
+    }
+
+    return password.length < 8 ? Math.min(score, 1) : score;
+};
+
+const StrengthMeter = ({ password }) => {
+    if (!password) {
+        return null;
+    }
+
+    const score = passwordStrength(password);
+
+    return (
+        <div className={`hf-settings-strength is-${score}`}>
+            <div className="hf-settings-strength__bars">
+                {[1, 2, 3, 4].map((bar) => (
+                    <span key={bar} className={bar <= score ? 'is-filled' : undefined} />
+                ))}
+            </div>
+            <span className="hf-settings-strength__label">{strengthLabels[score]}</span>
+        </div>
+    );
+};
+
+const PasswordInput = React.forwardRef(({ id, isInvalid, ...rest }, ref) => {
+    const [visible, setVisible] = useState(false);
+
+    return (
+        <div className="hf-settings-password">
+            <Form.Control ref={ref} id={id} type={visible ? 'text' : 'password'} isInvalid={isInvalid} {...rest} />
+            <button
+                type="button"
+                className="hf-settings-password__toggle"
+                onClick={() => setVisible((value) => !value)}
+                aria-label={visible ? 'Hide password' : 'Show password'}
+                aria-controls={id}
+            >
+                <Icon icon={visible ? 'solar:eye-closed-bold-duotone' : 'solar:eye-bold-duotone'} />
+            </button>
+        </div>
+    );
+});
+
+const CopyButton = ({ text, label = 'Copy' }) => {
+    const [copied, setCopied] = useState(false);
+
+    const copy = () => {
+        navigator.clipboard?.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    return (
+        <button type="button" className="btn btn-white" onClick={copy}>
+            <Icon icon={copied ? 'solar:check-read-bold' : 'solar:copy-bold-duotone'} className="me-1" />
+            {copied ? 'Copied' : label}
+        </button>
+    );
+};
 
 const UpdatePasswordSection = () => {
     const currentPasswordInput = useRef(null);
@@ -63,16 +138,16 @@ const UpdatePasswordSection = () => {
 
     const field = (name, label, ref, autoComplete) => (
         <FormField label={label} htmlFor={name}>
-            <Form.Control
+            <PasswordInput
                 ref={ref}
                 id={name}
                 name={name}
-                type="password"
                 value={data[name]}
                 autoComplete={autoComplete}
                 isInvalid={Boolean(errors[name])}
                 onChange={(e) => setData(name, e.target.value)}
             />
+            {name === 'password' && <StrengthMeter password={data.password} />}
             {errors[name] && <div className="invalid-feedback d-block">{errors[name]}</div>}
         </FormField>
     );
@@ -80,20 +155,28 @@ const UpdatePasswordSection = () => {
     return (
         <section className="hf-settings-section">
             <HeadingSmall
+                icon="solar:lock-password-bold-duotone"
                 title="Update password"
                 description="Ensure your account is using a long, random password to stay secure."
             />
 
             <form onSubmit={submit} className="hf-settings-fields">
                 {field('current_password', 'Current password', currentPasswordInput, 'current-password')}
-                {field('password', 'New password', passwordInput, 'new-password')}
-                {field('password_confirmation', 'Confirm password', null, 'new-password')}
+                <div className="hf-settings-grid">
+                    {field('password', 'New password', passwordInput, 'new-password')}
+                    {field('password_confirmation', 'Confirm password', null, 'new-password')}
+                </div>
 
                 <div className="hf-settings-actions">
                     <LoadingButton type="submit" variant="theme" processing={processing}>
                         Save password
                     </LoadingButton>
-                    {recentlySuccessful && <span className="hf-settings-saved">Saved.</span>}
+                    {recentlySuccessful && (
+                        <span className="hf-settings-saved">
+                            <Icon icon="solar:check-circle-bold" />
+                            Password updated
+                        </span>
+                    )}
                 </div>
             </form>
         </section>
@@ -104,6 +187,7 @@ const TwoFactorSection = ({ initialEnabled }) => {
     const [enabled, setEnabled] = useState(initialEnabled);
     const [setupOpen, setSetupOpen] = useState(false);
     const [qr, setQr] = useState(null);
+    const [secretKey, setSecretKey] = useState(null);
     const [recoveryCodes, setRecoveryCodes] = useState(null);
     const http = useHttp({ code: '' });
 
@@ -121,6 +205,10 @@ const TwoFactorSection = ({ initialEnabled }) => {
                     onSuccess: (response) => {
                         setQr(response);
                         setSetupOpen(true);
+                        http.get(twoFactor.secretKey().url, {
+                            onSuccess: (keyResponse) => setSecretKey(keyResponse.secretKey),
+                            onHttpException: redirectWhenPasswordConfirmRequired,
+                        });
                     },
                     onHttpException: redirectWhenPasswordConfirmRequired,
                 });
@@ -132,6 +220,7 @@ const TwoFactorSection = ({ initialEnabled }) => {
     const cancelSetup = () => {
         setSetupOpen(false);
         setQr(null);
+        setSecretKey(null);
         http.setData('code', '');
     };
 
@@ -169,18 +258,24 @@ const TwoFactorSection = ({ initialEnabled }) => {
     return (
         <section className="hf-settings-section">
             <HeadingSmall
+                icon="solar:shield-check-bold-duotone"
                 title="Two-factor authentication"
-                description="Manage your two-factor authentication settings."
+                description="Add an extra layer of security to your account."
                 badge={<StatusBadge enabled={enabled} />}
             />
 
             {!enabled && !setupOpen && (
                 <div className="hf-settings-fields">
-                    <p className="hf-settings-text">
-                        When you enable two-factor authentication, you will be prompted for a secure
-                        code during login. This code can be retrieved from a TOTP-supported
-                        application on your phone.
-                    </p>
+                    <div className="hf-settings-callout tone-warning">
+                        <Icon icon="solar:shield-warning-bold-duotone" />
+                        <div>
+                            <div className="hf-settings-callout__title">Your account is protected by a password only</div>
+                            <div className="hf-settings-callout__desc">
+                                When enabled, you will be prompted for a secure code during login. The code
+                                comes from a TOTP app on your phone, such as Google Authenticator or 1Password.
+                            </div>
+                        </div>
+                    </div>
                     <div className="hf-settings-actions">
                         <LoadingButton variant="theme" processing={http.processing} onClick={startSetup}>
                             Enable 2FA
@@ -191,30 +286,54 @@ const TwoFactorSection = ({ initialEnabled }) => {
 
             {setupOpen && qr && (
                 <form onSubmit={confirm} className="hf-settings-fields">
-                    <p className="hf-settings-text">
-                        Scan this QR code with your authenticator app, then enter the 6-digit code it
-                        generates.
-                    </p>
-                    <div className="hf-settings-qr" dangerouslySetInnerHTML={{ __html: qr.svg }} />
-                    <FormField label="Authentication code" htmlFor="code">
-                        <Form.Control
-                            id="code"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            maxLength={6}
-                            autoFocus
-                            isInvalid={Boolean(http.errors.code)}
-                            value={http.data.code}
-                            onChange={(e) => http.setData('code', e.target.value)}
-                        />
-                        {http.errors.code && <div className="invalid-feedback d-block">{http.errors.code}</div>}
-                    </FormField>
+                    <ol className="hf-settings-steps">
+                        <li>
+                            <div className="hf-settings-steps__title">Scan the QR code</div>
+                            <div className="hf-settings-steps__desc">
+                                Open your authenticator app and scan this code.
+                            </div>
+                            <div className="hf-settings-setup">
+                                <div className="hf-settings-qr" dangerouslySetInnerHTML={{ __html: qr.svg }} />
+                                {secretKey && (
+                                    <div className="hf-settings-secret">
+                                        <div className="hf-settings-secret__label">Can't scan? Enter this key</div>
+                                        <code>{secretKey}</code>
+                                        <CopyButton text={secretKey} label="Copy key" />
+                                    </div>
+                                )}
+                            </div>
+                        </li>
+                        <li>
+                            <div className="hf-settings-steps__title">Enter the 6-digit code</div>
+                            <div className="hf-settings-steps__desc">Type the code your app generates to confirm.</div>
+                            <FormField label="Authentication code" htmlFor="code">
+                                <Form.Control
+                                    id="code"
+                                    className="hf-settings-otp"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    autoFocus
+                                    isInvalid={Boolean(http.errors.code)}
+                                    value={http.data.code}
+                                    onChange={(e) => http.setData('code', e.target.value.replace(/\D/g, ''))}
+                                />
+                                {http.errors.code && <div className="invalid-feedback d-block">{http.errors.code}</div>}
+                            </FormField>
+                        </li>
+                    </ol>
                     <div className="hf-settings-actions">
                         <button type="button" className="btn btn-white" onClick={cancelSetup}>
                             Cancel
                         </button>
-                        <LoadingButton type="submit" variant="theme" processing={http.processing}>
-                            Confirm
+                        <LoadingButton
+                            type="submit"
+                            variant="theme"
+                            disabled={http.data.code.length !== 6}
+                            processing={http.processing}
+                        >
+                            Confirm & enable
                         </LoadingButton>
                     </div>
                 </form>
@@ -222,20 +341,24 @@ const TwoFactorSection = ({ initialEnabled }) => {
 
             {enabled && (
                 <div className="hf-settings-fields">
-                    <p className="hf-settings-text">
-                        With two-factor authentication enabled, you will be prompted for a secure,
-                        random code during login, which you can retrieve from your TOTP-supported
-                        application.
-                    </p>
+                    <div className="hf-settings-callout tone-success">
+                        <Icon icon="solar:shield-check-bold-duotone" />
+                        <div>
+                            <div className="hf-settings-callout__title">Two-factor authentication is on</div>
+                            <div className="hf-settings-callout__desc">
+                                You will be asked for a code from your authenticator app each time you sign in.
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="hf-settings-card">
                         <div className="hf-settings-card__head">
-                            <Icon icon="solar:lock-keyhole-bold-duotone" />
+                            <Icon icon="solar:key-square-2-bold-duotone" />
                             <div>
-                                <div className="hf-settings-card__title">2FA recovery codes</div>
+                                <div className="hf-settings-card__title">Recovery codes</div>
                                 <div className="hf-settings-card__desc">
-                                    Recovery codes let you regain access if you lose your 2FA device.
-                                    Store them in a secure password manager.
+                                    Use one to sign in if you lose your 2FA device. Each code works once —
+                                    store them in a secure password manager.
                                 </div>
                             </div>
                         </div>
@@ -251,20 +374,21 @@ const TwoFactorSection = ({ initialEnabled }) => {
                         <div className="hf-settings-actions">
                             {recoveryCodes ? (
                                 <>
-                                    <button
-                                        type="button"
-                                        className="btn btn-white"
-                                        onClick={() => setRecoveryCodes(null)}
-                                    >
-                                        Hide recovery codes
-                                    </button>
+                                    <CopyButton text={recoveryCodes.join('\n')} label="Copy codes" />
                                     <LoadingButton
                                         variant="white"
                                         processing={http.processing}
                                         onClick={regenerateRecoveryCodes}
                                     >
-                                        Regenerate codes
+                                        Regenerate
                                     </LoadingButton>
+                                    <button
+                                        type="button"
+                                        className="btn btn-link text-muted ms-auto"
+                                        onClick={() => setRecoveryCodes(null)}
+                                    >
+                                        Hide
+                                    </button>
                                 </>
                             ) : (
                                 <LoadingButton
@@ -278,7 +402,11 @@ const TwoFactorSection = ({ initialEnabled }) => {
                         </div>
                     </div>
 
-                    <div className="hf-settings-actions">
+                    <div className="hf-settings-danger">
+                        <div>
+                            <div className="hf-settings-danger__title">Disable two-factor authentication</div>
+                            <div className="hf-settings-danger__desc">Your account will be protected by a password only.</div>
+                        </div>
                         <LoadingButton variant="danger" processing={http.processing} onClick={disable}>
                             Disable 2FA
                         </LoadingButton>
@@ -322,6 +450,7 @@ const PasskeysSection = ({ passkeys }) => {
     return (
         <section className="hf-settings-section">
             <HeadingSmall
+                icon="solar:key-minimalistic-square-2-bold-duotone"
                 title="Passkeys"
                 description="Sign in without a password using your device's fingerprint, face or screen lock."
             />

@@ -455,6 +455,33 @@ body {
     font-weight: 500;
     color: var(--hf-text-2) !important;
   }
+
+  .no-data-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--hf-hover);
+    color: var(--hf-text-3);
+    font-size: 1.75rem;
+  }
+
+  .no-data-description {
+    max-width: 26rem;
+    margin-inline: auto;
+    font-size: .8125rem;
+    font-weight: 400;
+    color: var(--hf-text-3);
+  }
+
+  .no-data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+  }
 }
 
 // Row action icons as quiet icon buttons

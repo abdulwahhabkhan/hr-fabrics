@@ -6,13 +6,17 @@ import { PageContent, PageHeader } from '@/components/page.jsx';
 import profile from '@/routes/profile';
 
 const navItems = [
-    { title: 'Profile', href: profile.index(), icon: 'solar:user-bold-duotone' },
-    { title: 'Security', href: profile.security(), icon: 'solar:shield-keyhole-bold-duotone' },
+    { title: 'Profile', description: 'Name, email & role', href: profile.index(), icon: 'solar:user-bold-duotone' },
+    {
+        title: 'Security',
+        description: 'Password, 2FA & passkeys',
+        href: profile.security(),
+        icon: 'solar:shield-keyhole-bold-duotone',
+    },
 ];
 
 /**
- * Settings shell (Laravel React starter kit style): side nav on the left,
- * the active settings page on the right.
+ * Settings shell: horizontal tab bar across the top, the active settings page below.
  */
 export default function SettingLayout({ children }) {
     const { url } = usePage();
@@ -23,18 +27,27 @@ export default function SettingLayout({ children }) {
             <PageHeader title="Settings" description="Manage your profile and account settings" />
             <PageContent>
                 <div className="hf-settings">
-                    <nav className="hf-settings__nav" aria-label="Settings">
-                        {navItems.map((item) => (
-                            <InertiaLink
-                                key={item.title}
-                                href={item.href}
-                                className={cx('hf-settings__link', { 'is-active': currentPath === item.href.url })}
-                                aria-current={currentPath === item.href.url ? 'page' : undefined}
-                            >
-                                <Icon icon={item.icon} />
-                                {item.title}
-                            </InertiaLink>
-                        ))}
+                    <nav className="hf-settings__tabs" aria-label="Settings">
+                        {navItems.map((item) => {
+                            const isActive = currentPath === item.href.url;
+
+                            return (
+                                <InertiaLink
+                                    key={item.title}
+                                    href={item.href}
+                                    className={cx('hf-settings__tab', { 'is-active': isActive })}
+                                    aria-current={isActive ? 'page' : undefined}
+                                >
+                                    <span className="hf-settings__tab-icon">
+                                        <Icon icon={item.icon} />
+                                    </span>
+                                    <span className="hf-settings__tab-text">
+                                        <span className="hf-settings__tab-title">{item.title}</span>
+                                        <span className="hf-settings__tab-desc">{item.description}</span>
+                                    </span>
+                                </InertiaLink>
+                            );
+                        })}
                     </nav>
                     <div className="hf-settings__body">{children}</div>
                 </div>

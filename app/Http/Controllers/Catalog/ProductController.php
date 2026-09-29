@@ -38,7 +38,7 @@ class ProductController extends Controller
             'Catalog/Products/ProductIndex',
             [
                 'products' => $products,
-                'filters' => $request->only(['product_name', 'vendor_name', 'vendor']),
+                'filters' => $request->only(['product_name', 'vendor_name', 'has_vendor']),
                 'canAdd' => $request->user()->can('catalog.products.store'),
                 'canUpdate' => $request->user()->can('catalog.products.update'),
                 'canDelete' => $request->user()->can('catalog.products.destroy'),
