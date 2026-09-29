@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Catalog;
 
+use App\Models\Accounts\Account;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Finish;
 use App\Models\Catalog\Product;
@@ -87,6 +88,13 @@ class ProductFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_available' => true,
+        ]);
+    }
+
+    public function suppliedBy(Account|int $supplier): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'vendor_id' => $supplier instanceof Account ? $supplier->id : $supplier,
         ]);
     }
 }

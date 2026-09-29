@@ -74,7 +74,7 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
             .catch((error) => {
                 const fieldErrors = error.response?.data?.errors ?? {};
                 Object.entries(fieldErrors).forEach(([field, messages]) => {
-                    setError(field, { type: 'server', message: messages[0] });
+                    setError(field === 'product_id' ? 'product' : field, { type: 'server', message: messages[0] });
                 });
                 serverSideError(error);
             })

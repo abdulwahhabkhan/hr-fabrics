@@ -80,6 +80,12 @@ final class Product extends Model
     }
 
     #[Scope]
+    protected function suppliedBy(Builder $query, int $supplierId): Builder
+    {
+        return $query->where(self::qCol('vendor_id'), $supplierId);
+    }
+
+    #[Scope]
     protected function available(Builder $query): Builder
     {
         $subQuery = Inventory::query()

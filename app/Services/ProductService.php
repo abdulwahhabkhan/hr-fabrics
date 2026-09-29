@@ -31,9 +31,10 @@ class ProductService
     /**
      * @return Collection<int, Product>
      */
-    public function getPORProducts(): Collection
+    public function getPORProducts(?int $supplierId = null): Collection
     {
         return Product::query()
+            ->when($supplierId, fn ($query, $supplierId) => $query->suppliedBy($supplierId))
             ->addSelect([
                 'purchased_price' => PurchaseItem::query()
                     ->select('price')

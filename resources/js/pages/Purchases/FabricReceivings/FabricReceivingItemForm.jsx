@@ -72,6 +72,12 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
         setTimeout(() => productRef.current?.focus(), 0);
     };
 
+    /** Keeps voucher, product, unit and size for the next entry; only the quantity is cleared. */
+    const resetQuantity = () => {
+        setValue('qty', '');
+        setTimeout(() => setFocus('qty'), 0);
+    };
+
     const sendRequest = async (data) => {
         setProcessing(true);
         axios({
@@ -86,7 +92,7 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                 if (isEdit) {
                     onClose();
                 } else {
-                    resetForm(data);
+                    resetQuantity();
                 }
             })
             .catch((error) => {

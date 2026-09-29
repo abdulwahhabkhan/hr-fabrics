@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PackingType;
+use App\Models\Accounts\Account;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\Purchase;
@@ -58,6 +59,17 @@ it('leaves the purchase price null when the product has no receipt history', fun
     $products = $this->service->getPORProducts();
 
     expect($products->firstWhere('id', $product->id)->purchased_price)->toBeNull();
+});
+
+it('limits return products to the given supplier', function () {
+    $supplier = Account::factory()->supplier()->create();
+    $supplied = Product::factory()->suppliedBy($supplier)->create();
+    $otherSupplierProduct = Product::factory()->suppliedBy(Account::factory()->supplier()->create())->create();
+
+    $products = $this->service->getPORProducts($supplier->id);
+
+    expect($products->pluck('id'))->toContain($supplied->id)
+        ->not->toContain($otherSupplierProduct->id);
 });
 
 it('only returns products that have available inventory', function () {

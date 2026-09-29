@@ -130,7 +130,7 @@ class PurchaseReturnController extends Controller
         $this->authorize('update', $por);
         $productService = resolve(ProductService::class);
         $por->load(['supplier:id,name', 'itemsWithProduct']);
-        $products = $productService->getPORProducts();
+        $products = $productService->getPORProducts($por->supplier_id);
 
         return Inertia::render(
             'Purchases/Returns/ReturnForm',

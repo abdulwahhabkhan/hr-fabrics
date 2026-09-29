@@ -4,6 +4,7 @@
 
 use App\Enums\PackingType;
 use App\Enums\ReturnStatus;
+use App\Models\Accounts\Account;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\PurchaseReturn;
 use App\Models\Purchase\PurchaseReturnItem;
@@ -27,7 +28,7 @@ test('add item to return and allocate exact inventory',
         $qty = fake()->numberBetween(1, 5);
         $size = fake()->numberBetween(1, 10);
         $rate = fake()->numberBetween(10, 100);
-        $product = $productFactory->create();
+        $product = $productFactory->suppliedBy($this->return->supplier_id)->create();
         /** @var Inventory $inventory */
         $inventory = Inventory::factory()
             ->withPurchase()
@@ -95,7 +96,7 @@ it('allocates partial inventory and splits line', function () {
     $qtyRequested = 3;
     $size = 5; // meters per unit
     $rate = 20;
-    $product = Product::factory()->suit()->create();
+    $product = Product::factory()->suit()->suppliedBy($this->return->supplier_id)->create();
     /** @var Inventory $inv */
     $inv = Inventory::factory()
         ->withPurchase()
@@ -147,7 +148,7 @@ it('allocates partial inventory and splits line', function () {
 
 it('allocates across multiple inventory lines in fifo order', function () {
     // Arrange
-    $product = Product::factory()->suit()->create();
+    $product = Product::factory()->suit()->suppliedBy($this->return->supplier_id)->create();
     $rate = 20;
     /** @var Inventory $older */
     $older = Inventory::factory()
@@ -219,7 +220,7 @@ it('allocates across multiple inventory lines in fifo order', function () {
 
 it('rejects the request when available stock cannot fulfil the requested quantity', function () {
     // Arrange
-    $product = Product::factory()->suit()->create();
+    $product = Product::factory()->suit()->suppliedBy($this->return->supplier_id)->create();
     Inventory::factory()
         ->withPurchase()
         ->create([
@@ -295,4 +296,23 @@ it('forbids adding an item to a return that is not open', function () {
 
     // Assert
     $response->assertForbidden();
+});
+
+it('rejects a product that is not supplied by the return supplier', function () {
+    // Arrange
+    $payload = [
+        'product_id' => Product::factory()->suit()->suppliedBy(Account::factory()->supplier()->create())->create()->id,
+        'unit' => PackingType::Suit->name,
+        'qty' => 1,
+        'size' => 5,
+        'rate' => 20,
+        'total_qty' => 5,
+    ];
+
+    // Action
+    $response = postJson(route('ajax.return.item.save', $this->return->id), $payload);
+
+    // Assert
+    $response->assertJsonValidationErrors(['product_id' => 'The selected product is not supplied by this supplier.']);
+    assertDatabaseCount(PurchaseReturnItem::class, 0);
 });
