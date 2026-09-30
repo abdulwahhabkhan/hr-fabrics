@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import cx from 'classnames';
 import { Icon } from '@iconify/react';
 import { InertiaLink, usePage } from '@/util/Inertia';
@@ -42,6 +42,99 @@ function FlyoutLink({ item, onNavigate }) {
         <InertiaLink href={item.path} className={cx('hf-flyout-link', { 'is-active': item.active })} onClick={onNavigate}>
             {item.title}
         </InertiaLink>
+    );
+}
+
+/**
+ * Collapsed-mode cascading row: shows the group title only; its links open in
+ * a nested panel on hover, click, focus or ArrowRight.
+ */
+function FlyoutGroup({ group, isOpen, onOpen, onToggle, onNavigate }) {
+    const panelRef = useRef(null);
+
+    // Keep the nested panel inside the viewport (groups near the bottom shift up).
+    useLayoutEffect(() => {
+        const panel = panelRef.current;
+
+        if (!isOpen || !panel) {
+            return;
+        }
+
+        panel.style.transform = '';
+        const overflow = panel.getBoundingClientRect().bottom - window.innerHeight + 12;
+
+        if (overflow > 0) {
+            panel.style.transform = `translateY(-${overflow}px)`;
+        }
+    }, [isOpen]);
+
+    return (
+        <div className={cx('hf-flyout-group', { 'is-open': isOpen, 'is-active': group.active })} onMouseEnter={onOpen}>
+            <button
+                type="button"
+                className={cx('hf-flyout-link hf-flyout-group-toggle', { 'is-active': group.active })}
+                aria-haspopup="menu"
+                aria-expanded={isOpen}
+                onClick={onToggle}
+                onFocus={onOpen}
+                onKeyDown={(event) => {
+                    if (event.key === 'ArrowRight') {
+                        event.preventDefault();
+                        onOpen();
+                        requestAnimationFrame(() => panelRef.current?.querySelector('a')?.focus());
+                    }
+                }}
+            >
+                <span>{group.title}</span>
+                <SidebarGlyph name="chevronRight" size={12} className="hf-flyout-caret" />
+            </button>
+            <div
+                ref={panelRef}
+                className="hf-flyout hf-flyout-nested"
+                role="menu"
+                onKeyDown={(event) => {
+                    if (event.key === 'ArrowLeft') {
+                        event.preventDefault();
+                        event.currentTarget.previousElementSibling?.focus();
+                    }
+                }}
+            >
+                <div className="hf-flyout-title">{group.title}</div>
+                {group.children.map((link) => (
+                    <FlyoutLink key={link.name} item={link} onNavigate={onNavigate} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Collapsed-mode flyout: first level lists the section's children; nested
+ * groups cascade to the right, one at a time.
+ */
+function Flyout({ item, onNavigate }) {
+    const [openGroup, setOpenGroup] = useState(null);
+
+    return (
+        <div className="hf-flyout" role="menu" onMouseLeave={() => setOpenGroup(null)}>
+            <div className="hf-flyout-title">{item.title}</div>
+            {item.children.map((child) =>
+                child.children.length ? (
+                    <FlyoutGroup
+                        key={child.name}
+                        group={child}
+                        isOpen={openGroup === child.name}
+                        onOpen={() => setOpenGroup(child.name)}
+                        onToggle={() => setOpenGroup((open) => (open === child.name ? null : child.name))}
+                        onNavigate={onNavigate}
+                    />
+                ) : (
+                    <div key={child.name} onMouseEnter={() => setOpenGroup(null)}>
+                        <FlyoutLink item={child} onNavigate={onNavigate} />
+                    </div>
+                ),
+            )}
+        </div>
     );
 }
 
@@ -195,23 +288,13 @@ export default function SidebarNav({ collapsed = false }) {
                             )}
 
                             {/* Collapsed-mode flyout (hidden in expanded mode via CSS). */}
-                            <div className="hf-flyout" role="menu">
-                                <div className="hf-flyout-title">{item.title}</div>
-                                {hasChildren ? (
-                                    item.children.map((child) =>
-                                        child.children.length ? (
-                                            <div key={child.name} className="hf-flyout-group">
-                                                <div className="hf-flyout-group-title">{child.title}</div>
-                                                {child.children.map((link) => (
-                                                    <FlyoutLink key={link.name} item={link} onNavigate={() => setPinnedFlyout(null)} />
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <FlyoutLink key={child.name} item={child} onNavigate={() => setPinnedFlyout(null)} />
-                                        ),
-                                    )
-                                ) : null}
-                            </div>
+                            {hasChildren ? (
+                                <Flyout item={item} onNavigate={() => setPinnedFlyout(null)} />
+                            ) : (
+                                <div className="hf-flyout" role="tooltip">
+                                    <div className="hf-flyout-title">{item.title}</div>
+                                </div>
+                            )}
                         </div>
                     </React.Fragment>
                 );

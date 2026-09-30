@@ -515,6 +515,22 @@
       .hf-nav-icon { background: var(--hf-navy); color: var(--hf-gold); }
     }
 
+    // Cascading groups: row shows the title, its links open in a side panel.
+    .hf-flyout-group { position: relative; }
+    .hf-flyout-nested {
+      top: calc(-.375rem - 1px);
+      left: calc(100% + .75rem);
+      min-width: 190px;
+    }
+    .hf-flyout-group.is-open > .hf-flyout-nested {
+      display: block;
+      animation: hf-subnav-in .14s var(--hf-ease);
+    }
+    .hf-flyout-group.is-open > .hf-flyout-group-toggle {
+      background: var(--hf-hover);
+      color: var(--hf-text);
+    }
+
     // Items without children: flyout is just a label (acts as tooltip)
     .hf-flyout:not(:has(.hf-flyout-link)) {
       min-width: 0;
@@ -537,24 +553,6 @@
   color: var(--hf-navy);
   white-space: nowrap;
 }
-// Grouped flyouts (e.g. Reports) split into two columns so they stay short.
-.hf-flyout:has(.hf-flyout-group) {
-  column-count: 2;
-  column-gap: .25rem;
-  min-width: 440px;
-
-  .hf-flyout-title { column-span: all; }
-}
-.hf-flyout-group { break-inside: avoid; padding-bottom: .25rem; }
-.hf-flyout-group-title {
-  padding: .4rem .625rem .2rem;
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--hf-text-3);
-  white-space: nowrap;
-}
 .hf-flyout-link {
   display: block;
   font-size: .78rem;
@@ -567,6 +565,19 @@
   &:hover { background: var(--hf-hover); color: var(--hf-text); }
   &.is-active { background: var(--hf-gold-50); color: var(--hf-gold-text); font-weight: 600; }
 }
+.hf-flyout-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+
+  span { flex: 1; }
+}
+.hf-flyout-caret { flex: none; opacity: .6; }
+.hf-flyout-group.is-open .hf-flyout-caret { opacity: 1; }
 
 // ---------------------------------------------------------------------------
 // Mobile / tablet: off-canvas drawer
@@ -646,5 +657,5 @@
 @keyframes hf-fade { from { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .hf-sidebar, .hf-subnav, .hf-subnav-inner, .hf-nav-caret, .hf-flyout, .hf-sidebar-backdrop { transition: none !important; animation: none !important; }
+  .hf-sidebar, .hf-subnav, .hf-subnav-inner, .hf-nav-caret, .hf-flyout, .hf-flyout-nested, .hf-sidebar-backdrop { transition: none !important; animation: none !important; }
 }
