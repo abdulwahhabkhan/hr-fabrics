@@ -1,13 +1,14 @@
 <?php
 
 use App\Enums\AccountType;
+use App\Facades\Permission;
 use App\Models\Accounts\Account;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     $user = $this->getAdmin();
     $this->actingAs($user);
-    $this->fakeHavePermission();
+    Permission::fake(['accounts.*' => true]);
 });
 
 test('account index page can be rendered', function () {
@@ -149,4 +150,56 @@ test('account can be deleted', function () {
     $response->assertRedirect(route('accounts.accounts.index'));
     $response->assertSessionHas('success', 'Account deleted Successfully');
     $this->assertSoftDeleted(Account::class, ['id' => $account->id]);
+});
+
+test('account index marks system accounts as not editable or deletable', function () {
+    // Arrange
+    Account::factory()->expense()->system()->create();
+
+    // Act
+    $response = $this->get(route('accounts.accounts.index'));
+
+    // Assert
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('accounts.data.0.can.update', false)
+        ->where('accounts.data.0.can.delete', false)
+    );
+});
+
+test('system account edit page is forbidden', function () {
+    // Arrange
+    $account = Account::factory()->expense()->system()->create();
+
+    // Act
+    $response = $this->get(route('accounts.accounts.edit', $account));
+
+    // Assert
+    $response->assertForbidden();
+});
+
+test('system account cannot be updated', function () {
+    // Arrange
+    $account = Account::factory()->expense()->system()->create(['name' => 'Cash']);
+
+    // Act
+    $response = $this->put(route('accounts.accounts.update', $account), [
+        'name' => 'Renamed',
+        'type' => AccountType::Expenses->value,
+    ]);
+
+    // Assert
+    $response->assertForbidden();
+    expect($account->fresh()->name)->toBe('Cash');
+});
+
+test('system account cannot be deleted', function () {
+    // Arrange
+    $account = Account::factory()->expense()->system()->create();
+
+    // Act
+    $response = $this->delete(route('accounts.accounts.destroy', $account));
+
+    // Assert
+    $response->assertForbidden();
+    $this->assertNotSoftDeleted(Account::class, ['id' => $account->id]);
 });

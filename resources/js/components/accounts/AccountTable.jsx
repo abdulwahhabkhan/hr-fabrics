@@ -23,7 +23,7 @@ export default function AccountTable({ accounts, startIndex = 1, canUpdate, canD
                     </tr>
                 </thead>
                 <tbody>
-                    {accounts.map(({ id, name, type, updated_at, commission_rate }, index) => (
+                    {accounts.map(({ id, name, type, updated_at, commission_rate, can = {} }, index) => (
                         <tr key={id}>
                             <td className="text-center hf-muted-value hf-mono">{startIndex + index}</td>
                             <td>
@@ -46,7 +46,7 @@ export default function AccountTable({ accounts, startIndex = 1, canUpdate, canD
                             {showActions && (
                                 <td className="text-end">
                                     <div className="hf-row-actions">
-                                        {canUpdate && (
+                                        {canUpdate && can.update && (
                                             <InertiaLink
                                                 href={accountsRoutes.edit(id)}
                                                 className="hf-icon-btn hf-icon-btn--boxed"
@@ -56,7 +56,7 @@ export default function AccountTable({ accounts, startIndex = 1, canUpdate, canD
                                                 <Icon icon="solar:pen-2-bold-duotone" />
                                             </InertiaLink>
                                         )}
-                                        {canDelete && (
+                                        {canDelete && can.delete && (
                                             <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
                                                 <Delete action={accountsRoutes.destroy} id={id} />
                                             </span>

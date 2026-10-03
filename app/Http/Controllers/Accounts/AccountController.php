@@ -26,7 +26,11 @@ class AccountController extends Controller
             ->filterContain('name', $request->input('search'))
             ->filterWhere('type', $request->input('type'))
             ->orderby('updated_at', 'desc')->paginate()
-            ->appends($filters);
+            ->appends($filters)
+            ->through(fn (Account $account): Account => $account->setAttribute('can', [
+                'update' => $request->user()->can('update', $account),
+                'delete' => $request->user()->can('delete', $account),
+            ]));
 
         return Inertia::render('Accounts/Accounts/AccountIndex',
             [
@@ -69,6 +73,8 @@ class AccountController extends Controller
      */
     public function edit(Account $account): Response
     {
+        $this->authorize('update', $account);
+
         return Inertia::render('Accounts/Accounts/AccountForm',
             [
                 'account' => $account,
@@ -81,6 +87,8 @@ class AccountController extends Controller
      */
     public function update(AccountRequest $request, Account $account): RedirectResponse
     {
+        $this->authorize('update', $account);
+
         $data = $request->validated();
         $account->update($data);
 
@@ -93,6 +101,8 @@ class AccountController extends Controller
      */
     public function destroy(Account $account): RedirectResponse
     {
+        $this->authorize('delete', $account);
+
         $account->delete();
 
         return Redirect::route('accounts.accounts.index')

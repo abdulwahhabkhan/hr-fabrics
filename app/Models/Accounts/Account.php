@@ -8,7 +8,9 @@ use App\Models\Contracts\Fileable;
 use App\Models\Model;
 use App\Models\Traits\HasFiles;
 use App\Models\User;
+use App\Policies\Accounts\AccountPolicy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @method static ReceiptAccounts()
  */
+#[UsePolicy(AccountPolicy::class)]
 class Account extends Model implements Fileable
 {
     use HasFactory;

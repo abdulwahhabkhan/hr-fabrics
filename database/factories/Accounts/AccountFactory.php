@@ -150,4 +150,11 @@ class AccountFactory extends Factory
             ];
         });
     }
+
+    public function system(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'system' => true,
+        ]);
+    }
 }
