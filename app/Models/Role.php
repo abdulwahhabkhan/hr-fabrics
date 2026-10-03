@@ -41,6 +41,7 @@ class Role extends Model
     public static function clearCache($role_id): bool
     {
         Cache::forget(self::modelCacheKey($role_id));
+        Cache::forget(self::modelCacheKey('2_'.$role_id));
 
         return true;
     }

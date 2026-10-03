@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands\Util;
 
+use App\Enums\Role as RoleEnum;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
@@ -26,74 +28,104 @@ class PermissionGeneratorCommand extends Command
     protected $description = 'generate routes for roles permissions';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      */
     public function handle(): int
     {
         $this->info('Permission generator start ...');
-        $options = $this->options();
-        if ($options['fresh']) {
+
+        if ($this->option('fresh')) {
             User::query()->update(['role_id' => null]);
             Permission::query()->delete();
             Role::query()->delete();
         }
 
-        $routes = Route::getRoutes()->getRoutes();
+        $existing = Permission::query()
+            ->get(['action', 'name', 'module', 'section'])
+            ->map(fn (Permission $permission): string => $this->permissionKey($permission->only([
+                'action', 'name', 'module', 'section',
+            ])))
+            ->flip();
 
-        foreach ($routes as $route) {
-            $action = $route->getActionname();
-            $middleware = $this->getMiddleware($route);
-            if ($action === 'Closure' || ! $middleware) {
-                continue;
-            }
-            $name = $route->getName();
-            $module = explode('.', $name)[1];
-            $section = $route->getAction('prefix');
-            $section ??= $module;
-
-            $module = $module === 'accounts' ? 'account' : $module;
-            $section = str_replace(['/'], '', $section);
-
-            if (! $name) {
+        foreach (Route::getRoutes()->getRoutes() as $route) {
+            $permission = $this->permissionFromRoute($route);
+            if (! $permission || $existing->has($this->permissionKey($permission))) {
                 continue;
             }
 
-            $path = Permission::firstOrCreate(
-                ['action' => $action, 'name' => $name, 'module' => $module, 'section' => $section]
-            );
-            if (array_key_exists('role', $route->action)) {
-                $role = $route->action['role'];
-                $role = Role::firstOrCreate(['name' => $role]);
-                $role->permissions()->syncWithoutDetaching($path->id);
-            }
+            Permission::query()->create($permission);
+            $existing->put($this->permissionKey($permission), true);
         }
+
+        $this->addSuperAdminRole();
+
         Cache::flush();
         $this->info('Permission generator end ...');
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    public function getMiddleware($route): bool
+    public function getMiddleware(RoutingRoute $route): bool
     {
         $middlewares = $route->getAction('middleware');
-        if (empty($middlewares)) {
+        if (empty($middlewares) || ! is_array($middlewares)) {
             return false;
         }
         $excluded = $route->getAction('excluded_middleware') ?? [];
-        if (is_array($middlewares)) {
-            return in_array('auth.role', $middlewares) && ! in_array('auth.role', $excluded);
+
+        return in_array('auth.role', $middlewares) && ! in_array('auth.role', $excluded);
+    }
+
+    /**
+     * Build the permission attributes for a role-protected, named controller route.
+     *
+     * @return array{action: string, name: string, module: string, section: string}|null
+     */
+    private function permissionFromRoute(RoutingRoute $route): ?array
+    {
+        $action = $route->getActionName();
+        $name = $route->getName();
+        if ($action === 'Closure' || ! $name || ! $this->getMiddleware($route)) {
+            return null;
         }
 
-        return false;
+        $module = explode('.', $name)[1] ?? $name;
+        $section = str_replace('/', '', $route->getAction('prefix') ?? $module);
+
+        return [
+            'action' => $action,
+            'name' => $name,
+            'module' => $module === 'accounts' ? 'account' : $module,
+            'section' => $section,
+        ];
+    }
+
+    /**
+     * @param  array{action: string, name: string, module: ?string, section: ?string}  $permission
+     */
+    private function permissionKey(array $permission): string
+    {
+        return implode('|',
+            [$permission['action'], $permission['name'], $permission['module'], $permission['section']]);
+    }
+
+    /**
+     * Ensure the Super Admin role exists, grant it every permission and reset its permission cache.
+     */
+    private function addSuperAdminRole(): void
+    {
+        $role = Role::query()->find(RoleEnum::SuperAdmin->value);
+
+        if (! $role) {
+            $role = Role::query()->forceCreate([
+                'id' => RoleEnum::SuperAdmin->value,
+                'name' => 'Super Admin',
+                'description' => 'Super admin role',
+            ]);
+            $this->warn('Super admin role created.');
+        }
+
+        $role->permissions()->sync(Permission::query()->pluck('id')->toArray());
+        Role::clearCache($role->id);
     }
 }
