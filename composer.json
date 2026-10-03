@@ -70,6 +70,7 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
+            "@php artisan app:setup",
             "npm install",
             "npm run build"
         ],
@@ -118,7 +119,8 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "@php artisan migrate --graceful --ansi",
+            "@php artisan app:setup"
         ],
         "test:code-coverage": "pest --coverage --compact --min=78.6",
         "pre-package-uninstall": [
