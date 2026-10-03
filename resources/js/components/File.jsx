@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Icon } from '@iconify/react';
-import {
-    Button,
-    Col,
-    Image,
-    ProgressBar,
-    Row,
-    Tooltip,
-} from 'react-bootstrap';
+import { Button, Col, Image, ProgressBar, Row, Tooltip } from 'react-bootstrap';
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import Moment, { MomentFull } from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
-import { upload, view, show, deleteMethod } from '@/routes/file';
+import { deleteMethod, show, upload, view } from '@/routes/file';
 
 const thumbsContainer = {
     display: 'flex',
@@ -288,7 +281,7 @@ export const FileRow = ({ file, fnDelete = undefined }) => {
                             />
                         )}
                         {!file.is_image && (
-                            <div className="text-center fs-80px text-muted py-3">
+                            <div className="text-center file-icon-80 text-muted py-1">
                                 <Icon icon={'ph:file-pdf-duotone'} />
                             </div>
                         )}
@@ -455,7 +448,7 @@ export const AttachFiles = ({
                     <h3 className={'font-normal'}>
                         Files
                         <div className={'float-end'}>
-                            <Button type={'submit'} size={'xs'} onClick={open}>
+                            <Button type={'button'} size={'xs'} onClick={open}>
                                 <Icon icon={'solar:paperclip-bold-duotone'} />
                                 &nbsp; Attach file
                             </Button>
@@ -529,7 +522,7 @@ export const AttachFile = ({
                     <h3 className={'font-normal'}>
                         Files
                         <div className={'float-end'}>
-                            <Button type={'submit'} size={'xs'} onClick={open}>
+                            <Button type={'button'} size={'xs'} onClick={open}>
                                 <Icon icon={'solar:paperclip-bold-duotone'} />
                                 &nbsp; Attach file
                             </Button>
