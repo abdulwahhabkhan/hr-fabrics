@@ -6,6 +6,7 @@ enum DirectoryType: string
 {
     case SalesBilties = 'sales.bilties';
     case FabricsReceivings = 'fabrics.receivings';
+    case SalesReturns = 'sales.returns';
 
     case Vouchers = 'vouchers';
 
@@ -14,6 +15,7 @@ enum DirectoryType: string
         return match ($this) {
             self::SalesBilties => 'sales/bilties/',
             self::FabricsReceivings => 'inbound/fabric-receivings/',
+            self::SalesReturns => 'sales/returns/',
             self::Vouchers => 'vouchers/',
         };
     }

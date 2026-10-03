@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\DirectoryType;
 use App\Enums\FileType;
 use App\Models\File;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,7 @@ class FileFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'directory' => 'sales',
+            'directory' => DirectoryType::SalesBilties,
             'type' => FileType::PDF,
             'name' => $this->faker->word().'.pdf',
             'path' => 'files/'.$this->faker->uuid().'.pdf',

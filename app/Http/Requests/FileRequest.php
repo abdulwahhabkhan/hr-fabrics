@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\DirectoryType;
+use App\Models\File;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +16,12 @@ class FileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $fileable = $this->fileable();
+        if (! $fileable) {
+            return true;
+        }
+
+        return $this->user()->can('attach', [File::class, $fileable]);
     }
 
     /**
@@ -24,8 +32,22 @@ class FileRequest extends FormRequest
         return [
             'file' => ['required', 'mimetypes:image/jpeg,image/png,application/pdf'],
             'directory' => ['required', Rule::enum(DirectoryType::class)],
-            'morph_class' => ['sometimes', 'string'],
-            'morph_id' => ['sometimes', 'integer'],
+            'morph_class' => ['sometimes', 'required_with:morph_id', 'string', Rule::in(array_keys(Relation::morphMap()))],
+            'morph_id' => ['sometimes', 'required_with:morph_class', 'integer'],
         ];
+    }
+
+    /**
+     * The record the uploaded file is attached to, if any.
+     */
+    public function fileable(): ?Model
+    {
+        $modelClass = Relation::getMorphedModel((string) $this->input('morph_class'));
+        $morphId = $this->input('morph_id');
+        if (! $modelClass || ! $morphId) {
+            return null;
+        }
+
+        return once(fn () => $modelClass::query()->findOrFail($morphId));
     }
 }
