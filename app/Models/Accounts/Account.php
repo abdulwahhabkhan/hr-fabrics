@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 /**
  * @property-read int $supplier_id
@@ -40,6 +39,7 @@ class Account extends Model implements Fileable
         'limit' => 'float',
         'expense_account' => 'integer',
         'credit' => 'boolean',
+        'system' => 'boolean',
         'balance_date' => 'date:Y-m-d',
         'suspended' => 'boolean',
         'suspended_at' => 'datetime',
@@ -75,8 +75,9 @@ class Account extends Model implements Fileable
     #[Scope]
     protected function partners(Builder $query): Builder
     {
+
         $query->where(fn (Builder $where) => $where->where('type', AccountType::Partner)
-            ->orWhereIn('id', $this->partnerIds()));
+            ->orWhereIn('id', partnerIds()));
 
         return $query;
     }
@@ -119,6 +120,24 @@ class Account extends Model implements Fileable
         $query->where('type', '=', AccountType::Material);
 
         return $query;
+    }
+
+    #[Scope]
+    protected function cashAccount(Builder $query): Builder
+    {
+        return $query->where('name', 'like', '%'.AccountType::CashAccount->value.'%');
+    }
+
+    #[Scope]
+    protected function systemAccounts(Builder $query): Builder
+    {
+        return $query->where('system', true);
+    }
+
+    #[Scope]
+    protected function nonSystemAccounts(Builder $query): Builder
+    {
+        return $query->where('system', false);
     }
 
     #[Scope]
@@ -213,21 +232,5 @@ class Account extends Model implements Fileable
     protected function fullName(): Attribute
     {
         return Attribute::make(get: fn ($value, $attributes) => $attributes['name'].', '.$attributes['address']['city']);
-    }
-
-    /**
-     * Partner account ids from config, which may be a single id or a comma-separated list.
-     *
-     * @return array<int, int>
-     */
-    private function partnerIds(): array
-    {
-        return Str::of((string) config('store.partners_ids'))
-            ->explode(',')
-            ->map(fn (string $id): string => mb_trim($id))
-            ->filter()
-            ->map(fn (string $id): int => (int) $id)
-            ->values()
-            ->all();
     }
 }

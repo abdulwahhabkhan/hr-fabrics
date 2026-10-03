@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Str;
 
 if (! function_exists('storage')) {
     function storage(): Filesystem
@@ -60,5 +61,18 @@ if (! function_exists('hasPermission')) {
         }
 
         return once(fn () => $user->hasPermission($ability));
+    }
+}
+
+if (! function_exists('partnerIds')) {
+    function partnerIds(): array
+    {
+        return Str::of((string) config('store.partners_ids'))
+            ->explode(',')
+            ->map(fn (string $id): string => mb_trim($id))
+            ->filter()
+            ->map(fn (string $id): int => (int) $id)
+            ->values()
+            ->all();
     }
 }
