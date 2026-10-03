@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\DirectoryType;
 use App\Enums\OrderStatus;
 use App\Enums\PackingType;
 use App\Enums\PaymentMode;
@@ -75,7 +76,9 @@ test('sale return edit page can be rendered', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Sales/Returns/ReturnForm')
         ->has('return')
-        ->has('file_info')
+        ->has('files')
+        ->where('directory', DirectoryType::SalesReturns->value)
+        ->where('morph_class', $return->getMorphClass())
         ->has('products')
     );
 });

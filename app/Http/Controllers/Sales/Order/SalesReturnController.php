@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sales\Order;
 use App\Actions\Accounts\DeleteJournal;
 use App\Actions\LogAction\RecordAction;
 use App\Actions\Outbound\SaleReturns\ConfirmSaleReturn;
+use App\Enums\DirectoryType;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesIndexFilters;
 use App\Http\Requests\Sales\SalesReturnRequest;
@@ -127,8 +128,6 @@ class SalesReturnController extends Controller
     public function edit(SalesReturn $return, ProductService $service): Response
     {
         $products = $service->autocompleteProducts();
-        $fileInfo = $return->info['file'] ?? null;
-        $fileInfo['thumbnail_url'] = generate_thumbnail($fileInfo['file_path'] ?? null);
 
         $items = $return->returnItems()
             ->with('product.brand')
@@ -157,7 +156,9 @@ class SalesReturnController extends Controller
             [
                 'return' => $return->load('customer'),
                 'items' => $items,
-                'file_info' => $fileInfo,
+                'files' => $return->files()->get(),
+                'directory' => DirectoryType::SalesReturns,
+                'morph_class' => $return->getMorphClass(),
                 'products' => ProductACResource::collection($products),
             ]
         );

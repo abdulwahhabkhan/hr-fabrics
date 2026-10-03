@@ -5,10 +5,12 @@ namespace App\Models\Sales;
 use App\Casts\CeilInteger;
 use App\Enums\ReturnStatus;
 use App\Models\Accounts\Account;
+use App\Models\Contracts\Fileable;
 use App\Models\Contracts\Journalable;
 use App\Models\Contracts\Logable;
 use App\Models\Model;
 use App\Models\Stock\Inventory;
+use App\Models\Traits\HasFiles;
 use App\Models\Traits\MorphManayToLog;
 use App\Models\Traits\MorphToJournal;
 use App\Models\User;
@@ -26,9 +28,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string $account
  * @property-read int|null $total_returns
  */
-class SalesReturn extends Model implements Journalable, Logable
+class SalesReturn extends Model implements Fileable, Journalable, Logable
 {
     use HasFactory;
+    use HasFiles;
     use MorphManayToLog;
     use MorphToJournal;
 
