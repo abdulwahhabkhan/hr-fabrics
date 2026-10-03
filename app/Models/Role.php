@@ -17,8 +17,6 @@ class Role extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'description'];
-
     public static function permissionsByRole($role_id): array|Collection
     {
         if (! $role_id) {
@@ -31,7 +29,9 @@ class Role extends Model
             if (! $role) {
                 return collect();
             }
-            $permissions = $role->permissions->map(fn ($item, $key) => [$item['name'], $item['section'], $item['module']])->collapse()->unique()->values();
+            $permissions = $role->permissions->map(fn ($item, $key) => [
+                $item['name'], $item['section'], $item['module'],
+            ])->collapse()->unique()->values();
             Cache::put(self::modelCacheKey('2_'.$role_id), $permissions, 4 * 60 * 60);
         }
 
