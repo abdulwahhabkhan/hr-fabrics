@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Util;
 
+use App\Enums\Role as RoleEnum;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -74,16 +75,21 @@ class CreateUserCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @return Collection<int, string>
+     */
     private function getRoles(): Collection
     {
         $roles = Role::query()->orderBy('name')->pluck('name', 'id');
 
         if ($roles->isEmpty()) {
-
+            Role::query()->forceCreate([
+                'id' => RoleEnum::SuperAdmin->value,
+                'name' => 'Super Admin',
+                'description' => 'Super admin role',
+            ]);
             $this->warn('No roles found. Super admin role created.');
-            Role::query()->create(['name' => 'Super Admin', 'description' => 'Super admin role']);
             $roles = Role::query()->orderBy('name')->pluck('name', 'id');
-            // return self::FAILURE;
         }
 
         return $roles;
