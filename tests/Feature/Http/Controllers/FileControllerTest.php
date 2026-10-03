@@ -1,8 +1,10 @@
 <?php
 
 use App\Enums\DirectoryType;
+use App\Facades\Permission;
 use App\Models\File;
-use App\Models\Purchase\Purchase;
+use App\Models\Purchase\FabricReceiving;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,8 +21,6 @@ test('image upload', function () {
     $response = $this->post(route('file.upload'), [
         'directory' => DirectoryType::SalesBilties->value,
         'file' => $file,
-        'morph_class' => Purchase::morphClass(),
-        'morph_id' => $this->user->id,
     ]);
     // assert
     $response->assertOk();
@@ -37,8 +37,6 @@ test('file uploaded test', function () {
     $response = $this->post(route('file.upload'), [
         'directory' => $directory,
         'file' => UploadedFile::fake()->image($file_name),
-        'morph_class' => Purchase::morphClass(),
-        'morph_id' => $this->user->id,
     ]);
 
     // assert
@@ -56,44 +54,6 @@ test('file uploaded test', function () {
         'created_by',
         'created_at',
     ]);
-});
-
-test('view returns an inline image response', function () {
-    Storage::fake();
-    $path = UploadedFile::fake()->image('avatar.jpg')->store('files');
-
-    $response = $this->get(route('file.view', ['path' => $path]));
-
-    $response->assertOk();
-    expect($response->headers->get('content-type'))->toStartWith('image/');
-});
-
-test('view falls back to the public disk when missing from the default disk', function () {
-    Storage::fake();
-    Storage::fake('public');
-    $path = UploadedFile::fake()->create('doc.pdf', 10, 'application/pdf')
-        ->storeAs('files', 'doc.pdf', 'public');
-
-    $response = $this->get(route('file.view', ['path' => $path]));
-
-    $response->assertOk();
-});
-
-test('view aborts with 404 when the file does not exist on either disk', function () {
-    Storage::fake();
-    Storage::fake('public');
-
-    $this->get(route('file.view', ['path' => 'files/missing.jpg']))->assertNotFound();
-});
-
-test('thumbnail returns a resized inline image', function () {
-    Storage::fake();
-    $path = UploadedFile::fake()->image('photo.jpg', 800, 600)->store('files');
-
-    $response = $this->get(route('file.thumbnail', ['path' => $path]));
-
-    $response->assertOk();
-    expect($response->headers->get('content-type'))->toStartWith('image/');
 });
 
 test('delete soft-deletes the file record and keeps the stored file', function () {
@@ -122,19 +82,69 @@ test('deleting a missing file returns a 404', function () {
     $response->assertNotFound();
 });
 
-test('upload, view and thumbnail all work against an s3 disk', function () {
-    config(['filesystems.default' => 's3']);
-    Storage::fake('s3');
+test('upload attaches the file to a record the user can edit', function () {
+    Storage::fake();
+    Permission::fake(['purchases.fabric-receivings.edit' => true]);
+    $receiving = FabricReceiving::factory()->create();
 
-    $upload = $this->post(route('file.upload'), [
-        'directory' => DirectoryType::SalesBilties->value,
-        'file' => UploadedFile::fake()->image('s3-test.jpg'),
-        'morph_class' => Purchase::morphClass(),
+    $response = $this->post(route('file.upload'), [
+        'directory' => DirectoryType::FabricsReceivings->value,
+        'file' => UploadedFile::fake()->image('grn.jpg'),
+        'morph_class' => FabricReceiving::morphClass(),
+        'morph_id' => $receiving->id,
+    ]);
+
+    $response->assertOk();
+    $this->assertDatabaseHas(File::class, [
+        'fileable_type' => FabricReceiving::morphClass(),
+        'fileable_id' => $receiving->id,
+    ]);
+});
+
+test('upload cannot attach a file to a record the user cannot edit', function () {
+    Storage::fake();
+    Permission::fake(['purchases.fabric-receivings.edit' => false]);
+    $receiving = FabricReceiving::factory()->create();
+
+    $response = $this->post(route('file.upload'), [
+        'directory' => DirectoryType::FabricsReceivings->value,
+        'file' => UploadedFile::fake()->image('grn.jpg'),
+        'morph_class' => FabricReceiving::morphClass(),
+        'morph_id' => $receiving->id,
+    ]);
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount(File::class, 0);
+});
+
+test('upload rejects an unknown morph class', function () {
+    Storage::fake();
+
+    $response = $this->postJson(route('file.upload'), [
+        'directory' => DirectoryType::FabricsReceivings->value,
+        'file' => UploadedFile::fake()->image('grn.jpg'),
+        'morph_class' => User::class,
         'morph_id' => $this->user->id,
     ]);
-    $upload->assertOk();
-    $path = $upload->json('path');
 
-    $this->get(route('file.view', ['path' => $path]))->assertOk();
-    $this->get(route('file.thumbnail', ['path' => $path]))->assertOk();
+    $response->assertUnprocessable()->assertJsonValidationErrors('morph_class');
+});
+
+test('another user unattached file cannot be viewed or deleted', function () {
+    $file = File::factory()->create(['created_by' => $this->userWithoutPermissions()->id]);
+
+    $this->get(route('file.show', $file->id))->assertForbidden();
+    $this->delete(route('file.delete', $file->id))->assertForbidden();
+
+    $this->assertNotSoftDeleted($file);
+});
+
+test('attached file follows the owning record permissions', function () {
+    Permission::fake(['purchases.fabric-receivings.*' => false]);
+    $receiving = FabricReceiving::factory()->create();
+    $file = File::factory()->create(['created_by' => $this->user->id]);
+    $file->fileable()->associate($receiving)->save();
+
+    $this->get(route('file.show', $file->id))->assertForbidden();
+    $this->delete(route('file.delete', $file->id))->assertForbidden();
 });
