@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { Icon } from '@iconify/react';
 import { Button, Col, Image, ProgressBar, Row, Tooltip } from 'react-bootstrap';
 import OverlayTrigger from '@/components/ui/OverlayTrigger';
-import Moment, { MomentFull } from '@/components/Moment';
+import Moment from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
 import { deleteMethod, show, upload, view } from '@/routes/file';
 
@@ -267,66 +267,88 @@ export const FileDetail = ({ file, fnDelete = undefined }) => {
         </>
     );
 };
-export const FileRow = ({ file, fnDelete = undefined }) => {
-    return (
-        <>
-            <Col xs={12} sm={6} md={'auto'} key={file.id}>
-                <div className="card b-0 shadow-sm flex-row">
-                    <div className="border-bottom overflow-hidden text-center rounded-start">
-                        {file.is_image !== undefined && file.is_image && (
-                            <img
-                                src={file.thumbnail}
-                                className={'height-80'}
-                                alt={file.name}
-                            />
-                        )}
-                        {!file.is_image && (
-                            <div className="text-center file-icon-80 text-muted py-1">
-                                <Icon icon={'ph:file-pdf-duotone'} />
-                            </div>
-                        )}
-                    </div>
-                    <div className="card-body px-2 pt-2 pb-0">
-                        <div
-                            className="card-title fw-bold text-truncate mb-0"
-                            title={file.name}
-                        >
-                            {file.name}
-                        </div>
-                        <div className="d-flex gap-2 justify-content-between">
-                            <div className="card-text text-muted">
-                                {file.size}
-                            </div>
+/**
+ * Human readable file size, e.g. 343568 -> "335.5 KB".
+ */
+const formatFileSize = (bytes) => {
+    const size = Number(bytes);
+    if (!size) {
+        return null;
+    }
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const exponent = Math.min(
+        Math.floor(Math.log(size) / Math.log(1024)),
+        units.length - 1,
+    );
+    const value = size / 1024 ** exponent;
 
-                            <div className="card-text text-muted">
-                                <MomentFull date={file.created_at} />
-                            </div>
-                        </div>
-                        <div className="btn-group btn-group-sm mt-1">
-                            <a
-                                className={'btn btn-white btn-xs'}
-                                href={show(file.id).url}
-                                target={'_blank'}
-                                rel={'noopener noreferrer'}
-                                title={'Download file'}
-                            >
-                                <Icon
-                                    icon={'solar:gallery-download-line-duotone'}
-                                />
-                                Download
-                            </a>
-                            {fnDelete !== undefined && (
-                                <DeleteAjax
-                                    id={file.id}
-                                    className={'btn-white p-1'}
-                                    onDelete={fnDelete}
-                                />
-                            )}
-                        </div>
-                    </div>
+    return `${exponent === 0 ? value : value.toFixed(1)} ${units[exponent]}`;
+};
+
+export const FileRow = ({ file, fnDelete = undefined }) => {
+    const fileUrl = show(file.id).url;
+    const fileSize = formatFileSize(file.size);
+
+    return (
+        <div className="hf-file">
+            <a
+                className="hf-file__thumb"
+                href={fileUrl}
+                target={'_blank'}
+                rel={'noopener noreferrer'}
+            >
+                {file.is_image ? (
+                    <img src={file.thumbnail} alt={file.name} />
+                ) : (
+                    <Icon icon={'ph:file-pdf-duotone'} />
+                )}
+            </a>
+            <div className="hf-file__body">
+                <a
+                    className="hf-file__name"
+                    href={fileUrl}
+                    target={'_blank'}
+                    rel={'noopener noreferrer'}
+                    title={file.name}
+                >
+                    {file.name}
+                </a>
+                <div className="hf-file__meta">
+                    {fileSize && <span>{fileSize}</span>}
+                    <span>
+                        <Moment date={file.created_at} />
+                    </span>
                 </div>
-            </Col>
-        </>
+            </div>
+            <div className="hf-file__actions">
+                <OverlayTrigger
+                    placement={'top'}
+                    overlay={<Tooltip>Download</Tooltip>}
+                >
+                    <a
+                        className="hf-icon-btn hf-icon-btn--boxed"
+                        href={fileUrl}
+                        target={'_blank'}
+                        rel={'noopener noreferrer'}
+                        aria-label={`Download ${file.name}`}
+                    >
+                        <Icon
+                            icon={'solar:download-minimalistic-bold-duotone'}
+                        />
+                    </a>
+                </OverlayTrigger>
+                {fnDelete !== undefined && (
+                    <OverlayTrigger
+                        placement={'top'}
+                        overlay={<Tooltip>Delete</Tooltip>}
+                    >
+                        <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
+                            <DeleteAjax id={file.id} onDelete={fnDelete} />
+                        </span>
+                    </OverlayTrigger>
+                )}
+            </div>
+        </div>
     );
 };
 
@@ -400,9 +422,11 @@ export const AttachFiles = ({
 }) => {
     const acceptedMines = mimes ?? 'image/*';
     const [processing, setProcessing] = useState(false);
-    const { getRootProps, getInputProps, open } = useDropzone({
+    const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
         accept: acceptedMines,
         maxFiles: 1,
+        noClick: true,
+        noKeyboard: true,
         onDrop: (acceptedFiles) => {
             acceptedFiles.map((file) => {
                 progress(true);
@@ -442,37 +466,47 @@ export const AttachFiles = ({
     };
 
     return (
-        <section>
-            <Row>
-                <Col sm={12}>
-                    <h3 className={'font-normal'}>
-                        Files
-                        <div className={'float-end'}>
-                            <Button type={'button'} size={'xs'} onClick={open}>
-                                <Icon icon={'solar:paperclip-bold-duotone'} />
-                                &nbsp; Attach file
-                            </Button>
-                        </div>
-                    </h3>
-                    {processing !== false && <ProgressBar animated now={100} />}
-                    {attachments.length === 0 && <p>No files are attached</p>}
-                    <Row>
-                        {attachments.length > 0 &&
-                            attachments.map((file, index) => {
-                                return (
-                                    <FileRow
-                                        key={index}
-                                        file={file}
-                                        fnDelete={deleteAttachment}
-                                    />
-                                );
-                            })}
-                    </Row>
-                </Col>
-                <div {...getRootProps()}>
-                    <input {...getInputProps()} />
+        <section
+            {...getRootProps({
+                className: `hf-files${isDragActive ? ' is-drag-active' : ''}`,
+            })}
+        >
+            <input {...getInputProps()} />
+            <div className="hf-files__toolbar">
+                <span className="hf-files__count">
+                    {attachments.length}{' '}
+                    {attachments.length === 1 ? 'file' : 'files'}
+                </span>
+                <Button type={'button'} size={'xs'} onClick={open}>
+                    <Icon icon={'solar:paperclip-bold-duotone'} />
+                    &nbsp; Attach file
+                </Button>
+            </div>
+            {processing !== false && (
+                <ProgressBar animated now={100} className="mb-2" />
+            )}
+            {attachments.length === 0 ? (
+                <button
+                    type={'button'}
+                    className="hf-files__empty"
+                    onClick={open}
+                >
+                    <Icon icon={'solar:upload-minimalistic-bold-duotone'} />
+                    <span>
+                        Drop a file here or <b>browse</b>
+                    </span>
+                </button>
+            ) : (
+                <div className="hf-files__grid">
+                    {attachments.map((file) => (
+                        <FileRow
+                            key={file.id}
+                            file={file}
+                            fnDelete={deleteAttachment}
+                        />
+                    ))}
                 </div>
-            </Row>
+            )}
         </section>
     );
 };
