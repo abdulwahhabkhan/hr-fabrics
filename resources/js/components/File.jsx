@@ -6,6 +6,7 @@ import OverlayTrigger from '@/components/ui/OverlayTrigger';
 import Moment from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
 import { deleteMethod, show, upload, view } from '@/routes/file';
+import { Panel, PanelBody } from '@/components/panel/panel';
 
 const thumbsContainer = {
     display: 'flex',
@@ -393,21 +394,32 @@ const FileDetails = ({ file }) => {
 };
 
 export const PreviewAttachments = ({ attachments }) => {
+    if (attachments.length === 0) {
+        return null;
+    }
+
     return (
-        <>
-            {attachments.length > 0 && (
-                <div className="d-flex gap-4 mt-3 d-print-none">
-                    {attachments.length > 0 &&
-                        attachments.map((attachment) => {
-                            return (
-                                <div className="d-block" key={attachment.id}>
-                                    <FileDetail file={attachment} />
-                                </div>
-                            );
-                        })}
+        <Panel className="hf-order-card mt-3 mb-0 d-print-none">
+            <PanelBody>
+                <div className="hf-order-card__head">
+                    <span className="hf-form-section__icon">
+                        <Icon icon="solar:paperclip-bold-duotone" />
+                    </span>
+                    <div>
+                        <h2 className="hf-form-section__title">Attachments</h2>
+                        <p className="hf-form-section__desc">
+                            {attachments.length}{' '}
+                            {attachments.length === 1 ? 'file' : 'files'}
+                        </p>
+                    </div>
                 </div>
-            )}
-        </>
+                <div className="hf-files__grid">
+                    {attachments.map((attachment) => (
+                        <FileRow key={attachment.id} file={attachment} />
+                    ))}
+                </div>
+            </PanelBody>
+        </Panel>
     );
 };
 

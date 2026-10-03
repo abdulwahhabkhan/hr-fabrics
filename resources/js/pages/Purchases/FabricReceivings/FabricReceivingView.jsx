@@ -24,8 +24,8 @@ const FabricReceivingView = () => {
     const print = () => {
         window.print();
     };
-    const canModify = order.status === "open";
-    const canReturn = order.status === "closed";
+    const canModify = order.status === 'open';
+    const canReturn = order.status === 'closed';
     const [item, setItem] = useState({});
     const addReturn = (row) => {
         setItem(row);
@@ -48,8 +48,8 @@ const FabricReceivingView = () => {
                 {
                     canModify && (
                         <InertiaLink href={fabricReceivings.edit(order.id)}
-                                     className={"btn btn-sm btn-white"}>
-                            <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
+                                     className={'btn btn-sm btn-white'}>
+                            <Icon icon={'solar:pen-2-bold-duotone'} /> Edit
                         </InertiaLink>
                     )
                 }
@@ -57,10 +57,11 @@ const FabricReceivingView = () => {
                 <DownloadPdf target={invoiceRef} fileName={'FR-' + order.invoice_no + '.pdf'} />
             </>)} />
             <PageContent>
-                <Head title={"Fabric: " + order.invoice_no} />
+                <Head title={'Fabric: ' + order.invoice_no} />
                 <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
+                        <span className="text-muted"></span>
                     </div>
                     <div className="invoice-header">
                         <div className="invoice-to">
@@ -107,13 +108,13 @@ const FabricReceivingView = () => {
                                                 <td className="text-center">{getPOUnit(item.unit, item.size, item.qty)}</td>
                                                 <td className="text-right">
                                                     <NumberFormat
-                                                        displayType={"text"}
+                                                        displayType={'text'}
                                                         value={item.qty}
                                                         thousandSeparator={true} />
                                                 </td>
                                                 <td className="text-right">
                                                     <NumberFormat
-                                                        displayType={"text"}
+                                                        displayType={'text'}
                                                         value={item.total_qty}
                                                         thousandSeparator={true} />
                                                 </td>
@@ -153,7 +154,7 @@ const FabricReceivingView = () => {
                             <div className="invoice-price-right">
                                 <small>QTY</small> <span className="fw-600">
                                 <NumberFormat
-                                    displayType={"text"}
+                                    displayType={'text'}
                                     value={order.total_qty}
                                     thousandSeparator={true} />
                             </span>
@@ -161,7 +162,7 @@ const FabricReceivingView = () => {
                             <div className="invoice-price-right">
                                 <small>METERS</small><span className="fw-600">
                                 <NumberFormat
-                                    displayType={"text"}
+                                    displayType={'text'}
                                     value={getTotalQTY()}
                                     thousandSeparator={true} />
                             </span>
