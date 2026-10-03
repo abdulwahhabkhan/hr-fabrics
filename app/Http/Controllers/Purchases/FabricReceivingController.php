@@ -106,6 +106,7 @@ final class FabricReceivingController extends Controller
             'Purchases/FabricReceivings/FabricReceivingView',
             [
                 'order' => $data,
+                'can_modify' => request()->user()->can('edit', $fabric_receiving),
                 'transaction_date' => $data->transaction_display_date->toDateString(),
                 'attachments' => $fabric_receiving->files()->get(),
                 'total_summary' => $total_summary,
@@ -158,7 +159,14 @@ final class FabricReceivingController extends Controller
             'info' => ['nullable', 'array'],
         ]);
 
-        DB::transaction(function () use ($recordAction, $stockConfirmed, $updateStockTotal, $fabric_receiving, $data, $request) {
+        DB::transaction(function () use (
+            $recordAction,
+            $stockConfirmed,
+            $updateStockTotal,
+            $fabric_receiving,
+            $data,
+            $request
+        ) {
             unset($data['files']);
             $fabric_receiving->fill($data);
             if ($fabric_receiving->isClosed() && ! $fabric_receiving->transaction_date) {

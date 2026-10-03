@@ -286,73 +286,6 @@ const formatFileSize = (bytes) => {
     return `${exponent === 0 ? value : value.toFixed(1)} ${units[exponent]}`;
 };
 
-export const FileRow = ({ file, fnDelete = undefined }) => {
-    const fileUrl = show(file.id).url;
-    const fileSize = formatFileSize(file.size);
-
-    return (
-        <div className="hf-file">
-            <a
-                className="hf-file__thumb"
-                href={fileUrl}
-                target={'_blank'}
-                rel={'noopener noreferrer'}
-            >
-                {file.is_image ? (
-                    <img src={file.thumbnail} alt={file.name} />
-                ) : (
-                    <Icon icon={'ph:file-pdf-duotone'} />
-                )}
-            </a>
-            <div className="hf-file__body">
-                <a
-                    className="hf-file__name"
-                    href={fileUrl}
-                    target={'_blank'}
-                    rel={'noopener noreferrer'}
-                    title={file.name}
-                >
-                    {file.name}
-                </a>
-                <div className="hf-file__meta">
-                    {fileSize && <span>{fileSize}</span>}
-                    <span>
-                        <Moment date={file.created_at} />
-                    </span>
-                </div>
-            </div>
-            <div className="hf-file__actions">
-                <OverlayTrigger
-                    placement={'top'}
-                    overlay={<Tooltip>Download</Tooltip>}
-                >
-                    <a
-                        className="hf-icon-btn hf-icon-btn--boxed"
-                        href={fileUrl}
-                        target={'_blank'}
-                        rel={'noopener noreferrer'}
-                        aria-label={`Download ${file.name}`}
-                    >
-                        <Icon
-                            icon={'solar:download-minimalistic-bold-duotone'}
-                        />
-                    </a>
-                </OverlayTrigger>
-                {fnDelete !== undefined && (
-                    <OverlayTrigger
-                        placement={'top'}
-                        overlay={<Tooltip>Delete</Tooltip>}
-                    >
-                        <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
-                            <DeleteAjax id={file.id} onDelete={fnDelete} />
-                        </span>
-                    </OverlayTrigger>
-                )}
-            </div>
-        </div>
-    );
-};
-
 const FileDetails = ({ file }) => {
     return (
         <>
@@ -393,6 +326,94 @@ const FileDetails = ({ file }) => {
     );
 };
 
+/**
+ * Gallery tile for read-only pages: large preview of the file content
+ * (image thumbnail or first page of a PDF), opening the file inline on click.
+ */
+const AttachmentTile = ({ file, fnDelete = undefined }) => {
+    const viewUrl = file.preview || show(file.id).url;
+    const fileSize = formatFileSize(file.size);
+
+    return (
+        <div className="hf-attachment">
+            <a
+                className="hf-attachment__media"
+                href={viewUrl}
+                target={'_blank'}
+                rel={'noopener noreferrer'}
+                title={`Open ${file.name}`}
+            >
+                {file.is_image ? (
+                    <img src={file.thumbnail} alt={file.name} loading="lazy" />
+                ) : (
+                    <>
+                        <Icon
+                            className="hf-attachment__fallback"
+                            icon={'ph:file-pdf-duotone'}
+                        />
+                        {file.preview && (
+                            <iframe
+                                src={`${file.preview}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                                title={file.name}
+                                loading="lazy"
+                                tabIndex={-1}
+                            />
+                        )}
+                    </>
+                )}
+                <span className="hf-attachment__open">
+                    <Icon icon={'solar:eye-bold-duotone'} /> Open
+                </span>
+            </a>
+            <div className="hf-attachment__footer">
+                <div className="hf-file__body">
+                    <a
+                        className="hf-file__name"
+                        href={viewUrl}
+                        target={'_blank'}
+                        rel={'noopener noreferrer'}
+                        title={file.name}
+                    >
+                        {file.name}
+                    </a>
+                    <div className="hf-file__meta">
+                        {fileSize && <span>{fileSize}</span>}
+                        <span>
+                            <Moment date={file.created_at} />
+                        </span>
+                    </div>
+                </div>
+                <OverlayTrigger
+                    placement={'top'}
+                    overlay={<Tooltip>Download</Tooltip>}
+                >
+                    <a
+                        className="hf-icon-btn hf-icon-btn--boxed"
+                        href={show(file.id).url}
+                        target={'_blank'}
+                        rel={'noopener noreferrer'}
+                        aria-label={`Download ${file.name}`}
+                    >
+                        <Icon
+                            icon={'solar:download-minimalistic-bold-duotone'}
+                        />
+                    </a>
+                </OverlayTrigger>
+                {fnDelete !== undefined && (
+                    <OverlayTrigger
+                        placement={'top'}
+                        overlay={<Tooltip>Delete</Tooltip>}
+                    >
+                        <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
+                            <DeleteAjax id={file.id} onDelete={fnDelete} />
+                        </span>
+                    </OverlayTrigger>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export const PreviewAttachments = ({ attachments }) => {
     if (attachments.length === 0) {
         return null;
@@ -413,9 +434,9 @@ export const PreviewAttachments = ({ attachments }) => {
                         </p>
                     </div>
                 </div>
-                <div className="hf-files__grid">
+                <div className="hf-attachments">
                     {attachments.map((attachment) => (
-                        <FileRow key={attachment.id} file={attachment} />
+                        <AttachmentTile key={attachment.id} file={attachment} />
                     ))}
                 </div>
             </PanelBody>
@@ -509,9 +530,9 @@ export const AttachFiles = ({
                     </span>
                 </button>
             ) : (
-                <div className="hf-files__grid">
+                <div className="hf-attachments">
                     {attachments.map((file) => (
-                        <FileRow
+                        <AttachmentTile
                             key={file.id}
                             file={file}
                             fnDelete={deleteAttachment}

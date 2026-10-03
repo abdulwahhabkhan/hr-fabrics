@@ -420,9 +420,8 @@
 }
 
 // ---------------------------------------------------------------------------
-// Attachments (components/File.jsx → AttachFiles / FileRow)
-// Whole section is a drop target; files render as compact rows in an
-// auto-fill grid so the panel width is used before wrapping.
+// Attachments uploader (components/File.jsx → AttachFiles)
+// Whole section is a drop target; files render as .hf-attachment tiles.
 // ---------------------------------------------------------------------------
 .hf-files {
   position: relative;
@@ -474,44 +473,10 @@
     &:hover { background: var(--hf-hover); border-color: #bfb6a7; }
     &:focus-visible { outline: 0; box-shadow: var(--hf-ring); }
   }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-    gap: .5rem;
-  }
 }
 
+// name + meta lines shared by attachment tiles
 .hf-file {
-  display: flex;
-  align-items: center;
-  gap: .625rem;
-  min-width: 0;
-  padding: .4rem .5rem .4rem .4rem;
-  border: 1px solid var(--hf-border);
-  border-radius: var(--hf-radius);
-  background: var(--hf-surface);
-  box-shadow: var(--hf-shadow-xs);
-  transition: border-color .12s var(--hf-ease);
-
-  &:hover { border-color: var(--hf-border-strong); }
-
-  &__thumb {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    overflow: hidden;
-    border-radius: var(--hf-radius-sm);
-    background: var(--hf-surface-2);
-    color: #c9503f;
-
-    img { width: 100%; height: 100%; object-fit: cover; }
-    svg { width: 26px; height: 26px; }
-  }
-
   &__body {
     flex: 1 1 auto;
     min-width: 0;
@@ -544,10 +509,104 @@
       margin: 0 .375rem;
     }
   }
+}
 
-  &__actions {
+// ---------------------------------------------------------------------------
+// Attachment gallery (components/File.jsx → AttachmentTile)
+// Large content previews, click opens the file inline.
+// ---------------------------------------------------------------------------
+.hf-attachments {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: .75rem;
+}
+
+.hf-attachment {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--hf-border);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface);
+  box-shadow: var(--hf-shadow-xs);
+  transition: border-color .12s var(--hf-ease), box-shadow .12s var(--hf-ease);
+
+  &:hover {
+    border-color: var(--hf-border-strong);
+    box-shadow: var(--hf-shadow);
+  }
+
+  &__media {
+    position: relative;
     display: flex;
-    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: 1px solid var(--hf-border);
+    background: var(--hf-surface-2);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .2s var(--hf-ease);
+    }
+
+    // PDF first page; the link on top handles the click. Oversized and
+    // offset so the viewer's frame and scrollbar fall outside the tile.
+    iframe {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: calc(100% + 24px);
+      height: calc(100% + 8px);
+      border: 0;
+      background: #fff;
+      pointer-events: none;
+    }
+  }
+
+  &__fallback {
+    width: 56px;
+    height: 56px;
+    color: #c9503f;
+  }
+
+  &__open {
+    position: absolute;
+    right: .5rem;
+    bottom: .5rem;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
     gap: .25rem;
+    padding: .2rem .5rem;
+    border-radius: 999px;
+    background: rgba(var(--hf-navy-rgb), .85);
+    color: #fff;
+    font-size: .6875rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .12s var(--hf-ease), transform .12s var(--hf-ease);
+
+    svg { width: 14px; height: 14px; }
+  }
+
+  &__media:hover &__open,
+  &__media:focus-visible &__open {
+    opacity: 1;
+    transform: none;
+  }
+
+  &__media:hover img { transform: scale(1.03); }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .5rem .5rem .625rem;
   }
 }
