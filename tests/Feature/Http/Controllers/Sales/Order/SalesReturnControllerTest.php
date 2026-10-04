@@ -55,6 +55,7 @@ test('sale return view can be rendered', function () {
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Sales/Returns/ReturnView')
+        ->has('attachments')
         ->has('total_summary')
         ->has('transaction_date')
         ->has('balance')

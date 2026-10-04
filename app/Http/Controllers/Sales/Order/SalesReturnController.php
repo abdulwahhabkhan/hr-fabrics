@@ -112,7 +112,7 @@ class SalesReturnController extends Controller
         return Inertia::render(
             'Sales/Returns/ReturnView',
             [
-                'file_info' => $return->info['file'] ?? null,
+                'attachments' => $return->files()->get(),
                 'total_summary' => $total_summary,
                 'transaction_date' => $return->transaction_display_date->toDateString(),
                 'balance' => $return->balance,

@@ -5,7 +5,7 @@ import Moment from '@/components/Moment';
 import React, { useEffect, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
-import { FileIcon } from '@/components/File';
+import { PreviewAttachments } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
@@ -13,7 +13,7 @@ import returns from '@/routes/sales/returns';
 
 
 const ReturnView = () => {
-    const { so_return, appName, transaction_date, file_info, total_summary, balance, net_balance } = usePage().props;
+    const { so_return, appName, transaction_date, attachments, total_summary, balance, net_balance } = usePage().props;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const { items, customer } = so_return;
     const [returnForm, setReturnForm] = useState(false);
@@ -281,9 +281,10 @@ const ReturnView = () => {
                     </div>
                     <div className={"m-t-10"}>
                         <strong className={"bold"}>Notes:</strong><br />
-                        <p>{so_return.info.remarks}</p>
+                        <p>{so_return.info?.remarks}</p>
                     </div>
                 </div>
+                <PreviewAttachments attachments={attachments} />
             </PageContent>
         </>
     );
