@@ -4,7 +4,7 @@ import { Head, Link, setLayoutProps, useForm, usePage } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
 import LoginLink from '@/components/LoginLink/LoginLink.jsx';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
-import { dashboard, login } from '@/routes';
+import { login } from '@/routes';
 import { request as passwordRequest } from '@/routes/password';
 
 export default function Login() {
@@ -156,7 +156,6 @@ export default function Login() {
                             label="Login as Admin"
                             className="btn btn-warning w-100"
                             keyId="1"
-                            redirectUrl={dashboard().url}
                         />
                     </div>
                 )}
