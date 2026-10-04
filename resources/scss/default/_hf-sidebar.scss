@@ -565,6 +565,8 @@
   &:hover { background: var(--hf-hover); color: var(--hf-text); }
   &.is-active { background: var(--hf-gold-50); color: var(--hf-gold-text); font-weight: 600; }
 }
+// Match the expanded submenu spacing (.hf-subnav-inner gap) between flyout rows.
+.hf-flyout > :not(.hf-flyout-title) + :not(.hf-flyout-title) { margin-top: 3px; }
 .hf-flyout-group-toggle {
   display: flex;
   align-items: center;

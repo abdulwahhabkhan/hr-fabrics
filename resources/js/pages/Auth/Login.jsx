@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import ValidationErrors from '@/components/ValidationErrors';
 import { Head, Link, setLayoutProps, useForm, usePage } from '@/util/Inertia';
 import { Button, FloatingLabel, Form } from 'react-bootstrap';
+import { Icon } from '@iconify/react';
 import LoginLink from '@/components/LoginLink/LoginLink.jsx';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { login } from '@/routes';
@@ -125,6 +126,7 @@ export default function Login() {
                                 variant="primary"
                                 disabled={processing}
                             >
+                                <Icon icon="solar:login-3-bold-duotone" />{' '}
                                 {processing ? 'Signing in…' : 'Sign me in'}
                             </Button>
                         </div>
@@ -139,6 +141,7 @@ export default function Login() {
                             onClick={verify}
                             disabled={passkeyLoading || processing}
                         >
+                            <Icon icon="solar:key-minimalistic-square-bold-duotone" />{' '}
                             {passkeyLoading
                                 ? 'Verifying…'
                                 : 'Sign in with a passkey'}
