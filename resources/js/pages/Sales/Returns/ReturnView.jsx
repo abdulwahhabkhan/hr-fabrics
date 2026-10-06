@@ -11,9 +11,17 @@ import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
 import returns from '@/routes/sales/returns';
 
-
 const ReturnView = () => {
-    const { so_return, appName, transaction_date, attachments, total_summary, balance, net_balance } = usePage().props;
+    const {
+        so_return,
+        appName,
+        transaction_date,
+        attachments,
+        total_summary,
+        balance,
+        net_balance,
+        store,
+    } = usePage().props;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const { return_items: items, customer } = so_return;
     const [returnForm, setReturnForm] = useState(false);
@@ -30,15 +38,19 @@ const ReturnView = () => {
             return _.chain(items)
                 .groupBy((row) => {
                     return row.product_id + row.unit + row.rate;
-                }).map((row, id) => {
+                })
+                .map((row, id) => {
                     let first = _.first(row);
                     return {
                         ...first,
                         qty: _.sumBy(row, (i) => parseFloat(i.qty)),
                         total_qty: _.sumBy(row, (i) => parseFloat(i.total_qty)),
-                        total_amount: _.sumBy(row, (i) => parseFloat(i.total_amount))
+                        total_amount: _.sumBy(row, (i) =>
+                            parseFloat(i.total_amount),
+                        ),
                     };
-                }).value();
+                })
+                .value();
         }
     };
     useEffect(() => {
@@ -52,117 +64,136 @@ const ReturnView = () => {
     return (
         <>
             <Head title="Sales Return View" />
-            <PageHeader title="Sales Return View" buttons={(<>
-                <BackButton href={returns.index()} />
-                {
-                    canModify && (
-                        <InertiaLink href={returns.edit(so_return.id)}
-                                     className={"btn btn-sm btn-white"}>
-                            <Icon icon={"solar:pen-2-bold-duotone"} /> Edit
-                        </InertiaLink>
-                    )
+            <PageHeader
+                title="Sales Return View"
+                buttons={
+                    <>
+                        <BackButton href={returns.index()} />
+                        {canModify && (
+                            <InertiaLink
+                                href={returns.edit(so_return.id)}
+                                className={'btn btn-sm btn-white'}
+                            >
+                                <Icon icon={'solar:pen-2-bold-duotone'} /> Edit
+                            </InertiaLink>
+                        )}
+                        <Print />
+                    </>
                 }
-                <Print />
-            </>)} />
+            />
             <PageContent>
-                <Head title={so_return.invoice_no + " Sale Return "} />
+                <Head title={so_return.invoice_no + ' Sale Return '} />
                 <div className="invoice">
                     <div className="invoice-company text-inverse fw-600">
-                        {appName} <span className="float-end">Sales Return</span>
+                        {store.store_name}{' '}
+                        <span className="float-end">Sales Return</span>
                     </div>
                     <div className="invoice-header">
                         <div className="invoice-to">
-                            <Address name={customer.name} address={customer.address} />
+                            <Address
+                                name={customer.name}
+                                address={customer.address}
+                            />
                         </div>
                         <div className="invoice-date">
                             <div className="date text-inverse m-t-5">
-                                <Moment
-                                    date={transaction_date} />
+                                <Moment date={transaction_date} />
                             </div>
                             <div className="invoice-detail">
-                                <span className="fw-semibold">Invoice No:</span> {so_return.invoice_no}<br />
+                                <span className="fw-semibold">Invoice No:</span>{' '}
+                                {so_return.invoice_no}
+                                <br />
                             </div>
-
-
                         </div>
                     </div>
                     <div className="invoice-content">
-
                         <div className="table-responsive">
                             <table className="table table-invoice">
                                 <thead>
-                                <tr>
-                                    <th className="w-1">#</th>
-                                    <th>PRODUCT
-
-                                        <span className={"hidden-print"}>
-                                        <Form.Check
-                                            className={"ms-5px"}
-                                            checked={group}
-                                            onClick={() => setGroup(!group)}
-                                            type="checkbox"
-                                            id={"group_same"}
-                                            label="Group Identical"
-                                            inline />
-                                    </span>
-                                    </th>
-                                    <th className="text-center w-1">Unit</th>
-                                    <th className="text-center w-1">Qty</th>
-                                    <th className="text-center w-1">Mtr</th>
-                                    <th className="text-center w-1">Rate</th>
-                                    <th className="text-right w-1">Total</th>
-                                </tr>
+                                    <tr>
+                                        <th className="w-1">#</th>
+                                        <th>
+                                            PRODUCT
+                                            <span className={'hidden-print'}>
+                                                <Form.Check
+                                                    className={'ms-5px'}
+                                                    checked={group}
+                                                    onClick={() =>
+                                                        setGroup(!group)
+                                                    }
+                                                    type="checkbox"
+                                                    id={'group_same'}
+                                                    label="Group Identical"
+                                                    inline
+                                                />
+                                            </span>
+                                        </th>
+                                        <th className="text-center w-1">
+                                            Unit
+                                        </th>
+                                        <th className="text-center w-1">Qty</th>
+                                        <th className="text-center w-1">Mtr</th>
+                                        <th className="text-center w-1">
+                                            Rate
+                                        </th>
+                                        <th className="text-right w-1">
+                                            Total
+                                        </th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {
-                                    itemsList && itemsList.map((item, index) => {
-                                        return (
-
-                                            <tr key={index}>
-                                                <td className={"w-1"}>{index + 1}</td>
-                                                <td>
-                                                    {item.product && item.product.name}
-                                                </td>
-                                                <td className="text-center w-1">{item.unit}</td>
-                                                <td className="text-center w-1">{item.qty}</td>
-                                                <td className="text-center w-1">{item.total_qty}</td>
-                                                <td className={"num w-1"}><NumberFormat
-                                                    displayType={"text"}
-                                                    value={item.rate}
-                                                    thousandSeparator={true} /></td>
-                                                <td className="num w-1">
-                                                    <NumberFormat
-                                                        displayType={"text"}
-                                                        value={item.total_amount}
-                                                        thousandSeparator={true} />
-                                                </td>
-                                            </tr>
-
-                                        );
-                                    })
-                                }
-
+                                    {itemsList &&
+                                        itemsList.map((item, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <td className={'w-1'}>
+                                                        {index + 1}
+                                                    </td>
+                                                    <td>
+                                                        {item.product &&
+                                                            item.product.name}
+                                                    </td>
+                                                    <td className="text-center w-1">
+                                                        {item.unit}
+                                                    </td>
+                                                    <td className="text-center w-1">
+                                                        {item.qty}
+                                                    </td>
+                                                    <td className="text-center w-1">
+                                                        {item.total_qty}
+                                                    </td>
+                                                    <td className={'num w-1'}>
+                                                        <NumberFormat
+                                                            displayType={'text'}
+                                                            value={item.rate}
+                                                            thousandSeparator={
+                                                                true
+                                                            }
+                                                        />
+                                                    </td>
+                                                    <td className="num w-1">
+                                                        <NumberFormat
+                                                            displayType={'text'}
+                                                            value={
+                                                                item.total_amount
+                                                            }
+                                                            thousandSeparator={
+                                                                true
+                                                            }
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                 </tbody>
                             </table>
                         </div>
                         <Row className="mb-10px fw-semibold p-l-10">
-                            {
-                                suit_qty && (
-                                    <Col sm={3}>Suits: {suit_qty}</Col>
-                                )
-                            }
+                            {suit_qty && <Col sm={3}>Suits: {suit_qty}</Col>}
 
-                            {
-                                box_qty && (
-                                    <Col sm={3}>Suit Boxes: {box_qty}</Col>
-                                )
-                            }
+                            {box_qty && <Col sm={3}>Suit Boxes: {box_qty}</Col>}
 
-                            {
-                                thaan_qty && (
-                                    <Col sm={3}>Thaans: {thaan_qty}</Col>
-                                )
-                            }
+                            {thaan_qty && <Col sm={3}>Thaans: {thaan_qty}</Col>}
                             <Col sm={3}>Meters: {so_return.total_qty}</Col>
                         </Row>
                         <div className="invoice-price">
@@ -172,48 +203,60 @@ const ReturnView = () => {
                                         <small>SUBTOTAL</small>
                                         <span className="text-inverse">
                                             <NumberFormat
-                                                displayType={"text"}
+                                                displayType={'text'}
                                                 value={so_return.amount}
-                                                thousandSeparator={true} />
+                                                thousandSeparator={true}
+                                            />
                                         </span>
                                     </div>
-                                    {
-                                        so_return.discount > 0 && (
-                                            <>
-                                                <div className="sub-price">
-                                                    <Icon icon={"solar:minus-bold-duotone"} className={"text-muted"} />
-                                                </div>
-                                                <div className="sub-price">
-                                                    <small>Discount</small>
-                                                    <span className="text-inverse">
+                                    {so_return.discount > 0 && (
+                                        <>
+                                            <div className="sub-price">
+                                                <Icon
+                                                    icon={
+                                                        'solar:minus-bold-duotone'
+                                                    }
+                                                    className={'text-muted'}
+                                                />
+                                            </div>
+                                            <div className="sub-price">
+                                                <small>Discount</small>
+                                                <span className="text-inverse">
                                                     <NumberFormat
-                                                        displayType={"text"}
-                                                        value={so_return.discount}
-                                                        thousandSeparator={true} />
+                                                        displayType={'text'}
+                                                        value={
+                                                            so_return.discount
+                                                        }
+                                                        thousandSeparator={true}
+                                                    />
                                                 </span>
-                                                </div>
-                                            </>
-                                        )
-                                    }
-                                    {
-                                        so_return.expenses > 0 && (
-                                            <>
-                                                <div className="sub-price">
-                                                    <Icon icon={"solar:add-bold-duotone"} className={"text-muted"} />
-                                                </div>
-                                                <div className="sub-price">
-                                                    <small>Expenses</small>
-                                                    <span className="text-inverse">
+                                            </div>
+                                        </>
+                                    )}
+                                    {so_return.expenses > 0 && (
+                                        <>
+                                            <div className="sub-price">
+                                                <Icon
+                                                    icon={
+                                                        'solar:add-bold-duotone'
+                                                    }
+                                                    className={'text-muted'}
+                                                />
+                                            </div>
+                                            <div className="sub-price">
+                                                <small>Expenses</small>
+                                                <span className="text-inverse">
                                                     <NumberFormat
-                                                        displayType={"text"}
-                                                        value={so_return.expenses}
-                                                        thousandSeparator={true} />
+                                                        displayType={'text'}
+                                                        value={
+                                                            so_return.expenses
+                                                        }
+                                                        thousandSeparator={true}
+                                                    />
                                                 </span>
-                                                </div>
-                                            </>
-                                        )
-                                    }
-
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 {/*<div className="invoice-price-row">
                                     <div className={'num-word'}>
@@ -222,12 +265,14 @@ const ReturnView = () => {
                                 </div>*/}
                             </div>
                             <div className="invoice-price-right">
-                                <small>TOTAL BILL</small> <span className="fw-600">
-                                <NumberFormat
-                                    displayType={"text"}
-                                    value={so_return.total_amount}
-                                    thousandSeparator={true} />
-                            </span>
+                                <small>TOTAL BILL</small>{' '}
+                                <span className="fw-600">
+                                    <NumberFormat
+                                        displayType={'text'}
+                                        value={so_return.total_amount}
+                                        thousandSeparator={true}
+                                    />
+                                </span>
                             </div>
                         </div>
 
@@ -239,47 +284,67 @@ const ReturnView = () => {
                                             <div className="sub-price">
                                                 <small>Previous Balance</small>
                                                 <span className="text-inverse">
-                                            <NumberFormat
-                                                displayType={"text"}
-                                                value={balance}
-                                                thousandSeparator={true} />
-                                        </span>
+                                                    <NumberFormat
+                                                        displayType={'text'}
+                                                        value={balance}
+                                                        thousandSeparator={true}
+                                                    />
+                                                </span>
                                             </div>
 
                                             <div className="sub-price">
                                                 <small>Total Balance</small>
                                                 <span className="text-inverse">
-                                            <NumberFormat
-                                                displayType={"text"}
-                                                value={net_balance}
-                                                thousandSeparator={true} />
-                                        </span>
+                                                    <NumberFormat
+                                                        displayType={'text'}
+                                                        value={net_balance}
+                                                        thousandSeparator={true}
+                                                    />
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </>
                         )}
-
                     </div>
                     <div className="invoice-note d-flex">
                         <div className="flex-fill">
-                            * If you have any questions concerning this invoice, contact sales team<br />
+                            * If you have any questions concerning this invoice,
+                            contact sales team
+                            <br />
                             <ul>
-                                <li><span className={"fw-bold"}>Mobile: </span>0316 703 1111 <br /></li>
-                                <li><span className={"fw-bold"}>PTCL: </span>071 5622 361</li>
+                                {store.contact.mobile && (
+                                    <li>
+                                        <span className={'fw-bold'}>
+                                            Mobile:{' '}
+                                        </span>
+                                        {store.contact.mobile}
+                                    </li>
+                                )}
+                                {store.contact.telephone && (
+                                    <li>
+                                        <span className={'fw-bold'}>
+                                            Telephone:{' '}
+                                        </span>
+                                        {store.contact.telephone}
+                                    </li>
+                                )}
                             </ul>
                         </div>
                         <div className="text-center fw-600">
-                            <span style={{ fontSize: "1.5rem" }}>
-                                <Icon icon={"solar:map-point-bold-duotone"} />
-                            </span><br />
-                            {appName}<br />
-                            March Bazar, Sukkur
+                            <span style={{ fontSize: '1.5rem' }}>
+                                <Icon icon={'solar:map-point-bold-duotone'} />
+                            </span>
+                            <br />
+                            {appName}
+                            <br />
+                            {store.branch_name}
                         </div>
                     </div>
-                    <div className={"m-t-10"}>
-                        <strong className={"bold"}>Notes:</strong><br />
+                    <div className={'m-t-10'}>
+                        <strong className={'bold'}>Notes:</strong>
+                        <br />
                         <p>{so_return.info?.remarks}</p>
                     </div>
                 </div>
