@@ -9,7 +9,6 @@ import stocks from '@/routes/stocks';
 
 export const ProductSearchFilter = ({filters}) => {
     const {products, product} = usePage().props
-    console.log(products)
     const {register, control, setValue, formState: {errors}, handleSubmit, watch} = useForm({defaultValues: filters});
     const sendRequest = async (data) => {
         const post_data = {...data}

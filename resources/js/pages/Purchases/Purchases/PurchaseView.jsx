@@ -58,7 +58,10 @@ const PurchaseView = () => {
                             </InertiaLink>
                         )}
                         <Print />
-                        <DownloadPdf target={invoiceRef} fileName={'PO-' + receipt.invoice_no + '.pdf'} />
+                        <DownloadPdf
+                            target={invoiceRef}
+                            fileName={'PO-' + receipt.invoice_no + '.pdf'}
+                        />
                     </>
                 }
             />
@@ -67,6 +70,7 @@ const PurchaseView = () => {
                 <div className="invoice" ref={invoiceRef}>
                     <div className="invoice-company text-inverse fw-600">
                         {appName}
+                        <span className="float-end">Purchase Invoice</span>
                     </div>
                     <div className="invoice-header">
                         <div className="invoice-to">

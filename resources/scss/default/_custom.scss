@@ -344,6 +344,9 @@ img.height-150 {
 
 .page-filters-wrapper {
   animation-delay: 250ms;
+  // Keep filter dropdowns above the page content's animated stacking context.
+  position: relative;
+  z-index: 2;
 }
 
 .page-content-wrapper {

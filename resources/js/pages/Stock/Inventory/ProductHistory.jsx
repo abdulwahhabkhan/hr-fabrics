@@ -154,7 +154,11 @@ const ProductHistory = () => {
                                             <td>{row.account?.name}</td>
                                             <td>{row.unit}</td>
                                             <td className="text-end hf-mono">
-                                                <NumberFormat displayType="text" value={row.size} thousandSeparator={true} />
+                                                {Number(row.size) ? (
+                                                    <NumberFormat displayType="text" value={row.size} thousandSeparator={true} />
+                                                ) : (
+                                                    <span className="text-muted">-</span>
+                                                )}
                                             </td>
                                             <td className="text-end hf-mono">
                                                 <NumberFormat displayType="text" value={row.qty} thousandSeparator={true} />

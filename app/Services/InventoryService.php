@@ -7,11 +7,15 @@ use App\Enums\PackingType;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\FabricReceiving;
+use App\Models\Purchase\FabricReceivingItem;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
 use App\Models\Purchase\PurchaseReturn;
+use App\Models\Purchase\PurchaseReturnItem;
 use App\Models\Sales\Order;
+use App\Models\Sales\OrderItem;
 use App\Models\Sales\SalesReturn;
+use App\Models\Sales\SalesReturnItem;
 use App\Models\Stock\Inventory;
 use Carbon\CarbonInterface;
 use DB;
@@ -72,68 +76,81 @@ class InventoryService
             ->groupBy(['brand_name', 'cost']);
     }
 
+    /**
+     * Product movements read from confirmed purchase, sale and return lines,
+     * hydrated as Inventory so account/product relations can be eager loaded.
+     */
     public function getProductHistory(int $productId): Builder
     {
-        $inventory = Inventory::query()->where('product_id', $productId);
-        $purchases = $inventory->clone()
+        $purchases = FabricReceivingItem::query()
             ->select([
                 FabricReceiving::qCol('invoice_no'),
-                Inventory::qCol('unit'),
-                Inventory::qCol('size'),
-                Inventory::qCol('qty'),
+                FabricReceivingItem::qCol('unit'),
+                FabricReceivingItem::qCol('size'),
+                FabricReceivingItem::qCol('qty'),
                 FabricReceiving::qCol('transaction_date'),
-                Inventory::qCol('meters'),
+                FabricReceivingItem::qCol('total_qty as meters'),
                 FabricReceiving::qCol('supplier_id as account_id'),
-                Inventory::qCol('product_id'),
+                FabricReceivingItem::qCol('product_id'),
             ])
             ->selectRaw("'Purchase' as type")
-            ->joinRelation('purchase');
-        $sales = $inventory->clone()
+            ->joinRelation('fabricReceiving')
+            ->whereHas('fabricReceiving', fn (Builder $query) => $query->confirmed())
+            ->where(FabricReceivingItem::qCol('product_id'), $productId);
+        $sales = OrderItem::query()
             ->select([
                 Order::qCol('invoice_no'),
-                Inventory::qCol('unit'),
-                Inventory::qCol('size'),
-                Inventory::qCol('qty'),
+                OrderItem::qCol('unit'),
+                OrderItem::qCol('size'),
+                OrderItem::qCol('qty'),
                 Order::qCol('transaction_date'),
-                Inventory::qCol('meters'),
+                OrderItem::qCol('total_qty as meters'),
                 Order::qCol('customer_id as account_id'),
-                Inventory::qCol('product_id'),
+                OrderItem::qCol('product_id'),
             ])
             ->selectRaw("'Sale' as type")
-            ->joinRelation('sale');
-        $purchaseReturn = $inventory->clone()
+            ->joinRelation('order')
+            ->whereHas('order', fn (Builder $query) => $query->confirmed())
+            ->where(OrderItem::qCol('product_id'), $productId);
+        $purchaseReturns = PurchaseReturnItem::query()
             ->select([
                 PurchaseReturn::qCol('invoice_no'),
-                Inventory::qCol('unit'),
-                Inventory::qCol('size'),
-                Inventory::qCol('qty'),
+                PurchaseReturnItem::qCol('unit'),
+                PurchaseReturnItem::qCol('size'),
+                PurchaseReturnItem::qCol('qty'),
                 PurchaseReturn::qCol('transaction_date'),
-                Inventory::qCol('meters'),
+                PurchaseReturnItem::qCol('total_qty as meters'),
                 PurchaseReturn::qCol('supplier_id as account_id'),
-                Inventory::qCol('product_id'),
+                PurchaseReturnItem::qCol('product_id'),
             ])
             ->selectRaw("'PO Return' as type")
-            ->joinRelation('purchaseReturn');
-        $saleReturns = $inventory->clone()
+            ->joinRelation('purchaseReturn')
+            ->whereHas('purchaseReturn', fn (Builder $query) => $query->confirmed())
+            ->where(PurchaseReturnItem::qCol('product_id'), $productId);
+        $saleReturns = SalesReturnItem::query()
             ->select([
                 SalesReturn::qCol('invoice_no'),
-                Inventory::qCol('unit'),
-                Inventory::qCol('size'),
-                Inventory::qCol('qty'),
+                SalesReturnItem::qCol('unit'),
+                SalesReturnItem::qCol('size'),
+                SalesReturnItem::qCol('qty'),
                 SalesReturn::qCol('transaction_date'),
-                Inventory::qCol('meters'),
+                SalesReturnItem::qCol('total_qty as meters'),
                 SalesReturn::qCol('customer_id as account_id'),
-                Inventory::qCol('product_id'),
+                SalesReturnItem::qCol('product_id'),
             ])
             ->selectRaw("'Sale Return' as type")
-            ->joinRelation('saleReturn');
+            ->joinRelation('salesReturn')
+            ->whereHas('salesReturn', fn (Builder $query) => $query->confirmed())
+            ->where(SalesReturnItem::qCol('product_id'), $productId);
 
-        return $purchases
-            ->union($sales)
-            ->union($purchaseReturn)
-            ->union($saleReturns)
+        $movements = $purchases
+            ->unionAll($sales)
+            ->unionAll($purchaseReturns)
+            ->unionAll($saleReturns);
+
+        return Inventory::query()
+            ->fromSub($movements, Inventory::tName())
             ->orderBy('transaction_date');
-
     }
 
     public function getPurchaseDetails(
