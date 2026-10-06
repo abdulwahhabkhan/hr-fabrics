@@ -1,7 +1,7 @@
 import { Head, InertiaLink, usePage } from '@/util/Inertia';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Icon } from '@iconify/react';
-import { AppName, settings } from '@/config/page-settings';
+import { settings } from '@/config/page-settings';
 import Moment from '@/components/Moment';
 import React, { useRef } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
@@ -33,7 +33,7 @@ const FabricReceivingView = () => {
             return s + item.total_qty;
         }, 0);
     };
-    const app_name = AppName;
+
     return (
         <>
             <Head title="Fabric Receiving View" />

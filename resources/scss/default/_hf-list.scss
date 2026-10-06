@@ -451,3 +451,46 @@ button.hf-icon-btn {
     --hf-flush-inset: 1rem;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Scrollable table: body scrolls inside the panel while the header row (and
+// optional footer totals row) stays pinned. Use on `.table-responsive`.
+// ---------------------------------------------------------------------------
+.hf-table-scroll {
+  max-height: calc(100vh - 26rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+
+  > .table {
+    border-collapse: separate;
+    border-spacing: 0;
+
+    > thead > tr > th,
+    > tfoot > tr > td {
+      position: sticky;
+      z-index: 2;
+      background: var(--hf-surface);
+    }
+
+    > thead > tr > th {
+      top: 0;
+      color: var(--hf-text-2);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      box-shadow: inset 0 -1px 0 var(--hf-border);
+    }
+
+    > tfoot > tr > td {
+      bottom: 0;
+      font-weight: 700;
+      color: var(--hf-text);
+      box-shadow: inset 0 1px 0 var(--hf-border-strong);
+    }
+  }
+}
+
+.hf-num-in { color: #1d7a50; }
+.hf-num-out { color: #a33426; }
