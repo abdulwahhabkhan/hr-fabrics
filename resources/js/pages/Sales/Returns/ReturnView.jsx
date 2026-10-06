@@ -15,7 +15,7 @@ import returns from '@/routes/sales/returns';
 const ReturnView = () => {
     const { so_return, appName, transaction_date, attachments, total_summary, balance, net_balance } = usePage().props;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
-    const { items, customer } = so_return;
+    const { return_items: items, customer } = so_return;
     const [returnForm, setReturnForm] = useState(false);
     const [group, setGroup] = useState(true);
     const [itemsList, setItemsList] = useState(items);
@@ -29,7 +29,7 @@ const ReturnView = () => {
         else {
             return _.chain(items)
                 .groupBy((row) => {
-                    return row.product.product_id + row.unit + row.rate;
+                    return row.product_id + row.unit + row.rate;
                 }).map((row, id) => {
                     let first = _.first(row);
                     return {
@@ -49,7 +49,6 @@ const ReturnView = () => {
             return s + item.qty;
         }, 0);
     };
-    console.log("group", group, itemsList);
     return (
         <>
             <Head title="Sales Return View" />

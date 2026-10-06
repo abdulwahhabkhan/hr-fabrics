@@ -107,6 +107,7 @@ class SalesReturnController extends Controller
      */
     public function show(SalesReturn $return): Response
     {
+        $return->load(['customer', 'returnItems.product:id,name']);
         $total_summary = $return->returnItems->groupBy('unit')->map(fn ($item) => $item->sum('qty'));
 
         return Inertia::render(
@@ -116,7 +117,7 @@ class SalesReturnController extends Controller
                 'total_summary' => $total_summary,
                 'transaction_date' => $return->transaction_display_date->toDateString(),
                 'balance' => $return->balance,
-                'so_return' => $return->load('customer'),
+                'so_return' => $return,
                 'net_balance' => $return->balance - $return->total_amount,
             ]
         );

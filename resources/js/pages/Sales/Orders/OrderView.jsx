@@ -476,9 +476,9 @@ const OrderView = () => {
                             <div className="invoice-qr-frame">
                                 <img src={contact_qr} alt="Contact QR code" />
                             </div>
-                            <div className="invoice-qr-caption">
-                                <Icon icon="solar:scanner-bold-duotone" />
-                                Scan to save contact
+                            <div className="invoice-qr-label">
+                                <span className="invoice-qr-app">{appName}</span>
+                                <span className="invoice-qr-branch">{store.branch_name}</span>
                             </div>
                         </div>
                     </div>

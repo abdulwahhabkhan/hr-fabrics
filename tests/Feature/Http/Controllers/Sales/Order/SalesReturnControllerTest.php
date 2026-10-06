@@ -64,6 +64,23 @@ test('sale return view can be rendered', function () {
     );
 });
 
+test('sale return view includes return items with their products', function () {
+    $user = $this->getAdmin();
+    $product = Product::factory()->create();
+    $return = SalesReturn::factory()->closed()
+        ->has(SalesReturnItem::factory()->count(2)->state(['product_id' => $product->id]), 'returnItems')
+        ->create();
+
+    $response = $this->actingAs($user)->get(route('sales.returns.show', $return->id));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Returns/ReturnView')
+        ->has('so_return.return_items', 2)
+        ->where('so_return.return_items.0.product.name', $product->name)
+    );
+});
+
 test('sale return edit page can be rendered', function () {
     // Arrange
     $user = $this->getAdmin();
