@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Traits;
 
 use App\Contracts\HasLabel;
 use BackedEnum;

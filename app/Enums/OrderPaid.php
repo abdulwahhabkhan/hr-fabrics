@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Traits\HasOptions;
+
 enum OrderPaid: int
 {
     use HasOptions;

@@ -1,6 +1,6 @@
 <?php
 
-use App\Console\Commands\Accounts\CalculateCustomerBalance;
+use App\Console\Commands\Accounts\CalculateCustomerBalanceCommand;
 use App\Console\Commands\Attendance\ImportAttendanceLogsCommand;
 use App\Console\Commands\Attendance\ImportWorkersCommand;
 use App\Console\Commands\PruneDeletedFilesCommand;
@@ -14,7 +14,7 @@ Artisan::command('inspire', function () {
 $email = 'abdulwahhabkhan@hotmail.com';
 // Schedule::command('inspire')->hourly();
 Schedule::command('queue:work database --stop-when-empty')->everyMinute()->withoutOverlapping(15);
-Schedule::command(CalculateCustomerBalance::class)
+Schedule::command(CalculateCustomerBalanceCommand::class)
     ->daily()
     ->withoutOverlapping(500)
     ->emailOutputOnFailure($email);

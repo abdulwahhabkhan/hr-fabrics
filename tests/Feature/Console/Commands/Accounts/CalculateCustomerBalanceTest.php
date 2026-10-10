@@ -1,6 +1,6 @@
 <?php
 
-use App\Console\Commands\Accounts\CalculateCustomerBalance;
+use App\Console\Commands\Accounts\CalculateCustomerBalanceCommand;
 use App\Jobs\Account\CalculateCustomerBalanceJob;
 use App\Models\Accounts\Account;
 
@@ -11,7 +11,7 @@ test('job triggered for customer', function () {
     Queue::fake();
     Account::factory(4)->customer()->create();
     // action
-    artisan(CalculateCustomerBalance::class);
+    artisan(CalculateCustomerBalanceCommand::class);
     // assert
     Queue::assertPushed(CalculateCustomerBalanceJob::class, 4);
 

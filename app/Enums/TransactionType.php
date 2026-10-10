@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Contracts\HasLabel;
+use App\Traits\HasOptions;
 
 enum TransactionType: string implements HasLabel
 {

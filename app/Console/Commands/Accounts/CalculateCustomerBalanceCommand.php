@@ -6,7 +6,7 @@ use App\Jobs\Account\CalculateCustomerBalanceJob;
 use App\Models\Accounts\Account;
 use Illuminate\Console\Command;
 
-class CalculateCustomerBalance extends Command
+class CalculateCustomerBalanceCommand extends Command
 {
     /**
      * The name and signature of the console command.

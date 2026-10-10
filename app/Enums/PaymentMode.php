@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Traits\HasOptions;
+
 enum PaymentMode: string
 {
     use HasOptions;

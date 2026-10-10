@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Traits\HasOptions;
+
 enum EntryType: string
 {
     use HasOptions;
