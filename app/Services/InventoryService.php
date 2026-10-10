@@ -95,7 +95,7 @@ class InventoryService
             ])
             ->selectRaw("'Purchase' as type")
             ->joinRelation('fabricReceiving')
-            ->whereHas('fabricReceiving', fn (Builder $query) => $query->confirmed())
+            ->whereHas('fabricReceiving', fn ($query) => $query->confirmed())
             ->where(FabricReceivingItem::qCol('product_id'), $productId);
         $sales = OrderItem::query()
             ->select([
@@ -110,7 +110,7 @@ class InventoryService
             ])
             ->selectRaw("'Sale' as type")
             ->joinRelation('order')
-            ->whereHas('order', fn (Builder $query) => $query->confirmed())
+            ->whereHas('order', fn ($query) => $query->confirmed())
             ->where(OrderItem::qCol('product_id'), $productId);
         $purchaseReturns = PurchaseReturnItem::query()
             ->select([
@@ -125,7 +125,7 @@ class InventoryService
             ])
             ->selectRaw("'PO Return' as type")
             ->joinRelation('purchaseReturn')
-            ->whereHas('purchaseReturn', fn (Builder $query) => $query->confirmed())
+            ->whereHas('purchaseReturn', fn ($query) => $query->confirmed())
             ->where(PurchaseReturnItem::qCol('product_id'), $productId);
         $saleReturns = SalesReturnItem::query()
             ->select([
@@ -140,7 +140,7 @@ class InventoryService
             ])
             ->selectRaw("'Sale Return' as type")
             ->joinRelation('salesReturn')
-            ->whereHas('salesReturn', fn (Builder $query) => $query->confirmed())
+            ->whereHas('salesReturn', fn ($query) => $query->confirmed())
             ->where(SalesReturnItem::qCol('product_id'), $productId);
 
         $movements = $purchases

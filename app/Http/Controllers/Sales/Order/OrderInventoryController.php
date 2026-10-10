@@ -34,7 +34,7 @@ class OrderInventoryController extends Controller
                 'label' => 'Sales invoice',
                 'reference_no' => $order->invoice_no,
                 'url' => route('sales.orders.show', $order),
-                'status' => $order->status?->name,
+                'status' => $order->status->name,
                 'party' => [
                     'label' => 'Customer',
                     'name' => $order->customer?->name,

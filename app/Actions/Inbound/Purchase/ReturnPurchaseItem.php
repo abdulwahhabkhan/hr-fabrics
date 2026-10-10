@@ -4,7 +4,6 @@ namespace App\Actions\Inbound\Purchase;
 
 use App\Actions\Inventory\IssueInventory;
 use App\Actions\LogAction\RecordAction;
-use App\Enums\PackingType;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseReturnItem;
@@ -47,7 +46,7 @@ final class ReturnPurchaseItem
                 ->setOutboundItemId($returnItem->id)
                 ->setTransactionDate($receipt->transaction_date)
                 ->setProductId($returnItem->product_id)
-                ->setUnit(PackingType::from($returnItem->unit))
+                ->setUnit($returnItem->unit)
                 ->setSize((float) $returnItem->size)
                 ->setQuantity((int) $returnItem->qty)
                 ->setMeters((float) $returnItem->total_qty)

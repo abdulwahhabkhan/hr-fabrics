@@ -34,7 +34,7 @@ class FabricReceivingInventoryController extends Controller
                 'label' => 'Fabric receiving',
                 'reference_no' => $fabric_receiving->invoice_no,
                 'url' => route('purchases.fabric-receivings.show', $fabric_receiving),
-                'status' => $fabric_receiving->status?->value,
+                'status' => $fabric_receiving->status->value,
                 'party' => [
                     'label' => 'Supplier',
                     'name' => $fabric_receiving->supplier?->name,

@@ -34,7 +34,7 @@ class PurchaseInventoryController extends Controller
                 'label' => 'Fabric purchase',
                 'reference_no' => $receipt->invoice_no,
                 'url' => route('purchases.pos.show', $receipt),
-                'status' => $receipt->status?->value,
+                'status' => $receipt->status->value,
                 'party' => [
                     'label' => 'Supplier',
                     'name' => $receipt->supplier?->name,

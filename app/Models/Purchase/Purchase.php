@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $supplier_name
+ * @property int $total_amount
  */
 #[UsePolicy(PurchasePolicy::class)]
 final class Purchase extends Model implements Journalable, Logable

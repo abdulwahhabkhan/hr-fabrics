@@ -15,7 +15,7 @@ class DashboardController extends Controller
     /**
      * Number of days (including today) shown in the sales trend chart.
      */
-    protected const TREND_DAYS = 14;
+    protected const int TREND_DAYS = 14;
 
     public function __invoke(Request $request): Response
     {

@@ -31,6 +31,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read string|null $discount_label
+ * @property-read int $invoices
+ * @property-read int $total_amount
+ * @property-read string $customer_name
+ * @property-read string $city
  */
 class Order extends Model implements Fileable, Journalable, Logable
 {

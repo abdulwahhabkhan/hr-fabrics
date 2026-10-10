@@ -34,7 +34,7 @@ class ReturnInventoryController extends Controller
                 'label' => 'Sales return',
                 'reference_no' => $return->invoice_no,
                 'url' => route('sales.returns.show', $return),
-                'status' => $return->status?->name,
+                'status' => $return->status->name,
                 'party' => [
                     'label' => 'Customer',
                     'name' => $return->customer?->name,

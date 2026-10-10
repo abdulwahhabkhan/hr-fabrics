@@ -35,7 +35,7 @@ class ReturnInventoryController extends Controller
                 'label' => 'Fabric return',
                 'reference_no' => $return->invoice_no,
                 'url' => route('purchases.por.show', $return),
-                'status' => $return->status?->name,
+                'status' => $return->status->name,
                 'party' => [
                     'label' => 'Supplier',
                     'name' => $return->supplier?->name,

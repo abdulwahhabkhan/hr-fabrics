@@ -39,22 +39,19 @@ class CustomerRequest extends FormRequest
 
     /**
      * A credit limit only applies to customers allowed credit; cash-only
-     * customers always store a zero limit.
+     * customers always store a zero limit. The Urdu city name is resolved
+     * from the selected city so it is part of the validated address.
      */
     protected function prepareForValidation(): void
     {
         if (! $this->boolean('credit')) {
             $this->merge(['limit' => 0]);
         }
-    }
 
-    protected function passedValidation(): void
-    {
         $address = $this->input('address', []);
         if (! empty($address['city'] ?? null)) {
             $address['city_urdu'] = City::where('name', $address['city'])->value('name_urdu');
             $this->merge(['address' => $address]);
-            $this->getValidatorInstance()->setData($this->all());
         }
     }
 }
