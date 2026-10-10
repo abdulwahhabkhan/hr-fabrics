@@ -7,7 +7,7 @@ use App\Actions\LogAction\RecordAction;
 use App\Enums\PackingType;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Models\Purchase\Purchase;
-use App\Models\Purchase\PurchaseItemReturn;
+use App\Models\Purchase\PurchaseReturnItem;
 use App\Models\User;
 use DB;
 use Throwable;
@@ -20,7 +20,7 @@ final class ReturnPurchaseItem
      * @throws UnableToAllocateStockException
      * @throws Throwable
      */
-    public function handle(array $payload, User $user): PurchaseItemReturn
+    public function handle(array $payload, User $user): PurchaseReturnItem
     {
         $data = array_intersect_key($payload, array_flip([
             'purchase_id', 'product_id', 'unit', 'size', 'qty', 'price', 'remarks',
@@ -36,11 +36,11 @@ final class ReturnPurchaseItem
         /** @var Purchase $receipt */
         $receipt = Purchase::findOrFail($data['purchase_id']);
 
-        /** @var PurchaseItemReturn $return */
+        /** @var PurchaseReturnItem $return */
         $return = DB::transaction(function () use ($receipt, $data, $total) {
             Purchase::query()->where('id', $receipt->id)->increment('total_return', $total);
-            /** @var PurchaseItemReturn $returnItem */
-            $returnItem = PurchaseItemReturn::create($data);
+            /** @var PurchaseReturnItem $returnItem */
+            $returnItem = PurchaseReturnItem::create($data);
 
             resolve(IssueInventory::class)
                 ->setOutbound($returnItem)
