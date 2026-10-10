@@ -16,6 +16,7 @@ class ProductStockController extends Controller
     {
         $stock = Inventory::query()
             ->available()
+            ->costed()
             ->where('product_id', $product->id)
             ->selectRaw('unit, size, SUM(qty) as qty, SUM(meters) as meters')
             ->groupBy('unit', 'size')

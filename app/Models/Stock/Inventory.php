@@ -174,4 +174,10 @@ final class Inventory extends Model
 
         return $query->orderBy('id');
     }
+
+    #[Scope]
+    protected function costed(Builder $query): Builder
+    {
+        return $query->whereNotNull(self::qCol('cost'));
+    }
 }

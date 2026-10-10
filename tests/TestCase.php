@@ -101,7 +101,7 @@ abstract class TestCase extends BaseTestCase
         return Account::factory()->cash()->create();
     }
 
-    protected function addInventory(Product $product, PackingType $unit, int $qty = 1, float $size = 5.5): void
+    protected function addInventory(Product $product, PackingType $unit, int $qty = 1, float $size = 5.5, ?float $cost = null): void
     {
         $stockItem = FabricReceivingItem::factory()->create([
             'product_id' => $product->id,
@@ -119,6 +119,7 @@ abstract class TestCase extends BaseTestCase
             'qty' => $qty,
             'size' => $unit === PackingType::Thaan ? 0 : $size,
             'meters' => $qty * $size,
+            'cost' => $cost,
             'transaction_date' => fake()->dateTimeThisMonth(),
         ]);
     }
