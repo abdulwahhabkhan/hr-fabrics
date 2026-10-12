@@ -88,7 +88,7 @@ const CityForm = () => {
                                         <Form.Label>Name (Urdu):</Form.Label>
 
                                         <Form.Control
-                                            className={'text-end'}
+                                            className={'text-end urdu'}
                                             {...register('name_urdu', {
                                                 required: true,
                                             })}
