@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Sales\OrderItemResource;
 use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
-use App\Rules\CheckInventoryRule;
 use App\Services\OrderService;
 use DB;
 use Exception;
@@ -30,15 +29,12 @@ class AddOrderItemController extends Controller
         UpdateOrderTotal $updateOrderTotal
     ) {
         $this->orderService = $orderService;
-        /*$id = $order->id;
-        $verifyQty = ['required', 'numeric', new CheckInventoryRule];
-        */
         $validated = $request->validate([
             'item_id' => ['integer'],
             'product' => ['required', 'array'],
             'unit' => ['required', 'string'],
             'size' => ['required', 'numeric'],
-            'qty' => ['required', 'numeric', new CheckInventoryRule],
+            'qty' => ['required', 'numeric'],
             'price' => ['required', 'numeric'],
             'commission' => ['nullable'],
             'discount' => ['required', 'numeric'],

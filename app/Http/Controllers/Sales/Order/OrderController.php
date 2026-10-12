@@ -157,7 +157,7 @@ class OrderController extends Controller
             'Sales/Orders/OrderForm',
             [
                 'order' => $data,
-                'products' => ProductACResource::collection(resolve(ProductService::class)->availableProducts()),
+                'products' => ProductACResource::collection(resolve(ProductService::class)->autocompleteProducts()),
                 'items' => OrderItemResource::collection($items),
                 'types' => PurchaseType::toValues(),
                 'discountTypes' => DiscountType::toOptions(),

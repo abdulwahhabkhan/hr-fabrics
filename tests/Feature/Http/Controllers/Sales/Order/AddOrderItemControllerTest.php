@@ -8,7 +8,7 @@ use App\Models\Sales\OrderItem;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-test('add item failed due to no inventory',
+test('add item without inventory is allowed',
     function (PackingType $unit, float $size, int $qty, float $price, float $total) {
         // Arrange
         $user = $this->getAdmin();
@@ -30,8 +30,13 @@ test('add item failed due to no inventory',
             ->postJson(route('ajax.so.item.add', $order->id), $post);
 
         // Assert
-        $response->assertJsonValidationErrorFor('qty')->assertUnprocessable();
-        assertDatabaseCount(OrderItem::class, 0);
+        $response->assertJsonMissingValidationErrors()->assertOk();
+        assertDatabaseHas(OrderItem::class, [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'qty' => $qty,
+        ]);
+        assertDatabaseHas(Order::class, ['id' => $order->id, 'total' => $total]);
 
     })->with([
         'thaan' => [PackingType::Thaan, 21, 1, 350, 350 * 21],

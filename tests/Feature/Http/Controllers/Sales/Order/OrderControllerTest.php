@@ -24,6 +24,7 @@ use App\Models\Accounts\Journal;
 use App\Models\Accounts\JournalDetail;
 use App\Models\Action\Log;
 use App\Models\Catalog\Brand;
+use App\Models\Catalog\Product;
 use App\Models\File;
 use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
@@ -800,6 +801,23 @@ test('sale order edit page can be rendered', function () {
         ->has('items')
         ->has('types')
         ->has('discountTypes')
+    );
+});
+
+test('sale order edit page lists products with and without inventory', function () {
+    Permission::fake(['sales.orders.*' => true]);
+    $order = Order::factory()->create();
+    $availableProduct = Product::factory()->available()->create();
+    $unavailableProduct = Product::factory()->create(['is_available' => false]);
+
+    $response = $this->get(route('sales.orders.edit', $order->id));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Sales/Orders/OrderForm')
+        ->where('products.data', fn ($products) => collect($products)->pluck('product_id')
+            ->intersect([$availableProduct->id, $unavailableProduct->id])
+            ->count() === 2)
     );
 });
 
