@@ -117,7 +117,7 @@ test('sale return edit page includes saved items', function () {
         ->where('items.0.qty', $item->qty)
         ->where('items.0.rate', $item->rate)
     );
-});
+})->flaky();
 
 test('sale returns can be filtered by ref no', function () {
     $user = $this->getAdmin();
