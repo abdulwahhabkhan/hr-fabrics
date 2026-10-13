@@ -7,6 +7,46 @@ import Moment from '@/components/Moment';
 import { DeleteAjax } from '@/components/Actions.jsx';
 import { deleteMethod, show, upload, view } from '@/routes/file';
 import { Panel, PanelBody } from '@/components/panel/panel';
+import { notifyMessage } from '@/util/util.jsx';
+
+/**
+ * Builds a readable message from a failed upload request.
+ */
+const uploadErrorMessage = (error) => {
+    const { status, data } = error?.response ?? {};
+
+    if (status === 413) {
+        return 'The file is too large to upload.';
+    }
+
+    const validationMessage = Object.values(data?.errors ?? {}).flat()[0];
+
+    return validationMessage ?? data?.message ?? error?.message ?? 'The file could not be uploaded.';
+};
+
+const notifyUploadError = (error) => {
+    console.error(error);
+    notifyMessage({
+        title: 'Upload failed',
+        type: 'danger',
+        message: uploadErrorMessage(error),
+        timeout: 6000,
+    });
+};
+
+/**
+ * Reports files the dropzone refused before upload (wrong type, too many files).
+ */
+const notifyRejectedFiles = (fileRejections) => {
+    fileRejections.forEach(({ file, errors }) => {
+        notifyMessage({
+            title: 'Upload failed',
+            type: 'danger',
+            message: `${file.name}: ${errors.map((e) => e.message).join(', ')}`,
+            timeout: 6000,
+        });
+    });
+};
 
 const thumbsContainer = {
     display: 'flex',
@@ -56,6 +96,7 @@ export const FileUpload = ({
     const { getRootProps, getInputProps } = useDropzone({
         accept: acceptedMines,
         maxFiles: 1,
+        onDropRejected: notifyRejectedFiles,
         onDrop: (acceptedFiles) => {
             acceptedFiles.map((file) => {
                 progress(true);
@@ -76,9 +117,7 @@ export const FileUpload = ({
                         setProcessing(false);
                         progress(false);
                     })
-                    .catch((error) => {
-                        console.error(error);
-                    });
+                    .catch(notifyUploadError);
             });
         },
     });
@@ -460,6 +499,7 @@ export const AttachFiles = ({
         maxFiles: 1,
         noClick: true,
         noKeyboard: true,
+        onDropRejected: notifyRejectedFiles,
         onDrop: (acceptedFiles) => {
             acceptedFiles.map((file) => {
                 progress(true);
@@ -481,9 +521,7 @@ export const AttachFiles = ({
                         setProcessing(false);
                         progress(false);
                     })
-                    .catch((error) => {
-                        console.error(error);
-                    });
+                    .catch(notifyUploadError);
             });
         },
     });
@@ -556,6 +594,7 @@ export const AttachFile = ({
     const { getRootProps, getInputProps, open } = useDropzone({
         accept: acceptedMines,
         maxFiles: 1,
+        onDropRejected: notifyRejectedFiles,
         onDrop: (acceptedFiles) => {
             acceptedFiles.map((file) => {
                 progress(true);
@@ -575,9 +614,7 @@ export const AttachFile = ({
                         setProcessing(false);
                         progress(false);
                     })
-                    .catch((error) => {
-                        console.error(error);
-                    });
+                    .catch(notifyUploadError);
             });
         },
     });
