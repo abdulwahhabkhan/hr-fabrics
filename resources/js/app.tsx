@@ -8,6 +8,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import solarIconSubset from '@/icons/solar-subset.json';
+import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 import AppLayout from '@/layouts/AppLayout.jsx';
 import AuthLayout from '@/layouts/AuthLayout.jsx';
 import SettingsLayout from '@/layouts/SettingLayout.jsx';
@@ -30,7 +31,11 @@ void createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <ErrorBoundary>
+                <App {...props} />
+            </ErrorBoundary>,
+        );
     },
     layout: (name) => {
         switch (true) {

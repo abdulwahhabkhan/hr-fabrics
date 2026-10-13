@@ -79,8 +79,9 @@ const JournalView = () => {
                                             return (
                                                 <tr key={index}>
                                                     <td>
-                                                        {account.name},{' '}
-                                                        {account.address.city}
+                                                        {account.name}
+                                                        {account.address?.city &&
+                                                            `, ${account.address.city}`}
                                                     </td>
                                                     <td className={'num'}>
                                                         <NumberFormat

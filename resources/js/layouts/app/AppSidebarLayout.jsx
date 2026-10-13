@@ -5,6 +5,7 @@ import SidebarBrand from '@/components/sidebar/SidebarBrand';
 import SidebarGlyph from '@/components/sidebar/SidebarGlyph';
 import useSidebarState from '@/components/sidebar/useSidebarState';
 import FlashMessage from '@/components/FlashMessage';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AppSidebarLayout({ header, children }) {
     const { collapsed, toggle } = useSidebarState();
@@ -38,8 +39,10 @@ export default function AppSidebarLayout({ header, children }) {
                 </div>
 
                 <main id="content" className="app-content animate-fade-up">
-                    {header && <>{header}</>}
-                    {children}
+                    <ErrorBoundary resetKey={url}>
+                        {header && <>{header}</>}
+                        {children}
+                    </ErrorBoundary>
                 </main>
 
                 <footer id="footer" className="app-footer hf-footer">
