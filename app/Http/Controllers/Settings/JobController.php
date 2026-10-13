@@ -17,7 +17,7 @@ class JobController extends Controller
     {
         $roles = Role::filter($request)->paginate(100);
 
-        return Inertia::render('Settings/Role/RoleIndex',
+        return Inertia::render('settings/Role/RoleIndex',
             [
                 'roles' => $roles,
                 'filters' => $request->only('search'),

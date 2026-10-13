@@ -12,7 +12,6 @@ use App\Http\Controllers\Catalog\FinishController;
 use App\Http\Controllers\Catalog\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExceptionController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Purchases\FabricReceiving\UnLockFabricReceivingController;
 use App\Http\Controllers\Purchases\FabricReceivingController;
 use App\Http\Controllers\Purchases\FabricReceivingInventoryController;
@@ -30,7 +29,6 @@ use App\Http\Controllers\Sales\Order\OrderController;
 use App\Http\Controllers\Sales\Order\OrderInventoryController;
 use App\Http\Controllers\Sales\Order\OrderLedgerController;
 use App\Http\Controllers\Sales\Order\SalesReturnController;
-use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\Settings\CityController;
 use App\Http\Controllers\Settings\EmployeeController;
 use App\Http\Controllers\Settings\JobController;
@@ -57,7 +55,7 @@ Route::get('/', function () {
     }
 
     return redirect()->route('login');
-});
+})->name('home');
 
 Route::prefix('exceptions')->middleware('auth')->name('exceptions.')->group(function () {
     Route::get('/', [ExceptionController::class, 'index'])->name('home');
@@ -246,18 +244,7 @@ Route::prefix('settings')->middleware(['auth', 'verified', 'auth.role'])
             ->only(['index', 'destroy']);
     });
 
-// User Profile
-Route::middleware(['auth'])->group(function () {
-    Route::get('profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('profile/security', [SecurityController::class, 'edit'])
-        ->middleware('password.confirm')
-        ->name('profile.security');
-    Route::put('profile/password', [SecurityController::class, 'updatePassword'])
-        ->middleware('throttle:6,1')
-        ->name('profile.password');
-});
-
-require __DIR__.'/auth.php';
+require __DIR__.'/settings.php';
 require __DIR__.'/reports.php';
 require __DIR__.'/auto-complete.php';
 require __DIR__.'/inbound.php';

@@ -3,6 +3,7 @@ import { Dropdown } from 'react-bootstrap';
 import { InertiaLink, usePage } from '@/util/Inertia';
 import { logout } from '@/routes';
 import profile from '@/routes/profile';
+import security from '@/routes/security';
 import SidebarGlyph from './SidebarGlyph';
 
 const initials = (name = '') =>
@@ -47,10 +48,10 @@ export default function SidebarUser() {
                     </span>
                 </div>
                 <Dropdown.Divider />
-                <Dropdown.Item as={InertiaLink} href={profile.index()}>
+                <Dropdown.Item as={InertiaLink} href={profile.edit()}>
                     <SidebarGlyph name="user" /> My profile
                 </Dropdown.Item>
-                <Dropdown.Item as={InertiaLink} href={profile.security()}>
+                <Dropdown.Item as={InertiaLink} href={security.edit()}>
                     <SidebarGlyph name="shield" /> Security
                 </Dropdown.Item>
                 <Dropdown.Divider />

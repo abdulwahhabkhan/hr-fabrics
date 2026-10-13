@@ -19,7 +19,7 @@ test('employees list loaded', function () {
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/Employee/EmployeeIndex')
+        ->component('settings/Employee/EmployeeIndex')
         ->has('employees')
         ->has('employees.data', 10)
         ->has('filters')
@@ -34,7 +34,7 @@ test('employees list filtered by name', function () {
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/Employee/EmployeeIndex')
+        ->component('settings/Employee/EmployeeIndex')
         ->has('employees.data', 1)
         ->where('employees.data.0.name', 'Shehryar')
     );

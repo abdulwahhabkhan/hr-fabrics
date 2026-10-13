@@ -1,11 +1,14 @@
 <?php
 
 use App\Models\User;
-use App\Providers\AppServiceProvider;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Fortify;
 use PragmaRX\Google2FA\Google2FA;
 
+/**
+ * Enable and confirm real two-factor credentials, returning a currently valid TOTP code.
+ */
 function enableTwoFactor(User $user): string
 {
     app(EnableTwoFactorAuthentication::class)($user);
@@ -17,48 +20,48 @@ function enableTwoFactor(User $user): string
     );
 }
 
-test('login redirects to the two factor challenge without logging in', function () {
-    $user = User::factory()->create();
-    enableTwoFactor($user);
+test('two factor challenge redirects to login when not authenticated', function () {
+    $this->get(route('two-factor.login'))->assertRedirect(route('login'));
+});
 
-    $response = $this->post('/login', [
+test('two factor challenge can be rendered', function () {
+    $user = User::factory()->withTwoFactor()->create();
+
+    $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $response->assertRedirect(route('two-factor.login'));
-    $this->assertGuest();
+    $this->get(route('two-factor.login'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('auth/two-factor-challenge'));
 });
 
 test('a valid two factor code completes the login', function () {
     $user = User::factory()->create();
     $code = enableTwoFactor($user);
 
-    $this->post('/login', [
+    $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $response = $this->post('/two-factor-challenge', [
-        'code' => $code,
-    ]);
+    $this->post(route('two-factor.login.store'), ['code' => $code])
+        ->assertRedirect(route('dashboard', absolute: false));
 
     $this->assertAuthenticatedAs($user);
-    $response->assertRedirect(AppServiceProvider::HOME);
 });
 
 test('an invalid two factor code does not complete the login', function () {
     $user = User::factory()->create();
     enableTwoFactor($user);
 
-    $this->post('/login', [
+    $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->post('/two-factor-challenge', [
-        'code' => '000000',
-    ]);
+    $this->post(route('two-factor.login.store'), ['code' => '000000']);
 
     $this->assertGuest();
 });
@@ -68,14 +71,12 @@ test('a valid recovery code completes the login', function () {
     enableTwoFactor($user);
     $recoveryCode = $user->fresh()->recoveryCodes()[0];
 
-    $this->post('/login', [
+    $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->post('/two-factor-challenge', [
-        'recovery_code' => $recoveryCode,
-    ]);
+    $this->post(route('two-factor.login.store'), ['recovery_code' => $recoveryCode]);
 
     $this->assertAuthenticatedAs($user);
 });

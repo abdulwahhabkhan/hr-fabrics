@@ -16,7 +16,7 @@ test('roles list loaded', function () {
     $response = $this->get(route('settings.roles.index'));
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/Role/RoleIndex')
+        ->component('settings/Role/RoleIndex')
         ->has('roles')
         ->has('roles.data', 11)
         ->has('filters')
@@ -35,7 +35,7 @@ test('role form loaded', function ($action) {
     $response = $this->get($route);
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/Role/RoleForm')
+        ->component('settings/Role/RoleForm')
         ->has('permissions')
         ->has('role')
         ->has('rolePermission')

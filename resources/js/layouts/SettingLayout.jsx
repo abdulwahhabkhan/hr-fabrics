@@ -4,13 +4,14 @@ import { Icon } from '@iconify/react';
 import { InertiaLink, usePage } from '@/util/Inertia';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import profile from '@/routes/profile';
+import security from '@/routes/security';
 
 const navItems = [
-    { title: 'Profile', description: 'Name, email & role', href: profile.index(), icon: 'solar:user-bold-duotone' },
+    { title: 'Profile', description: 'Name, email & role', href: profile.edit(), icon: 'solar:user-bold-duotone' },
     {
         title: 'Security',
         description: 'Password, 2FA & passkeys',
-        href: profile.security(),
+        href: security.edit(),
         icon: 'solar:shield-keyhole-bold-duotone',
     },
 ];

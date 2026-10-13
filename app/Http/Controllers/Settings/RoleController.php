@@ -22,7 +22,7 @@ class RoleController extends Controller
         $roles = Role::filter($request)->paginate(100);
 
         return Inertia::render(
-            'Settings/Role/RoleIndex',
+            'settings/Role/RoleIndex',
             [
                 'roles' => $roles,
                 'filters' => $request->only('search'),
@@ -38,7 +38,7 @@ class RoleController extends Controller
         $permissions = Permission::listPermissions();
 
         return Inertia::render(
-            'Settings/Role/RoleForm',
+            'settings/Role/RoleForm',
             [
                 'permissions' => array_values($permissions->toArray()),
                 'role' => '',
@@ -70,7 +70,7 @@ class RoleController extends Controller
         $permissions = Permission::listPermissions();
 
         return Inertia::render(
-            'Settings/Role/RoleForm',
+            'settings/Role/RoleForm',
             [
                 'permissions' => array_values($permissions->toArray()),
                 'role' => $role,

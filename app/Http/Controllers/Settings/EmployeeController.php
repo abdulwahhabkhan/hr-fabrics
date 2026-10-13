@@ -22,7 +22,7 @@ class EmployeeController extends Controller
             ->paginate(20)
             ->appends($request->only('search'));
 
-        return Inertia::render('Settings/Employee/EmployeeIndex', [
+        return Inertia::render('settings/Employee/EmployeeIndex', [
             'employees' => $employees,
             'filters' => $request->only('search'),
         ]);

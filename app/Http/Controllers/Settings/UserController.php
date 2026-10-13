@@ -23,7 +23,7 @@ class UserController extends Controller
     {
         $users = User::with(['role'])->filter($request)->paginate(100);
 
-        return Inertia::render('Settings/User/UserIndex',
+        return Inertia::render('settings/User/UserIndex',
             [
                 'users' => $users,
                 'filters' => $request->only('search'),
@@ -37,7 +37,7 @@ class UserController extends Controller
     {
         $roles = Role::orderBy('name')->get();
 
-        return Inertia::render('Settings/User/UserForm',
+        return Inertia::render('settings/User/UserForm',
             [
                 'user' => null,
                 'roles' => $roles,
@@ -77,7 +77,7 @@ class UserController extends Controller
     {
         $roles = Role::orderBy('name')->get();
 
-        return Inertia::render('Settings/User/UserForm',
+        return Inertia::render('settings/User/UserForm',
             ['user' => $user, 'roles' => $roles]);
     }
 

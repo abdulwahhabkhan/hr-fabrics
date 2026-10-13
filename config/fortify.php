@@ -148,6 +148,7 @@ return [
     'passkeys' => [
         'relying_party_id' => parse_url(config('app.url'), PHP_URL_HOST),
         'allowed_origins' => [config('app.url')],
+        'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET', config('app.key')),
         'timeout' => 60000,
     ],
 
@@ -163,12 +164,12 @@ return [
     */
 
     'features' => [
-        // Registration, password reset, email verification, and profile/password
-        // updates stay on this app's existing controllers/routes/pages, so those
-        // Fortify features are intentionally left disabled here.
+        Features::resetPasswords(),
+        Features::emailVerification(),
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
+            // 'window' => 0
         ]),
         Features::passkeys([
             'confirmPassword' => true,

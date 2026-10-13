@@ -20,7 +20,7 @@ class CityController extends Controller
     {
         $cities = City::query()->filter($request)->oldest('name')->paginate(20)->appends($request->only('search'));
 
-        return Inertia::render('Settings/City/CityIndex',
+        return Inertia::render('settings/City/CityIndex',
             [
                 'cities' => $cities,
                 'filters' => $request->only('search'),
@@ -32,7 +32,7 @@ class CityController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Settings/City/CityForm',
+        return Inertia::render('settings/City/CityForm',
             [
                 'city' => null,
             ]);
@@ -58,7 +58,7 @@ class CityController extends Controller
      */
     public function edit(City $city): Response
     {
-        return Inertia::render('Settings/City/CityForm',
+        return Inertia::render('settings/City/CityForm',
             [
                 'city' => $city,
             ]);

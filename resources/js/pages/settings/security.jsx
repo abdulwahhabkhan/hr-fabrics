@@ -4,10 +4,10 @@ import { Form } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import LoadingButton from '@/components/LoadingButton';
 import { FormField } from '@/components/form/FormSection';
-import { MomentFull } from '@/components/Moment';
 import HeadingSmall from '@/components/settings/HeadingSmall';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
-import profile from '@/routes/profile';
+import security from '@/routes/security';
+import userPassword from '@/routes/user-password';
 import passkey from '@/routes/passkey';
 import twoFactor from '@/routes/two-factor';
 
@@ -18,7 +18,7 @@ import twoFactor from '@/routes/two-factor';
  */
 const redirectWhenPasswordConfirmRequired = (httpResponse) => {
     if (httpResponse.status === 423) {
-        Inertia.visit(profile.security());
+        Inertia.visit(security.edit());
 
         return true;
     }
@@ -119,7 +119,7 @@ const UpdatePasswordSection = () => {
     const submit = (e) => {
         e.preventDefault();
 
-        put(profile.password().url, {
+        put(userPassword.update().url, {
             preserveScroll: true,
             onSuccess: () => reset(),
             onError: (formErrors) => {
@@ -464,11 +464,8 @@ const PasskeysSection = ({ passkeys }) => {
                                 <div className="hf-settings-list__meta">
                                     <div className="hf-settings-list__title">{item.name}</div>
                                     <div className="hf-settings-list__desc">
-                                        {item.last_used_at ? (
-                                            <>Last used <MomentFull date={new Date(item.last_used_at)} /></>
-                                        ) : (
-                                            'Never used'
-                                        )}
+                                        {item.authenticator && <>{item.authenticator} · </>}
+                                        {item.last_used_at_diff ? `Last used ${item.last_used_at_diff}` : 'Never used'}
                                     </div>
                                 </div>
                                 <LoadingButton
@@ -513,15 +510,15 @@ const PasskeysSection = ({ passkeys }) => {
 };
 
 const Security = () => {
-    const { twoFactorEnabled, passkeys } = usePage().props;
+    const { canManageTwoFactor, twoFactorEnabled, canManagePasskeys, passkeys } = usePage().props;
 
     return (
         <>
             <Head title="Security settings" />
 
             <UpdatePasswordSection />
-            <TwoFactorSection initialEnabled={twoFactorEnabled} />
-            <PasskeysSection passkeys={passkeys} />
+            {canManageTwoFactor && <TwoFactorSection initialEnabled={twoFactorEnabled} />}
+            {canManagePasskeys && <PasskeysSection passkeys={passkeys} />}
         </>
     );
 };

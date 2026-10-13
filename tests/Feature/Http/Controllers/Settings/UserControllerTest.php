@@ -15,7 +15,7 @@ test('users list loaded', function () {
     $response = $this->get(route('settings.users.index'));
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/User/UserIndex')
+        ->component('settings/User/UserIndex')
         ->has('users')
         ->has('users.data', 11)
         ->has('filters')
@@ -34,7 +34,7 @@ test('user form loaded', function ($action) {
     $response = $this->get($route);
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/User/UserForm')
+        ->component('settings/User/UserForm')
         ->has('user')
         ->has('roles')
     );

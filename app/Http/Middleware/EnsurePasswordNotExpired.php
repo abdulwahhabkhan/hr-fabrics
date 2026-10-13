@@ -13,7 +13,7 @@ class EnsurePasswordNotExpired
      *
      * @var array<int, string>
      */
-    private const array ALLOWED_ROUTES = ['profile.index', 'profile.security', 'profile.password', 'logout', 'password.confirm', 'password.confirm.store', 'password.confirmation'];
+    private const array ALLOWED_ROUTES = ['profile.edit', 'security.edit', 'user-password.update', 'logout', 'password.confirm', 'password.confirm.store', 'password.confirmation'];
 
     /**
      * Send users with an expired password to the security settings page.
@@ -28,7 +28,7 @@ class EnsurePasswordNotExpired
             return $next($request);
         }
 
-        return redirect()->route('profile.security')
+        return redirect()->route('security.edit')
             ->with('error', __('Your password has expired. Please change it to continue.'));
     }
 }

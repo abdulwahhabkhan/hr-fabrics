@@ -18,7 +18,7 @@ test('cities list loaded', function () {
     $response = $this->get(route('settings.cities.index'));
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/City/CityIndex')
+        ->component('settings/City/CityIndex')
         ->has('cities')
         ->has('cities.data', 10)
         ->has('filters')
@@ -37,7 +37,7 @@ test('city form loaded', function ($action) {
     $response = $this->get($route);
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('Settings/City/CityForm')
+        ->component('settings/City/CityForm')
         ->has('city')
     );
 })->with(['create', 'update']);

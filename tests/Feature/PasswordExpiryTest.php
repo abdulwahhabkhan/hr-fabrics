@@ -27,16 +27,16 @@ test('expired user is redirected to security settings and can reach it after con
     $user = User::factory()->create(['password_changed_at' => now()->subDays(100)]);
 
     $this->actingAs($user)->get(route('dashboard'))
-        ->assertRedirect(route('profile.security'))
+        ->assertRedirect(route('security.edit'))
         ->assertSessionHas('error');
 
-    $this->actingAs($user)->get(route('profile.security'))
+    $this->actingAs($user)->get(route('security.edit'))
         ->assertRedirect(route('password.confirm'));
 
     $this->actingAs($user)->post(route('password.confirm.store'), ['password' => 'password'])
-        ->assertRedirect(route('profile.security'));
+        ->assertRedirect(route('security.edit'));
 
-    $this->actingAs($user)->get(route('profile.security'))->assertOk();
+    $this->actingAs($user)->get(route('security.edit'))->assertOk();
 });
 
 test('active user is not redirected', function () {
@@ -49,11 +49,11 @@ test('changing password archives old hash and resets expiry', function () {
     $user = User::factory()->create(['password_changed_at' => now()->subDays(100)]);
     $oldHash = $user->password;
 
-    $this->actingAs($user)->from(route('profile.security'))->put(route('profile.password'), [
+    $this->actingAs($user)->from(route('security.edit'))->put(route('user-password.update'), [
         'current_password' => 'password',
         'password' => 'NewSecret123',
         'password_confirmation' => 'NewSecret123',
-    ])->assertRedirect(route('profile.security'));
+    ])->assertRedirect(route('security.edit'));
 
     $user->refresh();
     expect(Hash::check('NewSecret123', $user->password))->toBeTrue()
@@ -68,7 +68,7 @@ test('reusing current or previous password is rejected', function () {
     PasswordHistory::factory()->for($user)->create(['password' => Hash::make('OlderSecret1')]);
 
     foreach (['password', 'OlderSecret1'] as $reused) {
-        $this->actingAs($user)->put(route('profile.password'), [
+        $this->actingAs($user)->put(route('user-password.update'), [
             'current_password' => 'password',
             'password' => $reused,
             'password_confirmation' => $reused,
