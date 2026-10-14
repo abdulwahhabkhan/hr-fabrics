@@ -2,6 +2,7 @@
 
 namespace App\Models\Purchase;
 
+use App\Casts\FloorInteger;
 use App\Enums\StatusText;
 use App\Models\Accounts\Account;
 use App\Models\Catalog\Product;
@@ -47,8 +48,8 @@ final class Purchase extends Model implements Journalable, Logable
         'status' => StatusText::class,
         'transaction_date' => 'date:Y-m-d',
         'discount' => 'integer',
-        'total' => 'integer',
-        'total_return' => 'integer',
+        'total' => FloorInteger::class,
+        'total_return' => FloorInteger::class,
     ];
 
     public function stocks(): Builder
