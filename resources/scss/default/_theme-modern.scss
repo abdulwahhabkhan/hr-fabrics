@@ -1202,7 +1202,7 @@ body.modal-open .app-top-menu {
         font-weight: 600;
         letter-spacing: .06em;
         text-transform: uppercase;
-        color: var(--hf-text-3);
+        color: var(--hf-text-2);
         margin-bottom: .25rem;
       }
 
@@ -1237,6 +1237,7 @@ body.modal-open .app-top-menu {
 
         small {
           color: var(--hf-gold);
+          opacity: 1;
           top: 1rem;
           inset-inline-start: 1.5rem;
         }

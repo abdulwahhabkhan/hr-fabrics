@@ -97,5 +97,64 @@
   }
   .invoice .invoice-price {
     background: transparent !important;
+    border: 1px solid #565353;
+  }
+  /* Browsers drop backgrounds when printing, so the light-on-dark total would vanish. */
+  .invoice .invoice-price .invoice-price-right {
+    color: #000 !important;
+    background: transparent !important;
+    border-inline-start: 1px solid #565353;
+    font-weight: 600;
+
+    small {
+      color: #333 !important;
+      opacity: 1;
+    }
+  }
+
+  /* Keep the contact block and QR together, at the same size as on screen. */
+  .invoice .invoice-note {
+    margin-top: 1rem;
+    align-items: center;
+    gap: 1.5rem;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .invoice-qr {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-shrink: 0;
+  }
+  .invoice-qr-frame {
+    width: 6.5rem;
+    height: 6.5rem;
+    flex-shrink: 0;
+    padding: .375rem;
+    border: 1px solid #565353;
+    border-radius: .375rem;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: contain;
+    }
+  }
+  .invoice-qr-label {
+    display: flex;
+    flex-direction: column;
+    gap: .125rem;
+    line-height: 1.3;
+  }
+  .invoice-qr-app {
+    font-weight: 700;
+  }
+  .invoice-qr-branch {
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
   }
 }
