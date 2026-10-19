@@ -17,6 +17,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertModelMissing;
+use function Pest\Laravel\assertSoftDeleted;
 
 beforeEach(function (): void {
     $this->fakeHavePermission();
@@ -155,7 +156,7 @@ test('sale return can be deleted', function () {
     // Arrange
     $user = $this->getAdmin();
     $return = SalesReturn::factory()->closed()->create();
-    Inventory::factory()->withPurchase()->create([
+    $inventory = Inventory::factory()->withPurchase()->create([
         'stockable_id' => $return->id,
         'stockable_type' => $return->getMorphClass(),
     ]);
@@ -171,7 +172,7 @@ test('sale return can be deleted', function () {
     $response->assertSessionDoesntHaveErrors();
     $response->assertRedirect(route('sales.returns.index'));
     assertModelMissing($return);
-    assertDatabaseCount(Inventory::class, 0);
+    assertSoftDeleted($inventory);
     assertDatabaseCount(Journal::class, 0);
 });
 

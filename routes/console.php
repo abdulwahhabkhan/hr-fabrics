@@ -4,6 +4,7 @@ use App\Console\Commands\Accounts\CalculateCustomerBalanceCommand;
 use App\Console\Commands\Attendance\ImportAttendanceLogsCommand;
 use App\Console\Commands\Attendance\ImportWorkersCommand;
 use App\Console\Commands\PruneDeletedFilesCommand;
+use App\Console\Commands\Stock\PruneDeletedInventoriesCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -28,5 +29,9 @@ Schedule::command(ImportWorkersCommand::class)
     ->emailOutputOnFailure($email);
 
 Schedule::command(PruneDeletedFilesCommand::class)
+    ->daily()
+    ->emailOutputOnFailure($email);
+
+Schedule::command(PruneDeletedInventoriesCommand::class)
     ->daily()
     ->emailOutputOnFailure($email);

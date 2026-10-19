@@ -149,6 +149,7 @@ class InventoryService
             ->unionAll($saleReturns);
 
         return Inventory::query()
+            ->withTrashed()
             ->fromSub($movements, Inventory::tName())
             ->orderBy('transaction_date');
     }

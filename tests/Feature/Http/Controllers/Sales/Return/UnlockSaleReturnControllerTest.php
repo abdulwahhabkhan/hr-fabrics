@@ -33,7 +33,8 @@ test('unlock closed sale return order', function () {
         'id' => $return->id,
     ]);
     // inventory check
-    assertDatabaseCount(Inventory::class, 0);
+    expect(Inventory::query()->count())->toBe(0)
+        ->and(Inventory::onlyTrashed()->count())->toBe(3);
     assertDatabaseCount(Journal::class, 0);
     assertDatabaseCount(JournalDetail::class, 0);
 });

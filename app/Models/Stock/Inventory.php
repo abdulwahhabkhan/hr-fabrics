@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read float|null $stock_value
@@ -28,6 +29,7 @@ final class Inventory extends Model
     use BelongsToAccount;
     use BelongsToProduct;
     use HasFactory;
+    use SoftDeletes;
 
     protected $guarded = [];
 
@@ -159,6 +161,16 @@ final class Inventory extends Model
                     ->orWhere('outbound_on', '>', $date->toDateString());
             })
             ->available();
+    }
+
+    /**
+     * @param  Builder<Inventory>  $query
+     * @return Builder<Inventory>
+     */
+    #[Scope]
+    protected function trashedBefore(Builder $query, CarbonInterface $date): Builder
+    {
+        return $query->onlyTrashed()->where('deleted_at', '<=', $date);
     }
 
     #[Scope]

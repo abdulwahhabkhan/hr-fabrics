@@ -90,5 +90,6 @@ test('re-confirming a return replaces its inventory instead of duplicating it', 
     resolve(ConfirmSaleReturn::class)->handle($return, $this->user);
     resolve(ConfirmSaleReturn::class)->handle($return, $this->user);
 
-    assertDatabaseCount(Inventory::class, 2);
+    expect(Inventory::query()->count())->toBe(2)
+        ->and(Inventory::onlyTrashed()->count())->toBe(2);
 });

@@ -56,7 +56,7 @@ test('unlock reopens closed order', function () {
     expect($order->status)->toBe(OrderStatus::Open);
     assertDatabaseCount(Journal::class, 0);
     assertDatabaseCount(JournalDetail::class, 0);
-    assertDatabaseCount(Inventory::class, 1);
+    expect(Inventory::query()->count())->toBe(1);
     assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
     assertDatabaseHas(Log::class, [
         'loggable_type' => $order->getMorphClass(),
@@ -84,8 +84,9 @@ test('unlock merges partially issued stock back into its source line', function 
 
     // Assert
     $response->assertRedirect(route('sales.orders.edit', $order->id));
-    assertDatabaseCount(Inventory::class, 1);
-    assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'qty' => 24, 'meters' => 384]);
+    expect(Inventory::query()->count())->toBe(1)
+        ->and(Inventory::onlyTrashed()->count())->toBe(1);
+    assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'qty' => 24, 'meters' => 384, 'deleted_at' => null]);
 })->with([
     'thaan' => [PackingType::Thaan],
     'box' => [PackingType::Box],
