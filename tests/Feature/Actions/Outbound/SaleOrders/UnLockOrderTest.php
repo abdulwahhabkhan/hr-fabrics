@@ -20,7 +20,7 @@ beforeEach(function () {
     $this->creatCashAccount();
 });
 
-test('unlock reopens a closed order, wiping its journal and allocated inventory', function () {
+test('unlock reopens a closed order, wiping its journal and releasing allocated inventory', function () {
     // Arrange
     /** @var Order $order */
     $order = Order::factory()
@@ -42,7 +42,8 @@ test('unlock reopens a closed order, wiping its journal and allocated inventory'
     expect($order->status)->toBe(OrderStatus::Open);
     assertDatabaseCount(Journal::class, 0);
     assertDatabaseCount(JournalDetail::class, 0);
-    assertDatabaseCount(Inventory::class, 0);
+    assertDatabaseCount(Inventory::class, 1);
+    assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
     assertDatabaseHas(Log::class, [
         'loggable_type' => $order->getMorphClass(),
         'loggable_id' => $order->id,
