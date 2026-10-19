@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read string $product_name
  * @property-read float $total_meters
+ * @property-read float|string|null $inventory_sum_meters
+ * @property-read int|string|null $inventory_sum_qty
  */
 final class FabricReceivingItem extends Model
 {
