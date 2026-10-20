@@ -897,3 +897,59 @@ test('bilti file can be uploaded', function () {
         ->and($file->fileable_type)->toBe($order->getMorphClass())
         ->and($order->refresh()->has_bilti)->toBeTrue();
 });
+
+test('delete open order removes it with items, journal entries and releases inventory', function () {
+    // Arrange
+    $user = $this->userWithoutPermissions();
+    $this->attachPermissions($user, ['sales.orders.index', 'sales.orders.destroy']);
+    $this->creatCashAccount();
+    $order = Order::factory()
+        ->closed()
+        ->has(OrderItem::factory()->thaan(), 'items')
+        ->create();
+    $item = $order->items->first();
+    $this->addInventory($item->product, $item->unit, $item->qty, $item->size);
+    resolve(ConfirmOrder::class)->handle($order, $this->user);
+    $order->update(['status' => OrderStatus::Open]);
+
+    // Act
+    $response = $this->actingAs($user)->delete(route('sales.orders.destroy', $order->id));
+
+    // Assert
+    $response->assertRedirect(route('sales.orders.index'))
+        ->assertSessionHas('success', 'Order deleted successfully');
+    $this->assertSoftDeleted($order);
+    assertDatabaseCount(OrderItem::class, 0);
+    assertDatabaseCount(Journal::class, 0);
+    assertDatabaseCount(JournalDetail::class, 0);
+    assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
+});
+
+test('delete order forbidden once order is closed', function () {
+    // Arrange
+    $user = $this->userWithoutPermissions();
+    $this->attachPermissions($user, 'sales.orders.destroy');
+    $order = Order::factory()->closed()->has(OrderItem::factory()->thaan(), 'items')->create();
+
+    // Act
+    $response = $this->actingAs($user)->delete(route('sales.orders.destroy', $order->id));
+
+    // Assert
+    $response->assertForbidden();
+    $this->assertNotSoftDeleted($order);
+    assertDatabaseCount(OrderItem::class, 1);
+});
+
+test('delete order forbidden without the destroy permission', function () {
+    // Arrange
+    $user = $this->userWithoutPermissions();
+    $order = Order::factory()->has(OrderItem::factory()->thaan(), 'items')->create();
+
+    // Act
+    $response = $this->actingAs($user)->delete(route('sales.orders.destroy', $order->id));
+
+    // Assert
+    $response->assertForbidden();
+    $this->assertNotSoftDeleted($order);
+    assertDatabaseCount(OrderItem::class, 1);
+});

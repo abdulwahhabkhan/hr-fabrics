@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sales\Order;
 
 use App\Actions\Outbound\SaleOrders\ConfirmOrder;
 use App\Actions\Outbound\SaleOrders\CreateOrder;
+use App\Actions\Outbound\SaleOrders\DeleteOrder;
 use App\Actions\Outbound\SaleOrders\UpdateOrderTotal;
 use App\Enums\DirectoryType;
 use App\Enums\DiscountType;
@@ -215,6 +216,20 @@ class OrderController extends Controller
 
         return Redirect::route('sales.orders.index')
             ->with(['success' => 'Order updated successfully']);
+    }
+
+    /**
+     * Remove the specified open order with its items, journal entries and inventory allocation.
+     *
+     * @throws Throwable
+     */
+    public function destroy(Order $order, Request $request, DeleteOrder $deleteOrder): RedirectResponse
+    {
+        $this->authorize('delete', $order);
+        $deleteOrder->handle($order, $request->user());
+
+        return Redirect::route('sales.orders.index')
+            ->with(['success' => 'Order deleted successfully']);
     }
 
     public function orderItems(Order $order): JsonResponse

@@ -29,6 +29,7 @@ class OrderResource extends JsonResource
             'can_ledger' => $request->user()->can('ledger', $this->resource),
             'can_inventory' => $request->user()->can('inventory', $this->resource),
             'can_update' => $request->user()->can('update', $this->resource),
+            'can_delete' => $request->user()->can('delete', $this->resource),
             'can_view' => $request->user()->can('view', $this->resource),
             'can_bilti' => $request->user()->can('bilti', $this->resource),
             'can_gate_pass' => $request->user()->can('gate-pass', $this->resource),

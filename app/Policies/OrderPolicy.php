@@ -27,7 +27,7 @@ class OrderPolicy
 
     public function delete(User $user, Order $order): bool
     {
-        return hasPermission('sales.orders.destroy', $user);
+        return $order->status === OrderStatus::Open && hasPermission('sales.orders.destroy', $user);
     }
 
     public function bilti(User $user, Order $order): bool

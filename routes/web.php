@@ -86,7 +86,7 @@ Route::prefix('sales')->middleware(['auth', 'verified', 'auth.role'])->as('sales
             ->name('customers.suspend')->withoutMiddleware(['auth.role']);
         Route::post('customers/{customer}/activate', [CustomerController::class, 'activate'])
             ->name('customers.activate')->withoutMiddleware(['auth.role']);
-        Route::resource('orders', OrderController::class)->except('destroy');
+        Route::resource('orders', OrderController::class);
         Route::get('orders/{order}/gate-pass', [OrderController::class, 'gatePass'])
             ->name('orders.gate-pass');
         Route::get('orders/{order}/ledger', OrderLedgerController::class)

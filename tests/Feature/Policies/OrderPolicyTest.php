@@ -47,13 +47,30 @@ it('forbids update when user lacks the update permission', function () {
     expect($user->can('update', $order))->toBeFalse();
 });
 
-it('allows delete when user has the destroy permission', function () {
+it('allows delete on an open order when user has the destroy permission', function () {
     $user = $this->userWithoutPermissions();
     $this->attachPermissions($user, 'sales.orders.destroy');
     $order = Order::factory()->create();
     actingAs($user);
 
     expect($user->can('delete', $order))->toBeTrue();
+});
+
+it('forbids delete on a closed order', function () {
+    $user = $this->userWithoutPermissions();
+    $this->attachPermissions($user, 'sales.orders.destroy');
+    $order = Order::factory()->closed()->create();
+    actingAs($user);
+
+    expect($user->can('delete', $order))->toBeFalse();
+});
+
+it('forbids delete when user lacks the destroy permission', function () {
+    $user = $this->userWithoutPermissions();
+    $order = Order::factory()->create();
+    actingAs($user);
+
+    expect($user->can('delete', $order))->toBeFalse();
 });
 
 it('forbids bilti when order is open', function () {

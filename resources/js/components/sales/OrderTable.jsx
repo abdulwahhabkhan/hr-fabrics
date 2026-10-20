@@ -4,6 +4,7 @@ import { InertiaLink } from '@/util/Inertia';
 import { Moment } from '@/components/Moment';
 import { settings } from '@/config/page-settings';
 import {
+    DeleteDropdownItem,
     InertiaEdit,
     InertiaInventoryAction,
     InertiaLedgerAction,
@@ -90,6 +91,7 @@ export default function OrderTable({ orders: rows }) {
                             transaction_date,
                             can_unlock,
                             can_update,
+                            can_delete,
                             can_view,
                             can_bilti,
                             can_gate_pass,
@@ -177,7 +179,8 @@ export default function OrderTable({ orders: rows }) {
                                             can_unlock ||
                                             can_bilti ||
                                             can_ledger ||
-                                            can_inventory) && (
+                                            can_inventory ||
+                                            can_delete) && (
                                             <RowActionsMenu>
                                                 {can_gate_pass && (
                                                     <InertiaLink
@@ -231,6 +234,16 @@ export default function OrderTable({ orders: rows }) {
                                                             Unlock Record
                                                         </span>
                                                     </UnLockDropdownItem>
+                                                )}
+                                                {can_delete && (
+                                                    <DeleteDropdownItem
+                                                        action={orders.destroy}
+                                                        id={id}
+                                                    >
+                                                        <span>
+                                                            Delete Record
+                                                        </span>
+                                                    </DeleteDropdownItem>
                                                 )}
                                             </RowActionsMenu>
                                         )}
