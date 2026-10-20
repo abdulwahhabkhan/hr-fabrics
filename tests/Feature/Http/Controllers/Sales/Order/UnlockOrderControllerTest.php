@@ -67,7 +67,7 @@ test('unlock reopens closed order', function () {
     ]);
 });
 
-test('unlock merges partially issued stock back into its source line', function (PackingType $unit) {
+test('unlock releases partially issued stock as a separate available line', function (PackingType $unit) {
     // Arrange
     $user = $this->getAdmin();
     $this->creatCashAccount();
@@ -84,8 +84,9 @@ test('unlock merges partially issued stock back into its source line', function 
 
     // Assert
     $response->assertRedirect(route('sales.orders.edit', $order->id));
-    assertDatabaseCount(Inventory::class, 1);
-    assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'qty' => 24, 'meters' => 384]);
+    assertDatabaseCount(Inventory::class, 2);
+    expect(Inventory::query()->available()->sum('meters'))->toEqual(384)
+        ->and(Inventory::query()->booked()->count())->toBe(0);
 })->with([
     'thaan' => [PackingType::Thaan],
     'box' => [PackingType::Box],

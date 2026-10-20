@@ -11,18 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('inventories')) {
-            Schema::rename('inventories', 'inventories_bk');
-        }
-
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
             $table->morphs('stockable');
             $table->unsignedInteger('stockable_item_id');
             $table->unsignedInteger('parent_id')->nullable();
-            /*$table->string('type', '20')->index();
-            $table->integer('record_id')->nullable(false);
-            $table->string('ref_no', 20)->index();*/
             $table->unsignedInteger('product_id')->index();
             $table->nullableMorphs('outbound');
             $table->unsignedBigInteger('outbound_item_id')->nullable();
