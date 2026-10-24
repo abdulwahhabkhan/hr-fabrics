@@ -85,13 +85,13 @@ const JournalReport = () => {
                         <Amount value={cash_sales} />
                     </SummaryStat>
                     <SummaryStat
-                        icon="solar:arrow-left-bold-duotone"
+                        icon="solar:card-receive-bold-duotone"
                         label="Total debit"
                     >
                         <Amount value={totalDebit} />
                     </SummaryStat>
                     <SummaryStat
-                        icon="solar:arrow-right-bold-duotone"
+                        icon="solar:card-send-bold-duotone"
                         label="Total credit"
                     >
                         <Amount value={totalCredit} />
