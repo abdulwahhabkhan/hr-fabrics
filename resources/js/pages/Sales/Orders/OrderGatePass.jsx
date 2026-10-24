@@ -50,7 +50,6 @@ const OrderGatePass = () => {
             <Head title={'Gate Pass: ' + order.invoice_no} />
             <PageHeader
                 title="Gate Pass"
-                description={customer.name}
                 buttons={
                     <>
                         <BackButton href={orders.index()} label="Orders List" />

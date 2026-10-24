@@ -1,29 +1,24 @@
 import * as React from 'react';
 
 export const Address = ({ address, name, email, phone }) => {
-    const { city, address: address_line, region } = address;
+    const { city, address: address_line, region } = address ?? {};
+    const lines = [
+        address_line,
+        city,
+        region,
+        phone && `Phone: ${phone}`,
+        email && `Email: ${email}`,
+    ].filter((line) => line && String(line).trim());
     return (
-        <>
-            <address className="m-t-5 m-b-5">
-                <strong className="text-inverse">{name}</strong>
-                <br />
-                {address_line}
-                <br />
-                {city}
-                <br />
-                {region}
-                {phone && (
-                    <span>
-                        <br /> Phone: {phone}
-                    </span>
-                )}
-                {email && (
-                    <span>
-                        <br /> Email: {email}
-                    </span>
-                )}
-            </address>
-        </>
+        <address className="m-t-5 m-b-5">
+            <strong className="text-inverse">{name}</strong>
+            {lines.map((line, index) => (
+                <React.Fragment key={index}>
+                    <br />
+                    {line}
+                </React.Fragment>
+            ))}
+        </address>
     );
 };
 
