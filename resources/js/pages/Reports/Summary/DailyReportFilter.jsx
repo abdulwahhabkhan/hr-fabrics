@@ -105,7 +105,7 @@ export default () => {
                     />
 
                     <Button variant="outline-primary" onClick={doSearch}>
-                        <Icon icon={"solar:magnifer-bold-duotone"} />
+                        <Icon icon={"andrsrxn:database-search"} />
                         &nbsp;View Report
                     </Button>
                 </InputGroup>
