@@ -128,7 +128,7 @@ export default () => {
                     </FormControl>*/}
 
                     {/*<Button variant="primary" type={"submit"} >
-                        <Icon icon={"solar:magnifer-bold-duotone"} />&nbsp;Search
+                        <Icon icon={"andrsrxn:database-search"} />&nbsp;Search
                     </Button>*/}
 
                     {Object.keys(pickBy(values)).length > 0 && <FilterButton onClick={reset} />}

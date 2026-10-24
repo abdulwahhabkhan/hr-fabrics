@@ -130,7 +130,7 @@ export default () => {
                         <option value={UNIT_THAAN}>{UNIT_THAAN}</option>
                     </FormSelect>
                     {/*<Button variant="primary" type={"submit"} >
-                        <Icon icon={"solar:magnifer-bold-duotone"} />&nbsp;Search
+                        <Icon icon={"andrsrxn:database-search"} />&nbsp;Search
                     </Button>*/}
 
                     <FilterButton onClick={reset} />

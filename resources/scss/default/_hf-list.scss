@@ -320,6 +320,30 @@
   font-weight: 600;
 }
 
+@media (min-width: 992px) {
+  // header filter bars stay on one line beside the page title
+  .page-header-wrapper {
+    gap: 1rem;
+
+    .page-header {
+      white-space: nowrap;
+    }
+
+    .page-actions {
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .default-search .input-group {
+      flex-wrap: nowrap;
+
+      > .rdt {
+        width: 150px;
+      }
+    }
+  }
+}
+
 @media (max-width: 575.98px) {
   // list filter bars (input-group of search + selects) stack on phones
   .default-search .input-group {
@@ -412,7 +436,12 @@ button.hf-icon-btn {
 .hf-table-panel {
   --hf-flush-inset: 1.25rem;
 
-  overflow: hidden;
+  overflow: clip;
+
+  // Let wide tables extend instead of clipping, and keep sticky headers working.
+  @media (min-width: 992px) {
+    overflow: visible;
+  }
 
   > .panel-body {
     padding: 0;
@@ -449,46 +478,6 @@ button.hf-icon-btn {
 
   @media (max-width: 767.98px) {
     --hf-flush-inset: 1rem;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Scrollable table: body scrolls inside the panel while the header row (and
-// optional footer totals row) stays pinned. Use on `.table-responsive`.
-// ---------------------------------------------------------------------------
-.hf-table-scroll {
-  max-height: calc(100vh - 26rem);
-  overflow: auto;
-  overscroll-behavior: contain;
-
-  > .table {
-    border-collapse: separate;
-    border-spacing: 0;
-
-    > thead > tr > th,
-    > tfoot > tr > td {
-      position: sticky;
-      z-index: 2;
-      background: var(--hf-surface);
-    }
-
-    > thead > tr > th {
-      top: 0;
-      color: var(--hf-text-2);
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      box-shadow: inset 0 -1px 0 var(--hf-border);
-    }
-
-    > tfoot > tr > td {
-      bottom: 0;
-      font-weight: 700;
-      color: var(--hf-text);
-      box-shadow: inset 0 1px 0 var(--hf-border-strong);
-    }
   }
 }
 

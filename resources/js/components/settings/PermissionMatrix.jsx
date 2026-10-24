@@ -126,7 +126,7 @@ export default function PermissionMatrix({ permissions, value, onChange }) {
         <div className="hf-perms">
             <div className="hf-perms__toolbar">
                 <div className="hf-perms__search">
-                    <Icon icon="solar:magnifer-linear" />
+                    <Icon icon="andrsrxn:database-search" />
                     <input
                         type="search"
                         className="form-control"

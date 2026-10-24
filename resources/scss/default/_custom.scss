@@ -344,6 +344,9 @@ img.height-150 {
 
 .page-header-wrapper {
   animation-delay: 120ms;
+  // Keep header filter dropdowns and date pickers above the page content's animated stacking context.
+  position: relative;
+  z-index: 3;
 }
 
 .page-filters-wrapper {

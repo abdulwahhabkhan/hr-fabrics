@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 
 import { Head, Link, router, usePage } from '@/util/Inertia';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faIdCard, faMagnifyingGlass, faTable } from '@fortawesome/free-solid-svg-icons';
+import { Icon } from '@iconify/react';
+import { faChevronLeft, faChevronRight, faIdCard, faTable } from '@fortawesome/free-solid-svg-icons';
 import { InertiaView } from '@/components/Actions';
 import './AttendanceRegister.css';
 import attendance from '@/routes/reports/attendance';
@@ -240,7 +241,7 @@ const AttendanceRegister = () => {
                         ))}
                         {filtered.length === 0 && (
                             <div className={'ar-empty-state'}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                <Icon icon={'andrsrxn:database-search'} />
                                 No one on the roll matches that filter. Clear the search or reset the status filter to
                                 see the full register.
                             </div>
@@ -303,7 +304,7 @@ const AttendanceRegister = () => {
                         </table>
                         {filtered.length === 0 && (
                             <div className={'ar-empty-state'}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} />
+                                <Icon icon={'andrsrxn:database-search'} />
                                 No one on the roll matches that filter. Clear the search or reset the status filter to
                                 see the full register.
                             </div>

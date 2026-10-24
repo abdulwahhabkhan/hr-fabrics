@@ -80,7 +80,7 @@ export const InventoryFilter = ({ filters }) => {
                             <Form.Label>&nbsp;</Form.Label>
                             <br />
                             <Button type={'submit'} variant={'white'}>
-                                <Icon icon={'iconamoon:search-duotone'} />{' '}
+                                <Icon icon={'andrsrxn:database-search'} />{' '}
                                 &nbsp; Search
                             </Button>
                             &nbsp;

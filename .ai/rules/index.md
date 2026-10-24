@@ -13,3 +13,4 @@ Maps file globs to rule files. Before editing a file, read every rule file whose
 | `app/Actions/**/*.php` | [journal-entries-via-ledger-entry.md](journal-entries-via-ledger-entry.md) |
 | `resources/js/**/*.jsx` | [loading-button-no-icon-variant.md](loading-button-no-icon-variant.md) |
 | `resources/js/Pages/**/*.jsx`, `resources/js/components/**/*Table.jsx` | [order-pages-as-crud-reference.md](order-pages-as-crud-reference.md) |
+| `resources/js/**/*.jsx`, `resources/scss/**/*.scss` | [tables-no-internal-scroll.md](tables-no-internal-scroll.md) |

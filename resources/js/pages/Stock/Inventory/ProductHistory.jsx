@@ -120,7 +120,7 @@ const ProductHistory = () => {
                 <Panel className="hf-table-panel">
                     <PanelHeader heading={productName ? `Movements (${rows.length})` : 'Movements'} />
                     <PanelBody>
-                        <div className="table-responsive hf-table-scroll">
+                        <div className="table-responsive">
                             <table className="table table-hover align-middle mb-0 hf-list-table">
                                 <thead>
                                     <tr>

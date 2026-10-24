@@ -121,7 +121,7 @@ export default () => {
                         <option value={ORDER_OPEN}>Open</option>
                     </FormControl>
                     {/*<Button variant="primary" type={"submit"} >
-                        <Icon icon={"solar:magnifer-bold-duotone"} />&nbsp;Search
+                        <Icon icon={"andrsrxn:database-search"} />&nbsp;Search
                     </Button>*/}
 
                     <FilterButton onClick={reset} />

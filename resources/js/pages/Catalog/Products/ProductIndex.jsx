@@ -44,7 +44,7 @@ const ProductIndex = () => {
                         {data.length === 0 &&
                             (isFiltered ? (
                                 <NoData
-                                    icon="solar:magnifer-linear"
+                                    icon="andrsrxn:database-search"
                                     label={searchTerm ? `No products match “${searchTerm}”` : 'No products match these filters'}
                                     description="Check the spelling or try a shorter name. You can also clear the filters to see all products."
                                 >

@@ -72,7 +72,7 @@ export default () => {
     return (
         <div className="default-search">
             <div>
-                <InputGroup className="mb-20px">
+                <InputGroup>
                     <FormSelect
                         name={"type"}
                         className="input-150"

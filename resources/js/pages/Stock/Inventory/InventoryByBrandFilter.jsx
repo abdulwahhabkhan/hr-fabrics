@@ -75,7 +75,7 @@ export const InventoryBrandFilter = ({filters}) => {
                         <Form.Group className="mb-3">
                             <Form.Label>&nbsp;</Form.Label><br/>
                             <Button size={'md'} type={'submit'} variant={'primary'}>
-                                <Icon icon={"solar:magnifer-bold-duotone"}/> &nbsp;
+                                <Icon icon={"andrsrxn:database-search"}/> &nbsp;
                                 Search
                             </Button>&nbsp;
                             <Button size={'md'} variant={'white'} onClick={() => sendRequest({})}>

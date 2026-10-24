@@ -413,12 +413,34 @@ body {
   }
 }
 
+// App-wide table rule: no internal scroll boxes. Cells stay on one line, and on
+// desktop the header row sticks to the top of the viewport while the page scrolls.
+@media screen {
+  .table > :not(caption) > * > * {
+    white-space: nowrap;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .table-responsive {
+    overflow: visible;
+  }
+
+  .table > thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    box-shadow: inset 0 -1px 0 var(--hf-border);
+  }
+}
+
 .table-bordered {
   border: 1px solid var(--hf-border);
   border-collapse: separate;
   border-spacing: 0;
   border-radius: var(--hf-radius);
-  overflow: hidden;
+  // clip (not hidden) so the table is not a scroll container and sticky headers still work
+  overflow: clip;
 
   > :not(caption) > * {
     border-width: 0;

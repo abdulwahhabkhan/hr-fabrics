@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Traits\HasOptions;
+
 enum AccountType: string
 {
+    use HasOptions;
     case Agent = 'agent';
     case Customer = 'customer';
     case Employee = 'employee';
