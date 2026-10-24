@@ -103,26 +103,62 @@
 .hf-brand-monogram { display: none; height: 34px; width: auto; }
 
 // Collapse toggle --------------------------------------------------------------
+// Edge handle, vertically centred on the sidebar's right border. Hidden until
+// the pointer is over the sidebar (or the handle has keyboard focus); always
+// shown on touch devices, which have no hover.
 .hf-sidebar-toggle {
   position: absolute;
-  top: calc(1rem + (52px - 1rem) / 2 - 13px); // vertical middle of brand row
-  right: -13px;
+  top: 50%;
+  right: -12px;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 48px;
   padding: 0;
-  border: 1px solid var(--hf-border-strong);
-  border-radius: 50%;
+  border: 1px solid var(--hf-sidebar-border);
+  border-radius: 999px;
   background: #fff;
-  color: var(--hf-navy);
-  box-shadow: 0 2px 6px rgba(var(--hf-navy-rgb), .2);
+  color: var(--hf-sidebar-muted);
+  box-shadow: 0 4px 14px rgba(var(--hf-navy-rgb), .14), 0 1px 2px rgba(var(--hf-navy-rgb), .08);
   cursor: pointer;
-  transition: transform .15s var(--hf-ease), box-shadow .15s var(--hf-ease);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-6px, -50%);
+  transition:
+    opacity .18s var(--hf-ease),
+    transform .18s var(--hf-ease),
+    background .15s var(--hf-ease),
+    color .15s var(--hf-ease),
+    border-color .15s var(--hf-ease),
+    box-shadow .15s var(--hf-ease);
 
-  &:hover { transform: scale(1.08); box-shadow: 0 3px 10px rgba(var(--hf-navy-rgb), .28); }
+  svg { transition: transform .15s var(--hf-ease); }
+
+  .hf-sidebar:hover &,
+  &:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, -50%);
+  }
+
+  &:hover {
+    background: var(--hf-navy);
+    border-color: var(--hf-navy);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(var(--hf-navy-rgb), .28);
+  }
+
+  &[aria-label='Collapse sidebar']:hover svg { transform: translateX(-1px); }
+  &[aria-label='Expand sidebar']:hover svg { transform: translateX(1px); }
+
   &:focus-visible { outline: 2px solid var(--hf-gold); outline-offset: 2px; }
+
+  @media (hover: none) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, -50%);
+  }
 }
 
 .hf-sidebar-close { display: none; }
