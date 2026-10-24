@@ -2,12 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Inertia, usePage } from "@/util/Inertia";
 import { usePrevious } from "react-use";
 import pickBy from "lodash/pickBy";
-import { FormControl, FormSelect, InputGroup } from "react-bootstrap";
+import { InputGroup, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Icon } from "@iconify/react";
 import Datetime from "react-datetime";
 import { settings } from "@/config/page-settings";
 import { useForm } from "react-hook-form";
 import "react-datetime/css/react-datetime.css";
 import FilterButton from "@/components/button/FilterButton.jsx";
+
+const typeOptions = {
+    journal: { tone: "tone-navy", icon: "solar:notebook-bold-duotone" },
+    purchases: { tone: "tone-gold", icon: "solar:box-bold-duotone" },
+    sales: { tone: "tone-green", icon: "solar:cart-large-2-bold-duotone" },
+};
 
 export default () => {
     const { filters, accounts } = usePage().props;
@@ -73,22 +80,31 @@ export default () => {
         <div className="default-search">
             <div>
                 <InputGroup>
-                    <FormSelect
-                        name={"type"}
-                        className="input-150"
-                        autoComplete="off"
-                        value={values.type}
-                        onChange={handleChange}
+                    <ToggleButtonGroup
+                        type="radio"
+                        name="type"
+                        className="hf-segmented"
+                        value={values.type || "journal"}
+                        onChange={(type) =>
+                            setValues((values) => ({
+                                ...values,
+                                type,
+                            }))
+                        }
                     >
-                        <option value="">Account Type</option>
-                        {accounts.map((account) => {
-                            return (
-                                <option key={account} value={account}>
-                                    {account}
-                                </option>
-                            );
-                        })}
-                    </FormSelect>
+                        {accounts.map((account) => (
+                            <ToggleButton
+                                key={account}
+                                id={`journal-type-${account}`}
+                                value={account}
+                                variant="light"
+                                className={typeOptions[account]?.tone ?? "tone-slate"}
+                            >
+                                <Icon icon={typeOptions[account]?.icon ?? "solar:document-bold-duotone"} />
+                                {account}
+                            </ToggleButton>
+                        ))}
+                    </ToggleButtonGroup>
 
                     <DatetimeComponent
                         initialValue={values.date}
