@@ -1,7 +1,7 @@
 import { Head, usePage } from '@/util/Inertia';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import Moment from '@/components/Moment';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { Form } from 'react-bootstrap';
@@ -10,178 +10,200 @@ import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
 import orders from '@/routes/sales/orders';
 
+const Qty = ({ value }) => (
+    <NumberFormat displayType={'text'} value={value} thousandSeparator={true} />
+);
+
 const OrderGatePass = () => {
-    const { order, appName, auth, transaction_date } = usePage().props;
-    const { items, user, customer } = order;
+    const { order, auth, transaction_date, store } = usePage().props;
+    const { items, customer } = order;
     const [group, setGroup] = useState(false);
-    const [itemsList, setItemsList] = useState(items);
-    const getGroup = (items) => {
-        if (!group)
-            return items; //_.chain(items).groupBy('id').value()
-        else {
-            return _.chain(items)
-                .groupBy((row) => {
-                    return row.product_id + row.unit + row.price;
-                }).map((row, id) => {
-                    let first = _.first(row);
-                    return {
-                        ...first,
-                        qty: _.sumBy(row, "qty"),
-                        total_amount: _.sumBy(row, "total_amount"),
-                        total_qty: _.sumBy(row, "total_qty")
-                    };
-                }).value();
+
+    const itemsList = useMemo(() => {
+        if (!group) {
+            return items;
         }
-    };
-    const getTotalQty = () => {
-        return items.reduce((s, item) => {
-            return s + item.qty;
-        }, 0);
-    };
 
-    useEffect(() => {
-        setItemsList(getGroup(items));
-    }, [group]);
+        return _.chain(items)
+            .groupBy((row) => row.product_id + row.unit + row.size)
+            .map((row) => ({
+                ..._.first(row),
+                qty: _.sumBy(row, 'qty'),
+                total_qty: _.sumBy(row, 'total_qty'),
+            }))
+            .value();
+    }, [group, items]);
 
+    const totalPieces = useMemo(() => _.sumBy(items, 'qty'), [items]);
+
+    const unitSummary = useMemo(
+        () =>
+            _.chain(items)
+                .groupBy('unit')
+                .map((rows, unit) => ({ unit, qty: _.sumBy(rows, 'qty') }))
+                .value(),
+        [items],
+    );
 
     return (
         <>
-            <Head title="Invoice Gate Pass" />
-            <PageHeader title="Invoice Gate Pass" buttons={(<>
-                <BackButton href={orders.index()} />
-                <Print />
-            </>)} />
+            <Head title={'Gate Pass: ' + order.invoice_no} />
+            <PageHeader
+                title="Gate Pass"
+                description={customer.name}
+                buttons={
+                    <>
+                        <BackButton href={orders.index()} label="Orders List" />
+                        <Print />
+                    </>
+                }
+            />
             <PageContent>
-                <Head title={"SO: " + order.invoice_no} />
-                <div className="invoice">
+                <div className="invoice gate-pass">
                     <div className="invoice-company text-inverse fw-600">
-                        {appName} <span className={"float-end p-r-10"}>GATE PASS</span>
+                        {store.store_name}
+                        <span className="float-end">Gate Pass</span>
                     </div>
                     <div className="invoice-header">
-
                         <div className="invoice-to">
                             <Address
                                 address={customer.address}
                                 name={customer.name}
                                 email={customer.email}
-                                phone={customer.phone} />
-
+                                phone={customer.phone}
+                            />
                         </div>
                         <div className="invoice-date">
                             <div className="date text-inverse m-t-5">
                                 <Moment date={transaction_date} />
                             </div>
                             <div className="invoice-detail">
-                                {order.invoice_no}<br />
+                                <span className="fw-semibold">Invoice No:</span>{' '}
+                                {order.invoice_no}
                             </div>
+                            {order.payment_mode && (
+                                <div className="invoice-detail">
+                                    <span className="fw-semibold">
+                                        Payment:
+                                    </span>{' '}
+                                    {order.payment_mode}
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="invoice-content gatepass">
+                    <div className="invoice-content">
                         <div className="table-responsive">
                             <table className="table table-invoice">
                                 <thead>
-                                <tr>
-                                    <th className="text-center" width="60px">SR</th>
-                                    <th>PRODUCT
-                                        <span className={"hidden-print"}>
-                                        <Form.Check
-                                            className={"ms-5px"}
-                                            defaultValue={group}
-                                            onClick={() => setGroup(!group)}
-                                            type="checkbox"
-                                            id={"group_same"}
-                                            label="Group Identical"
-                                            inline />
-                                    </span>
-                                    </th>
-                                    <th className="text-center" width="100px">UNIT</th>
-                                    <th className="text-center" width="80px">QTY</th>
-                                    <th className="text-center" width="100px">METERS</th>
-                                </tr>
+                                    <tr>
+                                        <th
+                                            className="text-center"
+                                            width="60px"
+                                        >
+                                            SR
+                                        </th>
+                                        <th>
+                                            PRODUCT
+                                            <span className={'hidden-print'}>
+                                                <Form.Check
+                                                    className={'ms-5px'}
+                                                    checked={group}
+                                                    onChange={() =>
+                                                        setGroup(!group)
+                                                    }
+                                                    type="checkbox"
+                                                    id={'group_same'}
+                                                    label="Group Identical"
+                                                    inline
+                                                />
+                                            </span>
+                                        </th>
+                                        <th
+                                            className="text-center"
+                                            width="120px"
+                                        >
+                                            UNIT
+                                        </th>
+                                        <th
+                                            className="text-center"
+                                            width="90px"
+                                        >
+                                            QTY
+                                        </th>
+                                        <th className="text-end" width="110px">
+                                            METERS
+                                        </th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {
-                                    itemsList && itemsList.map((item, index) => {
-                                        return (
-
-                                            <tr key={index}>
-                                                <td className="text-center">{index + 1} </td>
-                                                <td>
-                                                    <span className="text-inverse">
-                                                        {item.product && item.product.name}
-                                                    </span>
-                                                </td>
-                                                <td className="text-center">{getSOUnit(item.unit, item.size)} </td>
-                                                <td className="text-center">{item.qty}</td>
-                                                <td className="text-center">
-                                                    <NumberFormat
-                                                        displayType={"text"}
-                                                        value={item.total_qty}
-                                                        thousandSeparator={true} />
-                                                </td>
-                                            </tr>
-
-                                        );
-                                    })
-                                }
+                                    {itemsList.map((item, index) => (
+                                        <tr key={index}>
+                                            <td className="text-center">
+                                                {index + 1}
+                                            </td>
+                                            <td>
+                                                <span className="text-inverse">
+                                                    {item.product?.name}
+                                                </span>
+                                            </td>
+                                            <td className="text-center text-nowrap">
+                                                {getSOUnit(
+                                                    item.unit,
+                                                    item.size,
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                <Qty value={item.qty} />
+                                            </td>
+                                            <td className="text-end">
+                                                <Qty value={item.total_qty} />
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colSpan={3} className="text-end">
+                                            Total
+                                        </td>
+                                        <td className="text-center">
+                                            <Qty value={totalPieces} />
+                                        </td>
+                                        <td className="text-end">
+                                            <Qty value={order.total_qty} />
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
-                        <div className="invoice-price">
-                            <div className="invoice-price-left">
-                                <div className="invoice-price-row">
-                                    {/*<div className="sub-price">
-                                        <small>SUBTOTAL</small>
-                                        <span className="text-inverse">
-                                            <NumberFormat
-                                                displayType={'text'}
-                                                value={order.total}
-                                                thousandSeparator={true}/>
-                                        </span>
-                                    </div>*/}
+
+                        <div className="gate-pass-totals">
+                            {unitSummary.map(({ unit, qty }) => (
+                                <div className="gate-pass-total" key={unit}>
+                                    <small>{unit}</small>
+                                    <span>
+                                        <Qty value={qty} />
+                                    </span>
                                 </div>
+                            ))}
+                            <div className="gate-pass-total">
+                                <small>Total Pieces</small>
+                                <span>
+                                    <Qty value={totalPieces} />
+                                </span>
                             </div>
-                            <div className="invoice-price-right">
-                                <table className={"w-100 invoice-total"}>
-                                    <tr className="fw-600">
-                                        <td><span style={{ "fontSize": "0.75rem" }}>PIECES</span></td>
-                                        <td><span style={{ "fontSize": "0.75rem" }}>METERS</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <span className="fw-600">
-                                            <NumberFormat
-                                                displayType={"text"}
-                                                value={getTotalQty()}
-                                                thousandSeparator={true} />
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className="fw-600">
-                                            <NumberFormat
-                                                displayType={"text"}
-                                                value={order.total_qty}
-                                                thousandSeparator={true} />
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
-                                {/*<small>Meters</small> <span className="fw-600">
-                                <NumberFormat
-                                    displayType={'text'}
-                                    value={getTotalQty()}
-                                    thousandSeparator={true}/>
-                            </span>*/}
+                            <div className="gate-pass-total is-primary">
+                                <small>Total Meters</small>
+                                <span>
+                                    <Qty value={order.total_qty} />
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div className="invoice-note">
 
-                    </div>
                     <div className="invoice-footer">
-                        <p className="text-center m-b-5 fw-600">
-
-                            <span className={"float-end"}> Printed By: {auth.user.name}</span>
+                        <p className="m-b-5 fw-600 text-end">
+                            Printed By: {auth.user.name}
                         </p>
                     </div>
                 </div>

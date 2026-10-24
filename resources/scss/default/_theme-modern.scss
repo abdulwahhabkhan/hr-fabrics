@@ -1358,3 +1358,67 @@ body.modal-open .app-top-menu {
     padding: .625rem .75rem;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Gate pass — quantity totals as tiles (print in _print.scss)
+// ---------------------------------------------------------------------------
+@media screen {
+  .invoice.gate-pass {
+    .table-invoice > tfoot > tr > td {
+      padding-top: .875rem;
+      padding-bottom: .875rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--hf-text);
+      background: var(--hf-surface-2);
+      border-top: 2px solid var(--hf-border-strong);
+      border-bottom: 0;
+    }
+
+    .gate-pass-totals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: .75rem;
+    }
+
+    .gate-pass-total {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+      padding: 1rem 1.25rem;
+      background: var(--hf-surface-2);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--hf-radius-lg);
+
+      small {
+        font-size: .6875rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--hf-text-2);
+      }
+
+      span {
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: $tracking-tight;
+        font-variant-numeric: tabular-nums;
+        color: var(--hf-text);
+      }
+
+      &.is-primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--hf-brand) 0%, var(--hf-brand-600) 100%);
+        border-color: transparent;
+
+        small {
+          color: var(--hf-gold);
+        }
+
+        span {
+          color: #fff;
+        }
+      }
+    }
+  }
+}
