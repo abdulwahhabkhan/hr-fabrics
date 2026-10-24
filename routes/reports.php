@@ -7,6 +7,7 @@ use App\Http\Controllers\Reports\BankBookController;
 use App\Http\Controllers\Reports\CashCreditSaleController;
 use App\Http\Controllers\Reports\CustomerBalanceController;
 use App\Http\Controllers\Reports\CustomerLastPaymentController;
+use App\Http\Controllers\Reports\DailyActivityController;
 use App\Http\Controllers\Reports\DailyExpenseController;
 use App\Http\Controllers\Reports\DailyPurchasesController;
 use App\Http\Controllers\Reports\DailySummaryController;
@@ -64,6 +65,7 @@ Route::prefix('reports')
             ->name('purchases_daily');
 
         Route::get('summary', DailySummaryController::class)->name('summary');
+        Route::get('daily-activity', DailyActivityController::class)->name('daily-activity');
         Route::get('in-out-transactions-summary',
             InOutTransactionSummaryController::class)->name('in.out.transactions.summary');
         Route::get('in-out-transactions-summary/detail',

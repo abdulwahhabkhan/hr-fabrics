@@ -302,6 +302,11 @@ const Menu = [
                         name: 'reports.summary',
                     },
                     {
+                        path: reports.dailyActivity().url,
+                        title: 'Daily Activity',
+                        name: 'reports.daily-activity',
+                    },
+                    {
                         path: inMethod.out.transactions.summary().url,
                         title: 'In/Out Transaction Summary',
                         name: 'reports.in.out.transactions.summary',

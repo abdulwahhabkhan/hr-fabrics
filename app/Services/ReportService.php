@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\JournalHead;
+use App\Models\Accounts\Account;
+use App\Models\Accounts\Journal;
+use App\Models\Accounts\JournalDetail;
 use App\Models\Accounts\JournalLedger;
 use App\Models\Sales\Order;
 use App\Models\Sales\SalesReturn;
@@ -81,6 +85,33 @@ class ReportService
             'rows' => $banks,
             'totals' => $totals,
         ];
+    }
+
+    /**
+     * Journal detail lines posted on the given date, optionally limited to one head.
+     * The journal head excludes the cash account side of each entry.
+     */
+    public function dailyJournalQuery(CarbonImmutable $date, ?string $head = null): Builder
+    {
+        $query = Journal::query()
+            ->join(JournalDetail::tName(), Journal::qCol('id'), 'journal_id')
+            ->join(Account::tName(), Account::qCol('id'), 'account_id');
+        $query->when($head, function (Builder $query, string $head): void {
+            $query->where('head', '=', $head);
+            if ($head === JournalHead::Journal->value) {
+                $query->where(Account::qCol('id'), '!=', resolve(AccountService::class)->getCashAccount()->id);
+            }
+        });
+        $query->filterWhere('posted_at', $date->format('Y-m-d'));
+
+        return $query->select([
+            Journal::qCol('*'),
+            JournalDetail::qCol('account_id'),
+            JournalDetail::qCol('dr as debit'),
+            JournalDetail::qCol('cr as credit'),
+            Account::qCol('name'),
+            Account::qCol('address->city as city', false),
+        ])->orderBy(Journal::qCol('created_at'), 'desc');
     }
 
     public function salesSummary(CarbonImmutable $startDate, CarbonImmutable $endDate): array
