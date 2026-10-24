@@ -8,6 +8,7 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { Col, Form, Row, Table } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import DailyReportFilter from '@/pages/Reports/Summary/DailyReportFilter';
+import Print from '@/components/button/Print.jsx';
 
 const BankReport = () => {
     const {
@@ -50,8 +51,29 @@ const BankReport = () => {
     return (
         <>
             <Head title="Daily Summary Report" />
-            <PageHeader title="Daily Summary Report" />
-            <PageContent>
+            <PageHeader
+                title="Daily Summary Report"
+                description={
+                    <>
+                        <Date date={filters.start_date} /> -{' '}
+                        <Date date={filters.end_date} />
+                    </>
+                }
+                buttons={
+                    <>
+                        <DailyReportFilter />
+                        <Print />
+                    </>
+                }
+            />
+            <PageContent className="summary-report">
+                <div className="summary-report-print-title d-none d-print-block">
+                    <h1>Daily Summary Report</h1>
+                    <div>
+                        <Date date={filters.start_date} /> -{' '}
+                        <Date date={filters.end_date} />
+                    </div>
+                </div>
                 <Panel>
                     <PanelHeader
                         heading={
@@ -59,18 +81,6 @@ const BankReport = () => {
                                 Sales Summary :{' '}
                                 <Date date={filters.start_date} /> -{' '}
                                 <Date date={filters.end_date} />
-                            </>
-                        }
-                        buttons={
-                            <>
-                                <DailyReportFilter />
-                                <button
-                                    className="btn btn-sm btn-white  ms-5px me-5px hidden-print"
-                                    onClick={() => print()}
-                                >
-                                    <Icon icon={'solar:printer-bold-duotone'} />{' '}
-                                    Print
-                                </button>
                             </>
                         }
                     />
@@ -498,11 +508,15 @@ const BankReport = () => {
                 </Panel>
                 <div className="page-break row mb-2">&nbsp;</div>
                 <Panel>
-                    <PanelHeader>
-                        Bank Book Report : &nbsp;
-                        <Date date={filters.start_date} /> -{' '}
-                        <Date date={filters.end_date} />
-                    </PanelHeader>
+                    <PanelHeader
+                        heading={
+                            <>
+                                Bank Book Report :&nbsp;
+                                <Date date={filters.start_date} /> -{' '}
+                                <Date date={filters.end_date} />
+                            </>
+                        }
+                    />
                     <PanelBody>
                         <div className={'table-responsive'}>
                             <table
@@ -584,7 +598,7 @@ const BankReport = () => {
 
                                     <tr className="fw-bold text-right">
                                         <td
-                                            className="no-data text-center fw-bold"
+                                            className="text-center fw-bold"
                                             colSpan="2"
                                         >
                                             Total
@@ -637,6 +651,7 @@ const BankReport = () => {
                                     <Form.Control
                                         size={'sm'}
                                         as="textarea"
+                                        className="summary-report-notes"
                                         rows={3}
                                         placeholder={'other info'}
                                     />
