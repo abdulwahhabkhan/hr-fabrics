@@ -8,6 +8,7 @@ import { Form } from 'react-bootstrap';
 import { getSOUnit } from '@/util/util';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import PreviewButton from '@/components/button/PreviewButton.jsx';
 import orders from '@/routes/sales/orders';
 
 const Qty = ({ value }) => (
@@ -53,6 +54,10 @@ const OrderGatePass = () => {
                 buttons={
                     <>
                         <BackButton href={orders.index()} label="Orders List" />
+                        <PreviewButton
+                            href={orders.show(order.id)}
+                            label="View Detail"
+                        />
                         <Print />
                     </>
                 }
