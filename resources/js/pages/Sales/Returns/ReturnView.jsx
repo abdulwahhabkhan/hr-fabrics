@@ -5,6 +5,7 @@ import Moment from '@/components/Moment';
 import React, { useEffect, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
+import { InvoiceContact } from '@/components/InvoiceContact';
 import { PreviewAttachments } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
@@ -14,7 +15,6 @@ import returns from '@/routes/sales/returns';
 const ReturnView = () => {
     const {
         so_return,
-        appName,
         transaction_date,
         attachments,
         total_summary,
@@ -308,40 +308,7 @@ const ReturnView = () => {
                             </>
                         )}
                     </div>
-                    <div className="invoice-note d-flex">
-                        <div className="flex-fill">
-                            * If you have any questions concerning this invoice,
-                            contact sales team
-                            <br />
-                            <ul>
-                                {store.contact.mobile && (
-                                    <li>
-                                        <span className={'fw-bold'}>
-                                            Mobile:{' '}
-                                        </span>
-                                        {store.contact.mobile}
-                                    </li>
-                                )}
-                                {store.contact.telephone && (
-                                    <li>
-                                        <span className={'fw-bold'}>
-                                            Telephone:{' '}
-                                        </span>
-                                        {store.contact.telephone}
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
-                        <div className="text-center fw-600">
-                            <span style={{ fontSize: '1.5rem' }}>
-                                <Icon icon={'solar:map-point-bold-duotone'} />
-                            </span>
-                            <br />
-                            {appName}
-                            <br />
-                            {store.branch_name}
-                        </div>
-                    </div>
+                    <InvoiceContact />
                     <div className={'m-t-10'}>
                         <strong className={'bold'}>Notes:</strong>
                         <br />

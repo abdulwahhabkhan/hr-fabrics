@@ -8,8 +8,8 @@ return [
     'partners_ids' => env('PARTNERS_IDS', 734),
     'contact' => [
         'telephone' => '',
-        'mobile' => '',
-        'address' => '',
+        'mobile' => ['0326-7896666', '0336-6210061'],
+        'address' => 'Bao jee block U-1310 Madina market Raja bazar',
         'city' => 'Rawalpindi',
     ],
 ];

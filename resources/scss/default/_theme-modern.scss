@@ -1275,6 +1275,72 @@ body.modal-open .app-top-menu {
         color: var(--hf-brand);
       }
 
+      // Store contact: phones + address as compact icon tiles beside the QR
+      &.invoice-contact {
+        align-items: center;
+        border-style: solid;
+        border-color: var(--hf-border);
+      }
+
+      .invoice-contact-remark,
+      .invoice-contact-lead {
+        margin: 0 0 .625rem;
+        line-height: 1.5;
+      }
+
+      .invoice-contact-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+
+      .invoice-contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: .625rem;
+        padding: .625rem .75rem;
+        background: var(--hf-surface);
+        border: 1px solid var(--hf-border);
+        border-radius: var(--hf-radius);
+        flex: 1 1 10rem;
+
+        &.is-wide {
+          flex: 2 1 16rem;
+        }
+
+        > .iconify {
+          flex-shrink: 0;
+          width: 2rem;
+          height: 2rem;
+          padding: .4rem;
+          color: var(--hf-brand);
+          background: var(--hf-brand-50);
+          border-radius: 50%;
+        }
+
+        > div {
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          line-height: 1.35;
+        }
+
+        small {
+          font-size: .625rem;
+          font-weight: 600;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          color: var(--hf-text-3);
+        }
+
+        span {
+          font-size: .8125rem;
+          font-weight: 600;
+          font-variant-numeric: tabular-nums;
+          color: var(--hf-text);
+        }
+      }
+
       .invoice-qr {
         display: flex;
         align-items: center;
@@ -1282,27 +1348,6 @@ body.modal-open .app-top-menu {
         flex-shrink: 0;
         margin-top: -0.5rem;
         margin-bottom: -0.5rem;
-      }
-
-      .invoice-qr-label {
-        display: flex;
-        flex-direction: column;
-        gap: .125rem;
-        line-height: 1.3;
-      }
-
-      .invoice-qr-app {
-        font-size: .875rem;
-        font-weight: 700;
-        color: var(--hf-text);
-      }
-
-      .invoice-qr-branch {
-        font-size: .6875rem;
-        font-weight: 600;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        color: var(--hf-text-2);
       }
 
       .invoice-qr-frame {

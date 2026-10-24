@@ -10,13 +10,12 @@ import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
 import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import orders from '@/routes/sales/orders';
-import contact_qr from '@/img/contact-qr.jpeg';
+import { InvoiceContact } from '@/components/InvoiceContact';
 
 const OrderView = () => {
     const {
         order,
         transaction_date,
-        appName,
         auth,
         total_summary,
         balance,
@@ -51,7 +50,6 @@ const OrderView = () => {
                 .value();
         }
     };
-    console.log(total_summary);
 
     useEffect(() => {
         setItemsList(getGroup(items));
@@ -441,47 +439,7 @@ const OrderView = () => {
                             </>
                         )}
                     </div>
-                    <div className="invoice-note d-flex">
-                        <div className="flex-fill">
-                            {order.expenses_detail && (
-                                <>
-                                    * {order.expenses_detail}
-                                    <br />
-                                </>
-                            )}
-                            * If you have any questions concerning this invoice,
-                            contact sales team
-                            <br />
-                            <ul>
-                                {store.contact.mobile && (
-                                    <li>
-                                        <span className={'fw-bold'}>
-                                            Mobile:{' '}
-                                        </span>
-                                        {store.contact.mobile} <br />
-                                    </li>
-                                )}
-
-                                {store.contact.telephone && (
-                                    <li>
-                                        <span className={'fw-bold'}>
-                                            PTCL:{' '}
-                                        </span>
-                                        {store.contact.telephone}
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
-                        <div className="invoice-qr">
-                            <div className="invoice-qr-frame">
-                                <img src={contact_qr} alt="Contact QR code" />
-                            </div>
-                            <div className="invoice-qr-label">
-                                <span className="invoice-qr-app">{appName}</span>
-                                <span className="invoice-qr-branch">{store.branch_name}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <InvoiceContact remark={order.expenses_detail} />
                     <div className="invoice-footer">
                         <p className="text-center m-b-5 fw-600">
                             THANK YOU FOR YOUR BUSINESS
