@@ -39,9 +39,6 @@ use App\Http\Controllers\Stock\ConversionController;
 use App\Http\Controllers\Stock\InventoryController;
 use App\Http\Controllers\Stock\StockTransferController;
 use App\Http\Controllers\Stock\StockTransferInventoryController;
-use App\Http\Controllers\Stock\StoreTransferController;
-use App\Http\Controllers\Stock\StoreTransferInventoryController;
-use App\Http\Controllers\Stock\StoreTransferLedgerController;
 use App\Http\Controllers\Stock\ValueAdditionController;
 use Illuminate\Support\Facades\Route;
 
@@ -149,11 +146,6 @@ Route::prefix('purchases')->as('purchases.')->middleware([
 /* Purchase Routes */
 Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stocks.')
     ->group(function () {
-        Route::resource('store-transfers', StoreTransferController::class)->except('destroy');
-        Route::get('store-transfers/{store_transfer}/ledger', StoreTransferLedgerController::class)
-            ->name('store-transfers.ledger');
-        Route::get('store-transfers/{store_transfer}/inventory', StoreTransferInventoryController::class)
-            ->name('store-transfers.inventory');
         Route::resource('stock-transfers', StockTransferController::class)->except('show');
         Route::post('stock-transfers/{stock_transfer}/confirm', [StockTransferController::class, 'confirm'])
             ->name('stock-transfers.confirm');
@@ -165,34 +157,6 @@ Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stoc
                     ->name('stock.product');
                 Route::get('stock-transfers/availability/{product}', [StockTransferController::class, 'availability'])
                     ->name('stock-transfers.availability');
-
-                // Store Transfer Item
-                Route::get('store-transfers/items/{storeTransfer}', [
-                    StoreTransferController::class,
-                    'storeTransferItems',
-                ])
-                    ->name('store-transfers.items')->where(['storeTransfer' => '[0-9]+']);
-                Route::post('store-transfers/items/{storeTransfer}', [
-                    StoreTransferController::class,
-                    'storeTransferItem',
-                ])
-                    ->name('store-transfers.item')->where(['storeTransfer' => '[0-9]+']);
-                Route::delete('store-transfers/items/{id}', [
-                    StoreTransferController::class,
-                    'deleteStoreTransferItem',
-                ])
-                    ->name('store-transfers.item.destroy')->where(['id' => '[0-9]+']);
-                Route::get('store-transfers/stock/{storeTransfer}', [
-                    StoreTransferController::class,
-                    'availableStock',
-                ])
-                    ->name('store-transfers.stock')->where(['storeTransfer' => '[0-9]+']);
-                Route::post('store-transfers/items/{storeTransfer}/bulk', [
-                    StoreTransferController::class,
-                    'storeTransferItemsBulk',
-                ])
-                    ->name('store-transfers.items.bulk')->where(['storeTransfer' => '[0-9]+']);
-                //
             });
         Route::resource('conversions', ConversionController::class)
             ->except('show', 'edit', 'update');

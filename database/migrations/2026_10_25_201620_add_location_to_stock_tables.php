@@ -18,7 +18,6 @@ return new class extends Migration
         'order_items',
         'purchase_return_items',
         'sales_return_items',
-        'store_transfer_items',
     ];
 
     /**
