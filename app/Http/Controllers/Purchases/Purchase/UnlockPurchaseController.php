@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Purchases\Purchase;
 
-use App\Actions\LogAction\RecordAction;
-use App\Enums\StatusText;
+use App\Actions\Inbound\Purchase\UnLockPurchase;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase\Purchase;
-use DB;
 use Illuminate\Http\Request;
 use Redirect;
 use Throwable;
@@ -21,17 +19,7 @@ class UnlockPurchaseController extends Controller
         $user = $request->user();
         $this->authorize('unlock', $receipt);
         $this->authorize('check-inventory', $receipt);
-        resolve(RecordAction::class)->handle($receipt, $user, 'Purchase UnLocked');
-
-        DB::transaction(function () use ($receipt): void {
-            $receipt->update(['status' => StatusText::Open]);
-            $receipt->stocks()->update(['invoiced' => false]);
-            $journals = $receipt->journal()->get();
-            foreach ($journals as $journal) {
-                $journal->transactions()->delete();
-            }
-            $receipt->journal()->delete();
-        });
+        resolve(UnLockPurchase::class)->handle($receipt, $user);
 
         return Redirect::route('purchases.pos.edit', $receipt->id)
             ->with(['success' => 'Receiving unlocked successfully']);

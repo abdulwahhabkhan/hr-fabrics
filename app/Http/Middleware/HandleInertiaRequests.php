@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
             'accountTypes' => Inertia::once(fn () => AccountType::accountType()),
             'auth' => [
                 'user' => $request->user() ?
-                    $request->user()->only(['id', 'name', 'email']) : null,
+                    $request->user()->only(['id', 'name', 'email', 'is_master']) : null,
                 'permissions' => $request->user() ? Inertia::once(fn (
                 ) => $request->user()->permissions()->toArray()) : null,
             ],

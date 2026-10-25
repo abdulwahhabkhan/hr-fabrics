@@ -34,6 +34,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user can run the master correction tools.
+     */
+    public function master(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_master' => true,
+        ]);
+    }
+
+    /**
      * Indicate that the model has two-factor authentication configured.
      */
     public function withTwoFactor(): static
