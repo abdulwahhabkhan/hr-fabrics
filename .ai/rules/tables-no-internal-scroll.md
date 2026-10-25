@@ -6,7 +6,7 @@ title: Tables — no internal scroll boxes; single-line cells; header sticks to 
 Tables scroll with the page, never inside their own box. The app-wide styles in `resources/scss/default/_theme-modern.scss` already handle this for every `.table`:
 
 - Cells are `white-space: nowrap` on screen so rows stay on one line and use space efficiently.
-- On desktop (≥ 992px) `thead th` is `position: sticky; top: 0`, so the header row pins to the top of the viewport once the table scrolls up to it. `.table-responsive` is `overflow: visible` on desktop so it doesn't trap the sticky header.
+- On desktop (≥ 992px) `thead` is `position: sticky; top: 0` (and a `scroll-state` container, so header cells can restyle while stuck), so the header row pins to the top of the viewport once the table scrolls up to it. `.table-responsive` is `overflow: visible` on desktop so it doesn't trap the sticky header.
 
 Avoid this pattern:
 

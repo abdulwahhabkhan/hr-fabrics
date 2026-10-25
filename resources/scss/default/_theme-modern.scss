@@ -426,10 +426,16 @@ body {
     overflow: visible;
   }
 
-  .table > thead > tr > th {
+  // Sticky on thead (not th) so it can be a scroll-state container, letting header
+  // cells restyle themselves while stuck via @container scroll-state(stuck: top).
+  .table > thead {
     position: sticky;
     top: 0;
     z-index: 2;
+    container-type: scroll-state;
+  }
+
+  .table > thead > tr > th {
     box-shadow: inset 0 -1px 0 var(--hf-border);
   }
 }

@@ -506,6 +506,30 @@ button.hf-icon-btn {
   // Let wide tables extend instead of clipping, and keep sticky headers working.
   @media (min-width: 992px) {
     overflow: visible;
+
+    // Without the clip, a header row at the top of the panel would paint its square
+    // corners over the panel's rounded border, so round them to match.
+    > .panel-body:first-child > .table-responsive:first-child > .table:first-child,
+    > .panel-body:first-child > .table:first-child {
+      > thead:first-child > tr:first-child {
+        > th:first-child {
+          border-top-left-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        > th:last-child {
+          border-top-right-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        // Once pinned to the viewport the header is no longer inside the rounded frame.
+        @container scroll-state(stuck: top) {
+          > th:first-child,
+          > th:last-child {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+          }
+        }
+      }
+    }
   }
 
   > .panel-body {
