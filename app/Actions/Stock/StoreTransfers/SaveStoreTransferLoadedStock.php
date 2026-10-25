@@ -4,6 +4,7 @@ namespace App\Actions\Stock\StoreTransfers;
 
 use App\Actions\Inventory\ReturnInventory;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Stock\Inventory;
 use App\Models\Stock\StoreTransfer;
@@ -41,6 +42,7 @@ class SaveStoreTransferLoadedStock
         $unit = $row['unit'];
         $size = (float) $row['size'];
         $cost = (float) $row['cost'];
+        $location = StockLocation::tryFrom((string) ($row['location'] ?? '')) ?? StockLocation::Shop;
         $isBox = $unit === PackingType::Box->value;
         $totalQty = $isBox || ! isset($row['meters']) ? $qty * $size : (float) $row['meters'];
         $totalAmount = ($isBox ? $qty : $totalQty) * ($cost + $expense);
@@ -48,6 +50,7 @@ class SaveStoreTransferLoadedStock
         $item = $transfer->items()->create([
             'product_id' => $row['product_id'],
             'unit' => $unit,
+            'location' => $location,
             'size' => $size,
             'qty' => $qty,
             'price' => $cost,
@@ -56,18 +59,19 @@ class SaveStoreTransferLoadedStock
             'total_amount' => $totalAmount,
         ]);
 
-        $this->consumeInventory($transfer, $item->id, (int) $row['product_id'], $unit, $size, $cost, $qty, $totalQty);
+        $this->consumeInventory($transfer, $item->id, (int) $row['product_id'], $unit, $location, $size, $cost, $qty, $totalQty);
     }
 
     /**
      * @throws Throwable
      */
-    protected function consumeInventory(StoreTransfer $transfer, int $itemId, int $productId, string $unit, float $size, float $cost, int $qty, float $meters): void
+    protected function consumeInventory(StoreTransfer $transfer, int $itemId, int $productId, string $unit, StockLocation $location, float $size, float $cost, int $qty, float $meters): void
     {
         $inventories = Inventory::query()
             ->available()
             ->where('product_id', $productId)
             ->where('unit', $unit)
+            ->atLocation($location)
             ->where('size', $size)
             ->where(function ($query) use ($cost) {
                 if ($cost > 0) {

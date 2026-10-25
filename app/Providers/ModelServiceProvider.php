@@ -9,6 +9,7 @@ use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseReturn;
 use App\Models\Sales\Order;
 use App\Models\Sales\SalesReturn;
+use App\Models\Stock\StockTransfer;
 use App\Models\Stock\StoreTransfer;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +49,7 @@ final class ModelServiceProvider extends ServiceProvider
             'sales.sor' => SalesReturn::class,
             'journal' => Journal::class,
             'stock.transfer' => StoreTransfer::class,
+            'stock.location-transfer' => StockTransfer::class,
         ]);
     }
 

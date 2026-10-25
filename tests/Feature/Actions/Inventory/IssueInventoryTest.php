@@ -4,6 +4,7 @@
 
 use App\Actions\Inventory\IssueInventory;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\FabricReceiving;
@@ -567,3 +568,34 @@ it('throws exception if final allocation sum is incorrect', function () {
         ->setMeters(50)
         ->issue();
 })->throws(UnableToAllocateStockException::class);
+
+it('issues stock only from the given location', function () {
+    $this->getAdmin();
+    $product = Product::factory()->create();
+    $warehouseLot = Inventory::factory()->withPurchase()->box()->create([
+        'product_id' => $product->id, 'size' => 5, 'qty' => 4, 'meters' => 20,
+        'location' => StockLocation::WarehouseFSD, 'transaction_date' => now()->subWeek(),
+    ]);
+    $shopLot = Inventory::factory()->withPurchase()->box()->create([
+        'product_id' => $product->id, 'size' => 5, 'qty' => 4, 'meters' => 20,
+        'location' => StockLocation::Shop, 'transaction_date' => now()->subDay(),
+    ]);
+    $por = PurchaseReturn::factory()->closed()->create();
+
+    $issue = fn (StockLocation $location, int $qty) => (new IssueInventory)
+        ->setOutbound($por)
+        ->setTransactionDate(now())
+        ->setProductId($product->id)
+        ->setUnit(PackingType::Box)
+        ->setLocation($location)
+        ->setSize(5)
+        ->setQuantity($qty)
+        ->setMeters($qty * 5)
+        ->issue();
+
+    $issue(StockLocation::Shop, 4);
+
+    expect($shopLot->refresh()->outbound_id)->toBe($por->id)
+        ->and($warehouseLot->refresh()->outbound_id)->toBeNull()
+        ->and(fn () => $issue(StockLocation::Shop, 1))->toThrow(ValidationException::class, 'Not enough stock at Shop');
+});

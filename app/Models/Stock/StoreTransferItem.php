@@ -3,6 +3,7 @@
 namespace App\Models\Stock;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -27,6 +28,7 @@ class StoreTransferItem extends Model
         'price' => 'float',
         'expense' => 'float',
         'unit' => PackingType::class,
+        'location' => StockLocation::class,
     ];
 
     public static function getItems($id): Collection

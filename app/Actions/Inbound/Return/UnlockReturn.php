@@ -35,10 +35,10 @@ class UnlockReturn
     protected function dissociateInventory(PurchaseReturn $return): void
     {
         $return->inventories()->update([
-            'transaction_date' => null,
             'outbound_type' => null,
             'outbound_id' => null,
             'outbound_item_id' => null,
+            'outbound_on' => null,
         ]);
     }
 

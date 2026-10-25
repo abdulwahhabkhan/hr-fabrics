@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Stock;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Enums\StoreTransferType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,6 +36,7 @@ class StoreTransferItemsBulkRequest extends FormRequest
             'rows.*.cost' => ['required', 'numeric', 'min:0'],
             'rows.*.qty' => ['required', 'integer', 'min:0'],
             'rows.*.meters' => ['nullable', 'numeric', 'min:0'],
+            'rows.*.location' => ['nullable', Rule::enum(StockLocation::class)],
         ];
     }
 

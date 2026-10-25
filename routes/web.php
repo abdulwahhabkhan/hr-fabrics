@@ -37,6 +37,8 @@ use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Stock\BrandValuationController;
 use App\Http\Controllers\Stock\ConversionController;
 use App\Http\Controllers\Stock\InventoryController;
+use App\Http\Controllers\Stock\StockTransferController;
+use App\Http\Controllers\Stock\StockTransferInventoryController;
 use App\Http\Controllers\Stock\StoreTransferController;
 use App\Http\Controllers\Stock\StoreTransferInventoryController;
 use App\Http\Controllers\Stock\StoreTransferLedgerController;
@@ -152,10 +154,17 @@ Route::prefix('stocks')->middleware(['auth', 'verified', 'auth.role'])->as('stoc
             ->name('store-transfers.ledger');
         Route::get('store-transfers/{store_transfer}/inventory', StoreTransferInventoryController::class)
             ->name('store-transfers.inventory');
+        Route::resource('stock-transfers', StockTransferController::class)->except('show');
+        Route::post('stock-transfers/{stock_transfer}/confirm', [StockTransferController::class, 'confirm'])
+            ->name('stock-transfers.confirm');
+        Route::get('stock-transfers/{stock_transfer}/inventory', StockTransferInventoryController::class)
+            ->name('stock-transfers.inventory');
         Route::withoutMiddleware('auth.role')
             ->group(function () {
                 Route::get('stock/product', [InventoryController::class, 'productStock'])
                     ->name('stock.product');
+                Route::get('stock-transfers/availability/{product}', [StockTransferController::class, 'availability'])
+                    ->name('stock-transfers.availability');
 
                 // Store Transfer Item
                 Route::get('store-transfers/items/{storeTransfer}', [

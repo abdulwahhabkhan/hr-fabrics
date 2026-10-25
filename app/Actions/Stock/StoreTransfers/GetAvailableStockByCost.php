@@ -14,10 +14,11 @@ class GetAvailableStockByCost
             ->where('product_id', $productId)
             ->where('unit', $unit)
             ->available()
-            ->selectRaw('size, COALESCE(cost, 0) as cost')
+            ->selectRaw('location, size, COALESCE(cost, 0) as cost')
             ->selectRaw('SUM(qty) as available_qty')
             ->selectRaw('SUM(meters) as available_meters')
-            ->groupBy('size', DB::raw('COALESCE(cost, 0)'))
+            ->groupBy('location', 'size', DB::raw('COALESCE(cost, 0)'))
+            ->orderBy('location')
             ->orderBy('size')
             ->orderBy('cost')
             ->get();

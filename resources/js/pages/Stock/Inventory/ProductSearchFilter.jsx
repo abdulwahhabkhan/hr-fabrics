@@ -5,10 +5,12 @@ import {Inertia} from "@/util/Inertia";
 import { Icon } from "@iconify/react";
 import {usePage} from "@/util/Inertia";
 import Select from "react-select";
+import {useStockLocations} from '@/util/util';
 import stocks from '@/routes/stocks';
 
 export const ProductSearchFilter = ({filters}) => {
     const {products, product} = usePage().props
+    const {locations} = useStockLocations()
     const {register, control, setValue, formState: {errors}, handleSubmit, watch} = useForm({defaultValues: filters});
     const sendRequest = async (data) => {
         const post_data = {...data}
@@ -62,7 +64,18 @@ export const ProductSearchFilter = ({filters}) => {
 
                         </Form.Group>
                     </Col>
-                    <Col lg={2}>
+                    <Col md={3} lg={2}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Location:</Form.Label>
+                            <Form.Select {...register('location')}>
+                                <option value="">All Locations</option>
+                                {locations.map(({id, name}) => (
+                                    <option key={id} value={id}>{name}</option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Col>
+                    <Col lg={3}>
                         <Form.Group className="mb-3">
                             <Form.Label>&nbsp;</Form.Label><br/>
                             <Button size={'md'} type={'submit'} variant={'primary'}>

@@ -29,6 +29,7 @@ import {
     OptionCards,
 } from '@/components/form/FormSection';
 import orders from '@/routes/sales/orders';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import soAjax from '@/routes/ajax/so';
 
 const toNumber = (value) => parseFloat(value) || 0;
@@ -311,6 +312,7 @@ const OrderForm = () => {
                                         <th className="w-1">#</th>
                                         <th>Product</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1 text-end">Qty</th>
                                         <th className="w-1 text-end">Meters</th>
                                         <th className="w-1 text-end">Price</th>
@@ -342,6 +344,7 @@ const OrderForm = () => {
                                             total_amount,
                                             commission,
                                             total_commission,
+                                            location,
                                         } = row;
                                         return (
                                             <tr key={id}>
@@ -369,6 +372,9 @@ const OrderForm = () => {
                                                 </td>
                                                 <td className="text-nowrap">
                                                     {getSOUnit(unit, size)}
+                                                </td>
+                                                <td>
+                                                    <StockLocationBadge location={location} />
                                                 </td>
                                                 <td className="num text-end hf-mono">
                                                     {qty}
@@ -436,7 +442,7 @@ const OrderForm = () => {
                                 {items.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <th colSpan={3}>Total</th>
+                                            <th colSpan={4}>Total</th>
                                             <th className="num text-end hf-mono">
                                                 {totals.qty}
                                             </th>

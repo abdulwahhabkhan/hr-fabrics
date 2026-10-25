@@ -4,6 +4,7 @@
 
 use App\Enums\PackingType;
 use App\Enums\ReturnStatus;
+use App\Enums\StockLocation;
 use App\Models\Accounts\Account;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\PurchaseReturn;
@@ -315,4 +316,27 @@ it('rejects a product that is not supplied by the return supplier', function () 
     // Assert
     $response->assertJsonValidationErrors(['product_id' => 'The selected product is not supplied by this supplier.']);
     assertDatabaseCount(PurchaseReturnItem::class, 0);
+});
+
+test('return item takes stock only from the selected location', function () {
+    $product = Product::factory()->box()->suppliedBy($this->return->supplier_id)->create();
+    $warehouseLot = Inventory::factory()->withPurchase()->create([
+        'product_id' => $product->id, 'unit' => PackingType::Box->name, 'size' => 5, 'qty' => 2, 'meters' => 10,
+        'location' => StockLocation::WarehouseFSD,
+    ]);
+    $payload = [
+        'product_id' => $product->id,
+        'unit' => PackingType::Box->name,
+        'qty' => 2,
+        'size' => 5,
+        'rate' => 100,
+    ];
+
+    postJson(route('ajax.return.item.save', $this->return->id), [...$payload, 'location' => StockLocation::Shop->value])
+        ->assertUnprocessable();
+    postJson(route('ajax.return.item.save', $this->return->id), [...$payload, 'location' => StockLocation::WarehouseFSD->value])
+        ->assertOk();
+
+    expect($warehouseLot->refresh()->outbound_id)->toBe($this->return->id);
+    assertDatabaseHas(PurchaseReturnItem::class, ['product_id' => $product->id, 'location' => StockLocation::WarehouseFSD->value]);
 });

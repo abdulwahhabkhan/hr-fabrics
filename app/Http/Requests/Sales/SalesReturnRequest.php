@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Sales;
 
+use App\Enums\StockLocation;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SalesReturnRequest extends FormRequest
 {
@@ -31,6 +33,7 @@ class SalesReturnRequest extends FormRequest
             'items.*.commission' => ['required'],
             'items.*.qty' => ['required'],
             'items.*.unit' => ['required'],
+            'items.*.location' => ['nullable', Rule::enum(StockLocation::class)],
             'items.*.size' => ['required'],
             'items.*.rate' => ['required'],
             'items.*.total_commission' => ['required'],

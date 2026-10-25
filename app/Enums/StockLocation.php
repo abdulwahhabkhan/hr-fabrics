@@ -2,9 +2,10 @@
 
 namespace App\Enums;
 
+use App\Contracts\HasLabel;
 use App\Traits\HasOptions;
 
-enum StockLocation: string
+enum StockLocation: string implements HasLabel
 {
     use HasOptions;
 

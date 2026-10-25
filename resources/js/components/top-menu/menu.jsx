@@ -15,6 +15,7 @@ import conversions from '@/routes/stocks/conversions';
 import valueAddition from '@/routes/stocks/value-addition';
 import stocks from '@/routes/stocks';
 import storeTransfers from '@/routes/stocks/store-transfers';
+import stockTransfers from '@/routes/stocks/stock-transfers';
 import accountsModule from '@/routes/accounts/accounts';
 import journals from '@/routes/accounts/journals';
 import ledgers from '@/routes/accounts/ledgers';
@@ -161,6 +162,11 @@ const Menu = [
                 path: storeTransfers.index().url,
                 title: 'Store Transfers',
                 name: 'stocks.store-transfers.index',
+            },
+            {
+                path: stockTransfers.index().url,
+                title: 'Stock Transfers',
+                name: 'stocks.stock-transfers.index',
             },
         ],
     },

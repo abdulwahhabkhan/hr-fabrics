@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Purchases\Return;
 
 use App\Actions\Inbound\Return\AddReturnItem;
+use App\Enums\StockLocation;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Models\Purchase\PurchaseReturn;
@@ -28,6 +29,7 @@ class AddReturnItemController extends Controller
             'rate' => 'required|numeric',
             'size' => 'sometimes|numeric',
             'total_qty' => 'sometimes|numeric',
+            'location' => ['nullable', Rule::enum(StockLocation::class)],
             'product_id' => [
                 'required',
                 Rule::exists('products', 'id')->where('vendor_id', $return->supplier_id),

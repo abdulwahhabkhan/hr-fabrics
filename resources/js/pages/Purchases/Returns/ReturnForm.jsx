@@ -20,6 +20,7 @@ import NoData from '@/components/NoData.jsx';
 import SummaryStat from '@/components/SummaryStat.jsx';
 import { FormActions, FormField } from '@/components/form/FormSection';
 import por from '@/routes/purchases/por';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import porAjax from '@/routes/ajax/por';
 
 const RETURN_CLOSED = 1;
@@ -195,6 +196,7 @@ const ReturnForm = () => {
                                         <th className="w-1">#</th>
                                         <th>Product</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1 text-end">Qty</th>
                                         <th className="w-1 text-end">Meters</th>
                                         <th className="w-1 text-end">Rate</th>
@@ -216,6 +218,7 @@ const ReturnForm = () => {
                                             qty,
                                             total_qty,
                                             total_amount,
+                                            location,
                                         } = row;
                                         return (
                                             <tr key={id}>
@@ -229,6 +232,9 @@ const ReturnForm = () => {
                                                 </td>
                                                 <td className="text-nowrap">
                                                     {unit}
+                                                </td>
+                                                <td>
+                                                    <StockLocationBadge location={location} />
                                                 </td>
                                                 <td className="num text-end hf-mono">
                                                     {qty}
@@ -268,7 +274,7 @@ const ReturnForm = () => {
                                 {items.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <th colSpan={3}>Total</th>
+                                            <th colSpan={4}>Total</th>
                                             <th className="num text-end hf-mono">
                                                 {totals.qty}
                                             </th>

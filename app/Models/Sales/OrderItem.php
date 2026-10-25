@@ -3,6 +3,7 @@
 namespace App\Models\Sales;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Model;
 use App\Models\Stock\Inventory;
@@ -39,6 +40,7 @@ class OrderItem extends Model
         'commission' => 'float',
         'price' => 'float',
         'unit' => PackingType::class,
+        'location' => StockLocation::class,
     ];
 
     /**

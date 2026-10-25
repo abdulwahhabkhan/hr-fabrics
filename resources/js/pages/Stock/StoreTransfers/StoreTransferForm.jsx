@@ -22,6 +22,7 @@ import NoData from '@/components/NoData.jsx';
 import BackButton from '@/components/button/back.tsx';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import { Icon } from '@iconify/react';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import storeTransfers from '@/routes/stocks/store-transfers';
 
 const STORE_TRANSFER_TYPE_STORE = 'store';
@@ -375,6 +376,7 @@ const StoreTransferForm = () => {
                                     <th className="w-1">#</th>
                                     <th>Product</th>
                                     <th className="w-1">Unit</th>
+                                    <th className="w-1">Location</th>
                                     <th className={'num'}>Qty</th>
                                     <th className={'num'}>Meters</th>
                                     <th className={'num'}>Expense</th>
@@ -396,6 +398,7 @@ const StoreTransferForm = () => {
                                             size,
                                             total_qty,
                                             total_amount,
+                                            location,
                                         } = row;
                                         return (
                                             <tr key={index}>
@@ -413,6 +416,9 @@ const StoreTransferForm = () => {
                                                 </td>
                                                 <td className="w-1">
                                                     {getSOUnit(unit, size)}
+                                                </td>
+                                                <td className="w-1">
+                                                    <StockLocationBadge location={location} />
                                                 </td>
                                                 <td className={'num w-1'}>
                                                     {qty}

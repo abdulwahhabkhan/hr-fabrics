@@ -11,6 +11,18 @@ export const usePackingUnits = () => {
     const { packingUnits } = usePage().props;
     return packingUnits ?? [UNIT_BOX, UNIT_SUIT, UNIT_THAAN];
 }
+export const LOCATION_SHOP = 'shop'
+
+/**
+ * Stock locations shared by HandleInertiaRequests as `{ id, name }` options.
+ */
+export const useStockLocations = () => {
+    const { stockLocations } = usePage().props;
+    const locations = stockLocations ?? [{ id: LOCATION_SHOP, name: 'Shop' }];
+    const locationLabel = (value) => locations.find(({ id }) => id === value)?.name ?? value;
+
+    return { locations, locationLabel };
+}
 export const useAccountTypes = () => {
     const { accountTypes } = usePage().props;
     return accountTypes;

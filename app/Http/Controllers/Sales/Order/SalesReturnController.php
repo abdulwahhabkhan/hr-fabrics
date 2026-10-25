@@ -6,6 +6,7 @@ use App\Actions\Accounts\DeleteJournal;
 use App\Actions\LogAction\RecordAction;
 use App\Actions\Outbound\SaleReturns\ConfirmSaleReturn;
 use App\Enums\DirectoryType;
+use App\Enums\StockLocation;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\HandlesIndexFilters;
 use App\Http\Requests\Sales\SalesReturnRequest;
@@ -143,6 +144,7 @@ class SalesReturnController extends Controller
                 ],
                 'name' => $item->product?->name,
                 'unit' => $item->unit->value,
+                'location' => $item->location->value,
                 'size' => $item->size,
                 'qty' => $item->qty,
                 'rate' => $item->rate,
@@ -191,6 +193,7 @@ class SalesReturnController extends Controller
                 'sales_return_id' => $return->id,
                 'product_id' => $item['product']['product_id'],
                 'unit' => $item['unit'],
+                'location' => $item['location'] ?? StockLocation::Shop->value,
                 'size' => $item['size'],
                 'commission' => $item['commission'] ?? '',
                 'total_commission' => $item['total_commission'] ?? 0,

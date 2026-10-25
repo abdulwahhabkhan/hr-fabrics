@@ -20,6 +20,7 @@ import NoData from '@/components/NoData.jsx';
 import SummaryStat from '@/components/SummaryStat.jsx';
 import { FormActions, FormField, OptionCards } from '@/components/form/FormSection';
 import fabricReceivings from '@/routes/purchases/fabric-receivings';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
 
 const toNumber = (value) => parseFloat(value) || 0;
@@ -181,6 +182,7 @@ const FabricReceivingForm = () => {
                                         <th className="w-1">Voucher No</th>
                                         <th>Product</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1 text-end">Qty</th>
                                         <th className="w-1 text-end">Meters</th>
                                         <th className="w-1 text-end">Actions</th>
@@ -196,6 +198,7 @@ const FabricReceivingForm = () => {
                                             size,
                                             qty,
                                             total_qty,
+                                            location,
                                         } = row;
                                         return (
                                             <tr key={id}>
@@ -216,6 +219,9 @@ const FabricReceivingForm = () => {
                                                 </td>
                                                 <td className="text-nowrap">
                                                     {getPOUnit(unit, size, qty)}
+                                                </td>
+                                                <td>
+                                                    <StockLocationBadge location={location} />
                                                 </td>
                                                 <td className="num text-end hf-mono">
                                                     {qty}
@@ -252,7 +258,7 @@ const FabricReceivingForm = () => {
                                 {items.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <th colSpan={4}>Total</th>
+                                            <th colSpan={5}>Total</th>
                                             <th className="num text-end hf-mono">
                                                 {totals.qty}
                                             </th>

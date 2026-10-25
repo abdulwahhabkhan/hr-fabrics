@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\AccountType;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
@@ -35,6 +36,7 @@ class HandleInertiaRequests extends Middleware
             'appName' => config('app.name'),
             'store' => config('store'),
             'packingUnits' => Inertia::once(fn () => PackingType::toValues()),
+            'stockLocations' => Inertia::once(fn () => StockLocation::toOptions()),
             'accountTypes' => Inertia::once(fn () => AccountType::accountType()),
             'auth' => [
                 'user' => $request->user() ?

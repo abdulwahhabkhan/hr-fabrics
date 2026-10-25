@@ -11,6 +11,7 @@ import BackButton from '@/components/button/back.tsx';
 import Print from '@/components/button/Print.jsx';
 import SummaryStat from '@/components/SummaryStat';
 import InventoryParentCard from '@/components/inventory/InventoryParentCard';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 
 const Num = ({ value }) => <NumberFormat displayType="text" value={value} thousandSeparator />;
 
@@ -34,6 +35,7 @@ const StockInventoryView = () => {
                                 <th className="w-1 text-nowrap">Inbound on</th>
                                 <th className="w-1 text-nowrap">Outbound on</th>
                                 <th className="w-1 text-center">Unit</th>
+                                <th className="w-1">Location</th>
                                 <th className="num w-1 text-nowrap">Unit cost</th>
                                 <th className="num w-1">Qty</th>
                                 <th className="num w-1">Meters</th>
@@ -55,6 +57,9 @@ const StockInventoryView = () => {
                                     <td className="text-center text-nowrap">
                                         {getPOUnit(inventory.unit, inventory.size, inventory.qty)}
                                     </td>
+                                    <td>
+                                        <StockLocationBadge location={inventory.location} />
+                                    </td>
                                     <td className="num"><Num value={inventory.cost} /></td>
                                     <td className="num">{inventory.qty > 0 ? <Num value={inventory.qty} /> : ''}</td>
                                     <td className="num"><Num value={inventory.meters} /></td>
@@ -64,7 +69,7 @@ const StockInventoryView = () => {
                         {inventories.length > 0 && (
                             <tfoot>
                                 <tr>
-                                    <th colSpan={showReference ? 6 : 5}>Total</th>
+                                    <th colSpan={showReference ? 7 : 6}>Total</th>
                                     <th className="num"><Num value={totalQty} /></th>
                                     <th className="num"><Num value={totalMeters} /></th>
                                 </tr>

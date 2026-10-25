@@ -4,6 +4,7 @@ namespace Tests\Feature\Action\Stock\StoreTransfers;
 
 use App\Actions\Stock\StoreTransfers\SaveStoreTransferLoadedStock;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Catalog\Product;
 use App\Models\Stock\Inventory;
@@ -172,4 +173,29 @@ test('it throws when entered meters exceed available meters', function () {
 
     expect($handle)->toThrow(InsufficientStockException::class);
     $this->assertDatabaseCount(StoreTransferItem::class, 0);
+});
+
+test('it loads stock only from the location of each row', function () {
+    $product = Product::factory()->create();
+    $transfer = StoreTransfer::factory()->storeType()->create();
+    $shopLot = Inventory::factory()->withPurchase()->create([
+        'product_id' => $product->id, 'unit' => PackingType::Box, 'size' => 5, 'cost' => 100, 'qty' => 3, 'meters' => 15,
+        'location' => StockLocation::Shop,
+    ]);
+    $warehouseLot = Inventory::factory()->withPurchase()->create([
+        'product_id' => $product->id, 'unit' => PackingType::Box, 'size' => 5, 'cost' => 100, 'qty' => 3, 'meters' => 15,
+        'location' => StockLocation::WarehouseFSD,
+    ]);
+
+    (new SaveStoreTransferLoadedStock)->handle($transfer, [
+        'expense' => 0,
+        'rows' => [[
+            'product_id' => $product->id, 'unit' => PackingType::Box->value, 'size' => 5, 'cost' => 100, 'qty' => 3,
+            'location' => StockLocation::WarehouseFSD->value,
+        ]],
+    ]);
+
+    expect($warehouseLot->refresh()->outbound_id)->toBe($transfer->id)
+        ->and($shopLot->refresh()->outbound_id)->toBeNull()
+        ->and(StoreTransferItem::query()->sole()->location)->toBe(StockLocation::WarehouseFSD);
 });

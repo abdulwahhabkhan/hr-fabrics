@@ -37,6 +37,7 @@ final class FabricReceivingConfirmed
                 $inventory->product_id = $item->product_id;
                 $inventory->size = $item->size;
                 $inventory->unit = PackingType::from($item->unit);
+                $inventory->location = $item->location;
                 $inventory->qty = $item->qty;
                 $inventory->meters = $item->total_qty;
                 $inventory->info = $info;

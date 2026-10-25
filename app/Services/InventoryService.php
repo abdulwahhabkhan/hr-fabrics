@@ -17,6 +17,7 @@ use App\Models\Sales\OrderItem;
 use App\Models\Sales\SalesReturn;
 use App\Models\Sales\SalesReturnItem;
 use App\Models\Stock\Inventory;
+use App\Models\Stock\StockTransfer;
 use Carbon\CarbonInterface;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,10 +78,11 @@ class InventoryService
     }
 
     /**
-     * Product movements read from confirmed purchase, sale and return lines,
-     * hydrated as Inventory so account/product relations can be eager loaded.
+     * Product movements read from confirmed purchase, sale, return and stock transfer lines,
+     * hydrated as Inventory so account/product relations can be eager loaded. When a location is
+     * given only movements at that location are returned, and a transfer shows as a single in or out.
      */
-    public function getProductHistory(int $productId): Builder
+    public function getProductHistory(int $productId, ?string $location = null): Builder
     {
         $purchases = FabricReceivingItem::query()
             ->select([
@@ -92,11 +94,13 @@ class InventoryService
                 FabricReceivingItem::qCol('total_qty as meters'),
                 FabricReceiving::qCol('supplier_id as account_id'),
                 FabricReceivingItem::qCol('product_id'),
+                FabricReceivingItem::qCol('location'),
             ])
             ->selectRaw("'Purchase' as type")
             ->joinRelation('fabricReceiving')
             ->whereHas('fabricReceiving', fn ($query) => $query->confirmed())
-            ->where(FabricReceivingItem::qCol('product_id'), $productId);
+            ->where(FabricReceivingItem::qCol('product_id'), $productId)
+            ->filterWhere(FabricReceivingItem::qCol('location'), $location);
         $sales = OrderItem::query()
             ->select([
                 Order::qCol('invoice_no'),
@@ -107,11 +111,13 @@ class InventoryService
                 OrderItem::qCol('total_qty as meters'),
                 Order::qCol('customer_id as account_id'),
                 OrderItem::qCol('product_id'),
+                OrderItem::qCol('location'),
             ])
             ->selectRaw("'Sale' as type")
             ->joinRelation('order')
             ->whereHas('order', fn ($query) => $query->confirmed())
-            ->where(OrderItem::qCol('product_id'), $productId);
+            ->where(OrderItem::qCol('product_id'), $productId)
+            ->filterWhere(OrderItem::qCol('location'), $location);
         $purchaseReturns = PurchaseReturnItem::query()
             ->select([
                 PurchaseReturn::qCol('invoice_no'),
@@ -122,11 +128,13 @@ class InventoryService
                 PurchaseReturnItem::qCol('total_qty as meters'),
                 PurchaseReturn::qCol('supplier_id as account_id'),
                 PurchaseReturnItem::qCol('product_id'),
+                PurchaseReturnItem::qCol('location'),
             ])
             ->selectRaw("'PO Return' as type")
             ->joinRelation('purchaseReturn')
             ->whereHas('purchaseReturn', fn ($query) => $query->confirmed())
-            ->where(PurchaseReturnItem::qCol('product_id'), $productId);
+            ->where(PurchaseReturnItem::qCol('product_id'), $productId)
+            ->filterWhere(PurchaseReturnItem::qCol('location'), $location);
         $saleReturns = SalesReturnItem::query()
             ->select([
                 SalesReturn::qCol('invoice_no'),
@@ -137,16 +145,20 @@ class InventoryService
                 SalesReturnItem::qCol('total_qty as meters'),
                 SalesReturn::qCol('customer_id as account_id'),
                 SalesReturnItem::qCol('product_id'),
+                SalesReturnItem::qCol('location'),
             ])
             ->selectRaw("'Sale Return' as type")
             ->joinRelation('salesReturn')
             ->whereHas('salesReturn', fn ($query) => $query->confirmed())
-            ->where(SalesReturnItem::qCol('product_id'), $productId);
+            ->where(SalesReturnItem::qCol('product_id'), $productId)
+            ->filterWhere(SalesReturnItem::qCol('location'), $location);
 
         $movements = $purchases
             ->unionAll($sales)
             ->unionAll($purchaseReturns)
-            ->unionAll($saleReturns);
+            ->unionAll($saleReturns)
+            ->unionAll($this->transferMovements($productId, 'from_location', 'Transfer Out', $location))
+            ->unionAll($this->transferMovements($productId, 'to_location', 'Transfer In', $location));
 
         return Inventory::query()
             ->fromSub($movements, Inventory::tName())
@@ -292,6 +304,7 @@ class InventoryService
                 ->selectRaw('sum(meters) as total_meters')
                 ->selectRaw('sum(qty) as total_qty')
                 ->where('created_at', '<=', $datetime)
+                ->withoutTransferArrivals()
                 ->groupBy(['product_id', 'unit']);
 
             return Product::query()
@@ -326,6 +339,7 @@ class InventoryService
                 Inventory::qCol('product_id')
             )
             ->where('created_at', '<=', $datetime)
+            ->withoutTransferArrivals()
             ->sum(DB::raw('CASE WHEN product_cost.unit = "'.PackingType::Box->value.'" THEN  qty * last_price ELSE meters * last_price END'));
 
     }
@@ -342,5 +356,32 @@ class InventoryService
             ->selectRaw('SUM(qty) total_qty, SUM(meters) as total_meters');
 
         return $query->first();
+    }
+
+    /**
+     * One side of each confirmed stock transfer, shaped like the other product history movements.
+     *
+     * @return Builder<StockTransfer>
+     */
+    private function transferMovements(int $productId, string $locationColumn, string $type, ?string $location): Builder
+    {
+        return StockTransfer::query()
+            ->select([
+                StockTransfer::qCol('transfer_no as invoice_no'),
+                StockTransfer::qCol('unit'),
+                StockTransfer::qCol('size'),
+                StockTransfer::qCol('qty'),
+                StockTransfer::qCol('transaction_date'),
+                StockTransfer::qCol('meters'),
+            ])
+            ->selectRaw('CAST(NULL AS UNSIGNED) as account_id')
+            ->addSelect([
+                StockTransfer::qCol('product_id'),
+                StockTransfer::qCol($locationColumn.' as location'),
+            ])
+            ->selectRaw('? as type', [$type])
+            ->confirmed()
+            ->where(StockTransfer::qCol('product_id'), $productId)
+            ->filterWhere(StockTransfer::qCol($locationColumn), $location);
     }
 }

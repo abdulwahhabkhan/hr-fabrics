@@ -12,10 +12,12 @@ import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
 import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import por from '@/routes/purchases/por';
+import { useStockLocations } from '@/util/util';
 
 
 const ReturnView = () => {
     const { pr_return, appName, file_info, unit_summary, transaction_date } = usePage().props;
+    const { locationLabel } = useStockLocations();
     const { items, supplier } = pr_return;
 
     const [group, setGroup] = useState(false);
@@ -28,7 +30,7 @@ const ReturnView = () => {
         else {
             return _.chain(items)
                 .groupBy((row) => {
-                    return row.product_id + row.unit + row.price;
+                    return row.product_id + row.unit + row.price + row.location;
                 }).map((row, id) => {
                     let first = _.first(row);
                     return {
@@ -127,6 +129,11 @@ const ReturnView = () => {
                                                 <td>{index + 1}</td>
                                                 <td>
                                                     {item.product && item.product.name}
+                                                    {item.location && (
+                                                        <small className="hidden-print text-muted ms-2">
+                                                            · {locationLabel(item.location)}
+                                                        </small>
+                                                    )}
                                                 </td>
                                                 <td className="text-center w-1">{item.unit}</td>
                                                 <td className="text-center w-1">{item.qty}</td>

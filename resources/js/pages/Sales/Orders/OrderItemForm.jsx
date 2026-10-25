@@ -2,14 +2,35 @@ import * as React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import cx from 'classnames';
 import { Icon } from '@iconify/react';
-import { Button, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
+import {
+    Button,
+    Col,
+    Form,
+    InputGroup,
+    Modal,
+    Row,
+    Spinner,
+} from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { FormField, SegmentedControl } from '@/components/form/FormSection';
 import { NumberFormat } from '@/util/NumberFormat';
-import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
+import {
+    LOCATION_SHOP,
+    notifyMessage,
+    serverSideError,
+    UNIT_BOX,
+    UNIT_SUIT,
+    UNIT_THAAN,
+    usePackingUnits,
+    useStockLocations,
+} from '@/util/util';
 import soAjax from '@/routes/ajax/so';
+import {
+    locationIcon,
+    StockLocationControl,
+} from '@/components/stock/StockLocation';
 
 const UNIT_ICONS = {
     [UNIT_BOX]: 'solar:box-bold-duotone',
@@ -20,22 +41,66 @@ const UNIT_ICONS = {
 const toNumber = (value) => parseFloat(value) || 0;
 
 function Money({ value }) {
-    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+    return (
+        <NumberFormat
+            displayType="text"
+            value={value}
+            thousandSeparator
+            decimalScale={2}
+        />
+    );
 }
 
 /**
- * Stock available for the unit/size currently entered. Thaan stock is tracked
- * by meters only, so its size is ignored when matching.
+ * Stock available at the location for the unit/size currently entered. Thaan stock is
+ * tracked by meters only, so its sizes are pooled.
  */
-const matchStock = (stock, unit, size) =>
-    stock.find((row) => row.unit === unit && (unit === UNIT_THAAN || row.size === toNumber(size)));
+const matchStock = (stock, location, unit, size) => {
+    const rows = stock.filter(
+        (row) =>
+            row.location === location &&
+            row.unit === unit &&
+            (unit === UNIT_THAAN || row.size === toNumber(size)),
+    );
+    if (rows.length === 0) {
+        return null;
+    }
 
-export const OrderItemForm = ({ orderId, item, onClose, setItems, products, commission, discountRate, discountPerMeter }) => {
+    return rows.reduce(
+        (sum, row) => ({
+            ...row,
+            qty: sum.qty + row.qty,
+            meters: sum.meters + row.meters,
+        }),
+        {
+            qty: 0,
+            meters: 0,
+        },
+    );
+};
+
+export const OrderItemForm = ({
+    orderId,
+    item,
+    onClose,
+    setItems,
+    products,
+    commission,
+    discountRate,
+    discountPerMeter,
+}) => {
     const packingUnits = usePackingUnits();
+    const { locations, locationLabel } = useStockLocations();
     const isEdit = item.id > 0;
     const itemDetail =
         _.find(products, { product_id: item.product_id ?? 0 }) ??
-        (isEdit ? { product_id: item.product_id, name: item.product_name, product_info: item.product_name } : null);
+        (isEdit
+            ? {
+                  product_id: item.product_id,
+                  name: item.product_name,
+                  product_info: item.product_name,
+              }
+            : null);
     const [product, setProduct] = useState(itemDetail);
     const [stock, setStock] = useState([]);
     const [stockLoading, setStockLoading] = useState(false);
@@ -60,10 +125,11 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
             size: item.size ?? '',
             price: item.price ?? '',
             commission: item.commission ?? '',
+            location: item.location ?? LOCATION_SHOP,
         },
     });
 
-    const { unit, qty, size, price } = watch();
+    const { unit, qty, size, price, location } = watch();
 
     const loadStock = (productId) => {
         setStock([]);
@@ -83,14 +149,17 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
         loadStock(itemDetail?.product_id);
     }, []);
 
-    const getCommission = (brand_id) => _.find(commission, (rate, key) => 'brand_' + brand_id === key);
+    const getCommission = (brand_id) =>
+        _.find(commission, (rate, key) => 'brand_' + brand_id === key);
 
     const priceFor = (selected, selectedUnit) => {
         if (!selected) {
             return '';
         }
 
-        return selectedUnit === UNIT_SUIT ? (selected.suit_price ?? '') : (selected.unit_price ?? '');
+        return selectedUnit === UNIT_SUIT
+            ? (selected.suit_price ?? '')
+            : (selected.unit_price ?? '');
     };
 
     const selectProduct = (selected) => {
@@ -103,8 +172,12 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
         const defaultUnit = selected.is_box ? UNIT_BOX : UNIT_THAAN;
         setValue('unit', defaultUnit, { shouldDirty: true });
         setValue('size', selected.size ?? '', { shouldDirty: true });
-        setValue('price', priceFor(selected, defaultUnit), { shouldDirty: true });
-        setValue('commission', getCommission(selected.brand_id) ?? '', { shouldDirty: true });
+        setValue('price', priceFor(selected, defaultUnit), {
+            shouldDirty: true,
+        });
+        setValue('commission', getCommission(selected.brand_id) ?? '', {
+            shouldDirty: true,
+        });
         setTimeout(() => setFocus('qty'), 0);
     };
 
@@ -120,6 +193,7 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
     }, [unit]);
 
     const pickStock = (row) => {
+        setValue('location', row.location, { shouldDirty: true });
         setValue('unit', row.unit, { shouldDirty: true });
         if (row.unit !== UNIT_THAAN) {
             setValue('size', row.size, { shouldDirty: true });
@@ -129,7 +203,15 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
     const resetForm = () => {
         setProduct(null);
         setStock([]);
-        reset({ product: null, unit: '', qty: '', size: '', price: '', commission: '' });
+        reset({
+            product: null,
+            unit: '',
+            qty: '',
+            size: '',
+            price: '',
+            commission: '',
+            location,
+        });
         setTimeout(() => productRef.current?.focus(), 0);
     };
 
@@ -147,7 +229,11 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
         })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({ title: 'Success', type: 'success', message: isEdit ? 'Item updated' : 'Item added' });
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: isEdit ? 'Item updated' : 'Item added',
+                });
 
                 if (isEdit) {
                     onClose();
@@ -167,26 +253,50 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
             });
     };
 
-    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
+    const units = packingUnits.filter((val) =>
+        product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX,
+    );
 
     const line = useMemo(() => {
         const meters = toNumber(qty) * toNumber(size);
-        const amount = unit === UNIT_THAAN ? meters * toNumber(price) : toNumber(qty) * toNumber(price);
-        const discount = discountPerMeter ? meters * toNumber(discountRate) : amount * (toNumber(discountRate) / 100);
+        const amount =
+            unit === UNIT_THAAN
+                ? meters * toNumber(price)
+                : toNumber(qty) * toNumber(price);
+        const discount = discountPerMeter
+            ? meters * toNumber(discountRate)
+            : amount * (toNumber(discountRate) / 100);
 
         return { meters, amount, discount, total: amount - discount };
     }, [unit, qty, size, price, discountPerMeter, discountRate]);
 
-    const matchedStock = unit ? matchStock(stock, unit, size) : null;
+    const matchedStock = unit ? matchStock(stock, location, unit, size) : null;
+    const isPicked = (row) =>
+        row.location === location &&
+        row.unit === unit &&
+        (unit === UNIT_THAAN || row.size === toNumber(size));
     const overStock =
-        product && unit && toNumber(qty) > 0 && !stockLoading &&
-        (!matchedStock || toNumber(qty) > matchedStock.qty || line.meters > matchedStock.meters);
+        product &&
+        unit &&
+        toNumber(qty) > 0 &&
+        !stockLoading &&
+        (!matchedStock ||
+            toNumber(qty) > matchedStock.qty ||
+            line.meters > matchedStock.meters);
 
     return (
-        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+        <Modal
+            show={true}
+            backdrop="static"
+            size="lg"
+            keyboard={true}
+            onHide={onClose}
+        >
             <form onSubmit={handleSubmit(sendRequest)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{isEdit ? 'Edit Item' : 'Add Item'}</Modal.Title>
+                    <Modal.Title>
+                        {isEdit ? 'Edit Item' : 'Add Item'}
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="hf-item-form">
                     <FormField label="Product" required>
@@ -199,8 +309,12 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                                         field.onChange(selected);
                                         selectProduct(selected);
                                     }}
-                                    getOptionValue={(option) => option['product_id']}
-                                    getOptionLabel={(option) => option['product_info']}
+                                    getOptionValue={(option) =>
+                                        option['product_id']
+                                    }
+                                    getOptionLabel={(option) =>
+                                        option['product_info']
+                                    }
                                     placeholder="Search product by name, finish or brand..."
                                     isClearable
                                     autoFocus={!isEdit}
@@ -211,22 +325,55 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                             name="product"
                             rules={{ required: true }}
                         />
-                        {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                        {errors.product && (
+                            <div className="invalid-feedback d-block">
+                                Please select a product.
+                            </div>
+                        )}
                     </FormField>
 
                     {product && (
                         <div className="hf-item-product">
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                                <span className="hf-cell-title">{product.name}</span>
-                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                <span className="hf-cell-title">
+                                    {product.name}
+                                </span>
+                                {product.finish && (
+                                    <span className="hf-chip">
+                                        {product.finish}
+                                    </span>
+                                )}
                                 <span className="ms-auto hf-item-product__prices">
                                     {product.is_box ? (
-                                        <>Box <strong>Rs <Money value={product.unit_price} /></strong></>
+                                        <>
+                                            Box{' '}
+                                            <strong>
+                                                Rs{' '}
+                                                <Money
+                                                    value={product.unit_price}
+                                                />
+                                            </strong>
+                                        </>
                                     ) : (
                                         <>
-                                            Thaan <strong>Rs <Money value={product.unit_price} />/m</strong>
+                                            Thaan{' '}
+                                            <strong>
+                                                Rs{' '}
+                                                <Money
+                                                    value={product.unit_price}
+                                                />
+                                                /m
+                                            </strong>
                                             <span className="hf-dot-sep ms-2">
-                                                Suit <strong>Rs <Money value={product.suit_price} /></strong>
+                                                Suit{' '}
+                                                <strong>
+                                                    Rs{' '}
+                                                    <Money
+                                                        value={
+                                                            product.suit_price
+                                                        }
+                                                    />
+                                                </strong>
                                             </span>
                                         </>
                                     )}
@@ -234,39 +381,100 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                             </div>
 
                             <div className="hf-item-stock">
-                                <span className="hf-item-stock__label">In stock</span>
-                                {stockLoading && <Spinner animation="border" size="sm" />}
-                                {!stockLoading && stock.length === 0 && (
-                                    <span className="text-danger fw-semibold">No stock available</span>
+                                <span className="hf-item-stock__label">
+                                    In stock
+                                </span>
+                                {stockLoading && (
+                                    <Spinner animation="border" size="sm" />
                                 )}
-                                {!stockLoading &&
-                                    stock.map((row) => (
-                                        <button
-                                            key={`${row.unit}-${row.size}`}
-                                            type="button"
-                                            className={cx('hf-stock-chip', { 'is-active': matchedStock === row })}
-                                            onClick={() => pickStock(row)}
-                                            title="Use this unit and size"
-                                        >
-                                            <strong>{row.unit}</strong>
-                                            {row.unit !== UNIT_THAAN && <span>{row.size}m</span>}
-                                            <span className="hf-stock-chip__qty">
-                                                {row.qty} pcs · {row.meters}m
-                                            </span>
-                                        </button>
-                                    ))}
+                                {!stockLoading && stock.length === 0 && (
+                                    <span className="text-danger fw-semibold">
+                                        No stock available
+                                    </span>
+                                )}
                             </div>
+                            {!stockLoading &&
+                                locations
+                                    .filter(({ id }) =>
+                                        stock.some(
+                                            (row) => row.location === id,
+                                        ),
+                                    )
+                                    .map(({ id, name }) => (
+                                        <div key={id} className="hf-item-stock">
+                                            <span className="hf-item-stock__label">
+                                                <Icon
+                                                    icon={locationIcon(id)}
+                                                    className="me-1"
+                                                />
+                                                {name}
+                                            </span>
+                                            {stock
+                                                .filter(
+                                                    (row) =>
+                                                        row.location === id,
+                                                )
+                                                .map((row) => (
+                                                    <button
+                                                        key={`${row.location}-${row.unit}-${row.size}`}
+                                                        type="button"
+                                                        className={cx(
+                                                            'hf-stock-chip',
+                                                            {
+                                                                'is-active':
+                                                                    isPicked(
+                                                                        row,
+                                                                    ),
+                                                            },
+                                                        )}
+                                                        onClick={() =>
+                                                            pickStock(row)
+                                                        }
+                                                        title={`Sell this unit and size from ${name}`}
+                                                    >
+                                                        <strong>
+                                                            {row.unit}
+                                                        </strong>
+                                                        {row.unit !==
+                                                            UNIT_THAAN && (
+                                                            <span>
+                                                                {row.size}m
+                                                            </span>
+                                                        )}
+                                                        <span className="hf-stock-chip__qty">
+                                                            {row.qty} pcs ·{' '}
+                                                            {row.meters}m
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    ))}
                         </div>
                     )}
 
                     <Row className="g-3 mt-1">
-                        <Col md={12}>
+                        <Col md={6}>
+                            <FormField label="Sell from" required>
+                                <div>
+                                    <StockLocationControl
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                    />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col md={6}>
                             <FormField label="Unit" required>
                                 <div>
                                     <SegmentedControl
                                         name="unit"
                                         register={register}
-                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                        options={units.map((value) => ({
+                                            value,
+                                            label: value,
+                                            icon: UNIT_ICONS[value],
+                                        }))}
                                     />
                                 </div>
                             </FormField>
@@ -279,14 +487,25 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                                     step="any"
                                     min={1}
                                     inputMode="decimal"
-                                    {...register('qty', { required: true, min: 1 })}
+                                    {...register('qty', {
+                                        required: true,
+                                        min: 1,
+                                    })}
                                     isInvalid={errors.qty}
                                     placeholder="0"
                                 />
                             </FormField>
                         </Col>
                         <Col sm={commission ? 3 : 4} xs={6}>
-                            <FormField label={unit === UNIT_THAAN ? 'Meters per thaan' : 'Size'} htmlFor="size" required>
+                            <FormField
+                                label={
+                                    unit === UNIT_THAAN
+                                        ? 'Meters per thaan'
+                                        : 'Size'
+                                }
+                                htmlFor="size"
+                                required
+                            >
                                 <InputGroup className="hf-amount">
                                     <Form.Control
                                         id="size"
@@ -294,7 +513,10 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                                         step="any"
                                         min={0}
                                         inputMode="decimal"
-                                        {...register('size', { required: true, min: 0.01 })}
+                                        {...register('size', {
+                                            required: true,
+                                            min: 0.01,
+                                        })}
                                         isInvalid={errors.size}
                                         placeholder="0"
                                     />
@@ -303,7 +525,17 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                             </FormField>
                         </Col>
                         <Col sm={commission ? 3 : 4} xs={6}>
-                            <FormField label={unit === UNIT_THAAN ? 'Price / meter' : (unit ? `Price / ${unit}` : 'Price')} htmlFor="price" required>
+                            <FormField
+                                label={
+                                    unit === UNIT_THAAN
+                                        ? 'Price / meter'
+                                        : unit
+                                          ? `Price / ${unit}`
+                                          : 'Price'
+                                }
+                                htmlFor="price"
+                                required
+                            >
                                 <InputGroup className="hf-amount">
                                     <InputGroup.Text>Rs</InputGroup.Text>
                                     <Form.Control
@@ -312,7 +544,10 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                                         step="any"
                                         min={1}
                                         inputMode="decimal"
-                                        {...register('price', { required: true, min: 1 })}
+                                        {...register('price', {
+                                            required: true,
+                                            min: 1,
+                                        })}
                                         isInvalid={errors.price}
                                         placeholder="0"
                                     />
@@ -321,13 +556,20 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                         </Col>
                         {commission && (
                             <Col sm={3} xs={6}>
-                                <FormField label="Commission" htmlFor="commission" required>
+                                <FormField
+                                    label="Commission"
+                                    htmlFor="commission"
+                                    required
+                                >
                                     <Form.Control
                                         id="commission"
                                         type="number"
                                         step="any"
                                         min={0}
-                                        {...register('commission', { required: true, min: 0 })}
+                                        {...register('commission', {
+                                            required: true,
+                                            min: 0,
+                                        })}
                                         isInvalid={errors.commission}
                                         placeholder="0"
                                     />
@@ -341,34 +583,61 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                             <Icon icon="solar:danger-triangle-bold-duotone" />
                             {errors.qty?.message ||
                                 (matchedStock
-                                    ? `Only ${matchedStock.qty} pcs / ${matchedStock.meters}m available for this unit and size.`
-                                    : 'No stock for this unit and size.')}
+                                    ? `Only ${matchedStock.qty} pcs / ${matchedStock.meters}m available at ${locationLabel(location)} for this unit and size.`
+                                    : `No stock at ${locationLabel(location)} for this unit and size.`)}
                         </div>
                     )}
 
                     <div className="hf-item-preview">
                         <div>
                             <span>Meters</span>
-                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator decimalScale={2} /> m</strong>
+                            <strong>
+                                <NumberFormat
+                                    displayType="text"
+                                    value={line.meters}
+                                    thousandSeparator
+                                    decimalScale={2}
+                                />{' '}
+                                m
+                            </strong>
                         </div>
                         <div>
                             <span>Amount</span>
-                            <strong>Rs <Money value={line.amount} /></strong>
+                            <strong>
+                                Rs <Money value={line.amount} />
+                            </strong>
                         </div>
                         <div>
-                            <span>Discount {discountPerMeter ? `(${toNumber(discountRate)}/m)` : `(${toNumber(discountRate)}%)`}</span>
-                            <strong>− Rs <Money value={line.discount} /></strong>
+                            <span>
+                                Discount{' '}
+                                {discountPerMeter
+                                    ? `(${toNumber(discountRate)}/m)`
+                                    : `(${toNumber(discountRate)}%)`}
+                            </span>
+                            <strong>
+                                − Rs <Money value={line.discount} />
+                            </strong>
                         </div>
                         <div className="is-total">
                             <span>Line total</span>
-                            <strong>Rs <Money value={line.total} /></strong>
+                            <strong>
+                                Rs <Money value={line.total} />
+                            </strong>
                         </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    {!isEdit && <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>}
                     {!isEdit && (
-                        <Button variant="link" className="text-muted" onClick={resetForm}>
+                        <span className="me-auto hf-field-hint mt-0">
+                            Enter saves and starts the next item.
+                        </span>
+                    )}
+                    {!isEdit && (
+                        <Button
+                            variant="link"
+                            className="text-muted"
+                            onClick={resetForm}
+                        >
                             Clear
                         </Button>
                     )}
@@ -376,7 +645,7 @@ export const OrderItemForm = ({ orderId, item, onClose, setItems, products, comm
                         {isEdit ? 'Cancel' : 'Done'}
                     </Button>
                     <LoadingButton type="submit" processing={processing}>
-                        {isEdit ? 'Update item' : 'Save & add next'}
+                        {isEdit ? 'Update item' : 'Save & next'}
                     </LoadingButton>
                 </Modal.Footer>
             </form>

@@ -6,6 +6,8 @@ import { Head, usePage } from '@/util/Inertia';
 import { NumberFormat } from '@/util/NumberFormat';
 import { ProductSearchFilter } from '@/pages/Stock/Inventory/ProductSearchFilter';
 import { Date } from '@/components/CustomDate';
+import { useStockLocations } from '@/util/util';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import NoData from '@/components/NoData.jsx';
 
 /**
@@ -17,6 +19,8 @@ const MOVEMENT_TYPES = {
     'Sale Return': { totalKey: 'saleReturns', direction: 1, tone: 'gold', icon: 'solar:undo-left-round-bold-duotone' },
     Sale: { totalKey: 'sold', direction: -1, tone: 'navy', icon: 'solar:upload-minimalistic-bold-duotone' },
     'PO Return': { totalKey: 'purchaseReturns', direction: -1, tone: 'red', icon: 'solar:undo-right-round-bold-duotone' },
+    'Transfer In': { totalKey: 'transferredIn', direction: 1, tone: 'teal', icon: 'solar:login-2-bold-duotone' },
+    'Transfer Out': { totalKey: 'transferredOut', direction: -1, tone: 'slate', icon: 'solar:logout-2-bold-duotone' },
 };
 
 const Meters = ({ value, className }) => (
@@ -46,9 +50,10 @@ const StatTile = ({ tone, icon, label, value, footer }) => (
 
 const ProductHistory = () => {
     const { items, filters } = usePage().props;
+    const { locationLabel } = useStockLocations();
 
     const { rows, totals } = useMemo(() => {
-        const totals = { purchased: 0, sold: 0, purchaseReturns: 0, saleReturns: 0, in: 0, out: 0 };
+        const totals = { purchased: 0, sold: 0, purchaseReturns: 0, saleReturns: 0, transferredIn: 0, transferredOut: 0, in: 0, out: 0 };
         let balance = 0;
 
         const rows = items.map((item) => {
@@ -76,7 +81,11 @@ const ProductHistory = () => {
             <Head title="Product History" />
             <PageHeader
                 title="Product History"
-                description={productName ? `${productName} · ${items.length} movements` : 'Stock movements of a product'}
+                description={
+                    productName
+                        ? `${productName} · ${filters?.location ? locationLabel(filters.location) : 'All locations'} · ${items.length} movements`
+                        : 'Stock movements of a product'
+                }
             />
 
             <PageFilters>
@@ -112,7 +121,13 @@ const ProductHistory = () => {
                             icon="solar:box-bold-duotone"
                             label="Balance"
                             value={totals.balance}
-                            footer="Meters in hand after last movement"
+                            footer={
+                                totals.transferredIn + totals.transferredOut > 0 ? (
+                                    <>Transfers in <Meters value={totals.transferredIn} /> m · out <Meters value={totals.transferredOut} /> m</>
+                                ) : (
+                                    'Meters in hand after last movement'
+                                )
+                            }
                         />
                     </div>
                 )}
@@ -129,6 +144,7 @@ const ProductHistory = () => {
                                         <th className="w-1">Type</th>
                                         <th className="w-1">Ref No</th>
                                         <th>Account</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1">Unit</th>
                                         <th className="w-1 text-end">Size</th>
                                         <th className="w-1 text-end">Qty</th>
@@ -152,6 +168,9 @@ const ProductHistory = () => {
                                             </td>
                                             <td className="hf-cell-title text-nowrap">{row.invoice_no}</td>
                                             <td>{row.account?.name}</td>
+                                            <td>
+                                                <StockLocationBadge location={row.location} />
+                                            </td>
                                             <td>{row.unit}</td>
                                             <td className="text-end hf-mono">
                                                 {Number(row.size) ? (
@@ -178,7 +197,7 @@ const ProductHistory = () => {
                                 {rows.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <td colSpan="8" className="text-end">Total</td>
+                                            <td colSpan="9" className="text-end">Total</td>
                                             <td className="text-end hf-mono">
                                                 <Meters value={totals.in} className="hf-num-in" />
                                             </td>

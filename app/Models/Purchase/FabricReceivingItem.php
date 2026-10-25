@@ -2,6 +2,7 @@
 
 namespace App\Models\Purchase;
 
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Model;
 use App\Models\Stock\Inventory;
@@ -27,6 +28,7 @@ final class FabricReceivingItem extends Model
         'fabric_receiving_id' => 'integer',
         'total_qty' => 'float',
         'size' => 'float',
+        'location' => StockLocation::class,
     ];
 
     /**

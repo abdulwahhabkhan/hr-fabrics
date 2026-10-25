@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stock;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Product;
 use App\Models\Stock\Inventory;
@@ -25,6 +26,7 @@ class InventoryController extends Controller
         $query->filterContain('name', $request->input('name'));
         $query->filterWhere(Inventory::qCol('unit'), $request->input('unit'));
         $query->filterWhere(Inventory::qCol('size'), $request->input('size'));
+        $query->atLocation(StockLocation::tryFrom((string) $request->input('location')));
 
         $unitSums = $query->clone()
             ->selectRaw(Inventory::qCol('unit'))
@@ -41,6 +43,7 @@ class InventoryController extends Controller
             ),
             // (IF(inventories.unit = 'Thaan', 0, inventories.size)) as size
             Inventory::qCol('unit'),
+            Inventory::qCol('location'),
             DB::raw('SUM(qty) as qty'),
             DB::raw('SUM(meters) as meters'),
         ]);
@@ -49,7 +52,8 @@ class InventoryController extends Controller
             Product::qCol('name'),
             Product::qCol('finish'),
             DB::raw('size'),
-            Inventory::qCol('unit')
+            Inventory::qCol('unit'),
+            Inventory::qCol('location')
         );
         $query->orderBy('meters');
         $query->having('meters', '!=', 0);
@@ -61,7 +65,7 @@ class InventoryController extends Controller
             [
                 'items' => $items,
                 'unit_sums' => $unit_sums,
-                'filters' => $request->only('name', 'unit', 'size'),
+                'filters' => $request->only('name', 'unit', 'size', 'location'),
             ]
         );
     }

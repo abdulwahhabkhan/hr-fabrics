@@ -3,6 +3,7 @@
 namespace App\Models\Purchase;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Model;
 use App\Models\Traits\BelongsToProduct;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,7 @@ class PurchaseReturnItem extends Model
         'rate' => 'float',
         'total_rate' => 'float',
         'unit' => PackingType::class,
+        'location' => StockLocation::class,
     ];
 
     /**

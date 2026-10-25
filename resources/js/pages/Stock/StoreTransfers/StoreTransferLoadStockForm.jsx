@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button, Col, Form, Modal, Row, Table } from 'react-bootstrap';
 import LoadingButton from '@/components/LoadingButton';
 import StyledSelect from '@/components/StyledSelect';
-import { UNIT_BOX, usePackingUnits } from '@/util/util';
+import { UNIT_BOX, usePackingUnits, useStockLocations } from '@/util/util';
 import NoData from '@/components/NoData.jsx';
 import storeTransfers from '@/routes/stocks/store-transfers';
 
@@ -24,13 +24,14 @@ export const StoreTransferLoadStockForm = ({
     const [transferMeters, setTransferMeters] = useState({});
 
     const packingUnits = usePackingUnits();
+    const { locationLabel } = useStockLocations();
     const units = packingUnits.filter((val) => {
         if (product?.is_box) return val === UNIT_BOX;
         else return val !== UNIT_BOX;
     });
 
     const isBox = unit === UNIT_BOX;
-    const rowKey = (row) => `${row.size}_${row.cost}`;
+    const rowKey = (row) => `${row.location}_${row.size}_${row.cost}`;
 
     const handleClose = () => {
         onClose();
@@ -120,6 +121,7 @@ export const StoreTransferLoadStockForm = ({
             .map((row) => ({
                 product_id: product.product_id,
                 unit,
+                location: row.location,
                 size: row.size,
                 cost: row.cost,
                 qty: parseFloat(transferQty[rowKey(row)]) || 0,
@@ -196,6 +198,7 @@ export const StoreTransferLoadStockForm = ({
                         <Table bordered hover>
                             <thead>
                                 <tr>
+                                    <th>Location</th>
                                     <th className={'num'}>Size</th>
                                     <th className={'num'}>Cost</th>
                                     {isBox && (
@@ -218,6 +221,7 @@ export const StoreTransferLoadStockForm = ({
                             <tbody>
                                 {stockRows.map((row, index) => (
                                     <tr key={index}>
+                                        <td>{locationLabel(row.location)}</td>
                                         <td className={'num'}>{row.size}</td>
                                         <td className={'num'}>{row.cost}</td>
                                         {isBox && (

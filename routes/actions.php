@@ -3,6 +3,7 @@
 use App\Http\Controllers\Purchases\Purchase\UnlockPurchaseController;
 use App\Http\Controllers\Sales\Order\UnlockOrderController;
 use App\Http\Controllers\Sales\Return\UnlockSaleReturnController;
+use App\Http\Controllers\Stock\UnlockStockTransferController;
 use App\Http\Controllers\Stock\UnlockStoreTransferController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,7 @@ Route::prefix('actions')->middleware(['auth'])->name('actions.')->group(function
 
     Route::post('stocks/store-transfer/{storeTransfer}', UnlockStoreTransferController::class)
         ->name('store-transfer.open');
+
+    Route::post('stocks/stock-transfer/{stockTransfer}', UnlockStockTransferController::class)
+        ->name('stock-transfer.open');
 });

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\FabricReceivingItem;
@@ -122,4 +123,22 @@ test('inventory filter by product', function () {
         fn (Assert $page) => $page->component('Stock/Inventory/InventoryIndex')
             ->has('items', 3)
     );
+});
+
+test('inventory view filters and groups by location', function () {
+    $product = Product::factory()->create();
+    $attributes = ['product_id' => $product->id, 'transaction_date' => now()->subDay()];
+    Inventory::factory()->withPurchase()->box()->create([...$attributes, 'size' => 5, 'location' => StockLocation::Shop]);
+    Inventory::factory()->withPurchase()->box()->create([...$attributes, 'size' => 5, 'location' => StockLocation::WarehouseFSD]);
+
+    $this->actingAs($this->getAdmin())
+        ->get(route('stocks.inventories.index'))
+        ->assertInertia(fn (Assert $page) => $page->has('items', 2));
+
+    $this->actingAs($this->getAdmin())
+        ->get(route('stocks.inventories.index', ['location' => StockLocation::WarehouseFSD->value]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('items', 1)
+            ->where('items.0.location', StockLocation::WarehouseFSD->value)
+        );
 });

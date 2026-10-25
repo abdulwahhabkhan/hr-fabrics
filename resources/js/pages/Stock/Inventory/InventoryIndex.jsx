@@ -5,6 +5,7 @@ import { Head, usePage } from '@/util/Inertia';
 import { InventoryFilter } from '@/pages/Stock/Inventory/InventoryFilter';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Col, Row } from 'react-bootstrap';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import NoData from '@/components/NoData.jsx';
 
 const Inventory = () => {
@@ -49,6 +50,7 @@ const Inventory = () => {
                                         <th>Item Name</th>
                                         <th className="w-1">Finish</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1">Size</th>
                                         <th className={'num'}>Qty</th>
                                         <th className={'num'}>Meters</th>
@@ -64,6 +66,7 @@ const Inventory = () => {
                                                 qty,
                                                 meters,
                                                 finish,
+                                                location,
                                             },
                                             index,
                                         ) => {
@@ -78,6 +81,9 @@ const Inventory = () => {
                                                     </td>
                                                     <td className="w-1">
                                                         {unit}
+                                                    </td>
+                                                    <td className="w-1">
+                                                        <StockLocationBadge location={location} />
                                                     </td>
                                                     <td className="w-1 num">
                                                         {size > 0 ? size : '-'}

@@ -4,6 +4,7 @@ namespace App\Models\Sales;
 
 use App\Casts\CeilInteger;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ class SalesReturnItem extends Model
 
     protected $casts = [
         'unit' => PackingType::class,
+        'location' => StockLocation::class,
         'total_commission' => CeilInteger::class,
         'size' => 'float',
         'qty' => 'float',
