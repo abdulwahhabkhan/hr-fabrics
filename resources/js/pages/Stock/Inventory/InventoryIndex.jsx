@@ -7,6 +7,7 @@ import { NumberFormat } from '@/util/NumberFormat';
 import { Col, Row } from 'react-bootstrap';
 import { StockLocationBadge } from '@/components/stock/StockLocation';
 import NoData from '@/components/NoData.jsx';
+import { UNIT_THAAN } from '@/util/util';
 
 const Inventory = () => {
     const { items, filters, unit_sums } = usePage().props;
@@ -25,12 +26,16 @@ const Inventory = () => {
                                     <Col sm={4} key={index}>
                                         Total {unit}:
                                         <span className="ms-5px">
-                                            <NumberFormat
-                                                displayType={'text'}
-                                                value={qty}
-                                                thousandSeparator={true}
-                                            />{' '}
-                                            &{' '}
+                                            {unit !== UNIT_THAAN && (
+                                                <>
+                                                    <NumberFormat
+                                                        displayType={'text'}
+                                                        value={qty}
+                                                        thousandSeparator={true}
+                                                    />{' '}
+                                                    &{' '}
+                                                </>
+                                            )}
                                             <NumberFormat
                                                 displayType={'text'}
                                                 value={meters}
@@ -89,13 +94,17 @@ const Inventory = () => {
                                                         {size > 0 ? size : '-'}
                                                     </td>
                                                     <td className={'num'}>
-                                                        <NumberFormat
-                                                            displayType={'text'}
-                                                            value={qty}
-                                                            thousandSeparator={
-                                                                true
-                                                            }
-                                                        />
+                                                        {unit === UNIT_THAAN ? (
+                                                            '-'
+                                                        ) : (
+                                                            <NumberFormat
+                                                                displayType={'text'}
+                                                                value={qty}
+                                                                thousandSeparator={
+                                                                    true
+                                                                }
+                                                            />
+                                                        )}
                                                     </td>
                                                     <td className={'num'}>
                                                         <NumberFormat
