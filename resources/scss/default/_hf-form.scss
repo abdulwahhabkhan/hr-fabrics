@@ -411,6 +411,23 @@
   input:checked + &__box &__check { opacity: 1; transform: scale(1); }
   input:focus-visible + &__box { box-shadow: var(--hf-ring); }
 
+  // Optional per-option tone, e.g. Open / Close / Cancel status
+  @each $tone, $color, $bg in (success, #1d7a50, #e7f4ee), (warning, #9a6700, #fdf3dc), (danger, #b3392a, #fcebe8) {
+    &.is-#{$tone} {
+      .hf-option-card__icon { color: $color; }
+
+      input:checked + .hf-option-card__box {
+        border-color: rgba($color, .55);
+        background: $bg;
+        box-shadow: inset 0 0 0 1px rgba($color, .3);
+      }
+
+      input:checked + .hf-option-card__box .hf-option-card__icon { background: #fff; color: $color; }
+      input:checked + .hf-option-card__box .hf-option-card__title,
+      input:checked + .hf-option-card__box .hf-option-card__check { color: $color; }
+    }
+  }
+
   &.is-disabled {
     cursor: not-allowed;
 

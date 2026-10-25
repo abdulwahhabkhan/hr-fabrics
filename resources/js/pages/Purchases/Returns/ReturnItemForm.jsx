@@ -7,7 +7,16 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { FormField, SegmentedControl } from '@/components/form/FormSection';
 import { NumberFormat } from '@/util/NumberFormat';
-import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
+import {
+    LOCATION_SHOP,
+    notifyMessage,
+    serverSideError,
+    UNIT_BOX,
+    UNIT_SUIT,
+    UNIT_THAAN,
+    usePackingUnits,
+} from '@/util/util';
+import { StockLocationControl } from '@/components/stock/StockLocation';
 import returnAjax from '@/routes/ajax/return';
 
 const UNIT_ICONS = {
@@ -19,7 +28,14 @@ const UNIT_ICONS = {
 const toNumber = (value) => parseFloat(value) || 0;
 
 function Money({ value }) {
-    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+    return (
+        <NumberFormat
+            displayType="text"
+            value={value}
+            thousandSeparator
+            decimalScale={2}
+        />
+    );
 }
 
 export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
@@ -39,10 +55,17 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
         control,
         formState: { errors },
     } = useForm({
-        defaultValues: { product: null, unit: '', qty: '', size: '', rate: '' },
+        defaultValues: {
+            product: null,
+            unit: '',
+            qty: '',
+            size: '',
+            rate: '',
+            location: LOCATION_SHOP,
+        },
     });
 
-    const { unit, qty, size, rate } = watch();
+    const { unit, qty, size, rate, location } = watch();
 
     const selectProduct = (selected) => {
         setProduct(selected);
@@ -50,7 +73,9 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
             return;
         }
 
-        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, {
+            shouldDirty: true,
+        });
         setValue('size', selected.size ?? '', { shouldDirty: true });
         setValue('rate', selected.purchased_price ?? '', { shouldDirty: true });
         setTimeout(() => setFocus('qty'), 0);
@@ -58,23 +83,40 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
 
     const resetForm = () => {
         setProduct(null);
-        reset({ product: null, unit: '', qty: '', size: '', rate: '' });
+        reset({
+            product: null,
+            unit: '',
+            qty: '',
+            size: '',
+            rate: '',
+            location,
+        });
         setTimeout(() => productRef.current?.focus(), 0);
     };
 
     const sendRequest = async (data) => {
         setProcessing(true);
         axios
-            .post(returnAjax.item.save(returnId).url, { ...data, product_id: data?.product?.product_id })
+            .post(returnAjax.item.save(returnId).url, {
+                ...data,
+                product_id: data?.product?.product_id,
+            })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({ title: 'Success', type: 'success', message: 'Item added' });
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: 'Item added',
+                });
                 resetForm();
             })
             .catch((error) => {
                 const fieldErrors = error.response?.data?.errors ?? {};
                 Object.entries(fieldErrors).forEach(([field, messages]) => {
-                    setError(field === 'product_id' ? 'product' : field, { type: 'server', message: messages[0] });
+                    setError(field === 'product_id' ? 'product' : field, {
+                        type: 'server',
+                        message: messages[0],
+                    });
                 });
                 serverSideError(error);
             })
@@ -83,11 +125,16 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
             });
     };
 
-    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
+    const units = packingUnits.filter((val) =>
+        product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX,
+    );
 
     const line = useMemo(() => {
         const meters = Math.trunc(toNumber(qty) * toNumber(size));
-        const amount = unit === UNIT_BOX ? toNumber(qty) * toNumber(rate) : meters * toNumber(rate);
+        const amount =
+            unit === UNIT_BOX
+                ? toNumber(qty) * toNumber(rate)
+                : meters * toNumber(rate);
 
         return { meters, amount };
     }, [unit, qty, size, rate]);
@@ -95,7 +142,13 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
     const stockError = errors.product?.message || errors.qty?.message;
 
     return (
-        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+        <Modal
+            show={true}
+            backdrop="static"
+            size="lg"
+            keyboard={true}
+            onHide={onClose}
+        >
             <form onSubmit={handleSubmit(sendRequest)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Item</Modal.Title>
@@ -111,8 +164,12 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                                         field.onChange(selected);
                                         selectProduct(selected);
                                     }}
-                                    getOptionValue={(option) => option['product_id']}
-                                    getOptionLabel={(option) => option['product_info']}
+                                    getOptionValue={(option) =>
+                                        option['product_id']
+                                    }
+                                    getOptionLabel={(option) =>
+                                        option['product_info']
+                                    }
                                     placeholder="Search product by name or finish..."
                                     isClearable
                                     autoFocus
@@ -124,18 +181,32 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                             rules={{ required: true }}
                         />
                         {errors.product?.type === 'required' && (
-                            <div className="invalid-feedback d-block">Please select a product.</div>
+                            <div className="invalid-feedback d-block">
+                                Please select a product.
+                            </div>
                         )}
                     </FormField>
 
                     {product && (
                         <div className="hf-item-product">
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                                <span className="hf-cell-title">{product.name}</span>
-                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                <span className="hf-cell-title">
+                                    {product.name}
+                                </span>
+                                {product.finish && (
+                                    <span className="hf-chip">
+                                        {product.finish}
+                                    </span>
+                                )}
                                 {product.purchased_price && (
                                     <span className="ms-auto hf-item-product__prices">
-                                        Purchased <strong>Rs <Money value={product.purchased_price} /></strong>
+                                        Purchased{' '}
+                                        <strong>
+                                            Rs{' '}
+                                            <Money
+                                                value={product.purchased_price}
+                                            />
+                                        </strong>
                                     </span>
                                 )}
                             </div>
@@ -143,13 +214,30 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                     )}
 
                     <Row className="g-3 mt-1">
-                        <Col md={12}>
+                        <Col md={6}>
+                            <FormField label="Return from" required>
+                                <div>
+                                    <StockLocationControl
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                    />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col md={6}>
                             <FormField label="Unit" required>
                                 <div>
                                     <SegmentedControl
                                         name="unit"
-                                        register={(name) => register(name, { required: true })}
-                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                        options={units.map((value) => ({
+                                            value,
+                                            label: value,
+                                            icon: UNIT_ICONS[value],
+                                        }))}
                                     />
                                 </div>
                             </FormField>
@@ -162,14 +250,25 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                                     step="1"
                                     min={1}
                                     inputMode="numeric"
-                                    {...register('qty', { required: true, min: 1 })}
+                                    {...register('qty', {
+                                        required: true,
+                                        min: 1,
+                                    })}
                                     isInvalid={errors.qty}
                                     placeholder="0"
                                 />
                             </FormField>
                         </Col>
                         <Col sm={4} xs={6}>
-                            <FormField label={unit === UNIT_THAAN ? 'Meters per thaan' : 'Size'} htmlFor="size" required>
+                            <FormField
+                                label={
+                                    unit === UNIT_THAAN
+                                        ? 'Meters per thaan'
+                                        : 'Size'
+                                }
+                                htmlFor="size"
+                                required
+                            >
                                 <InputGroup className="hf-amount">
                                     <Form.Control
                                         id="size"
@@ -177,7 +276,9 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                                         step="any"
                                         min={0}
                                         inputMode="decimal"
-                                        {...register('size', { required: true })}
+                                        {...register('size', {
+                                            required: true,
+                                        })}
                                         isInvalid={errors.size}
                                         placeholder="0"
                                     />
@@ -186,7 +287,15 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                             </FormField>
                         </Col>
                         <Col sm={4} xs={6}>
-                            <FormField label={unit === UNIT_BOX ? 'Rate / box' : 'Rate / meter'} htmlFor="rate" required>
+                            <FormField
+                                label={
+                                    unit === UNIT_BOX
+                                        ? 'Rate / box'
+                                        : 'Rate / meter'
+                                }
+                                htmlFor="rate"
+                                required
+                            >
                                 <InputGroup className="hf-amount">
                                     <InputGroup.Text>Rs</InputGroup.Text>
                                     <Form.Control
@@ -195,7 +304,9 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                                         step="any"
                                         min={0}
                                         inputMode="decimal"
-                                        {...register('rate', { required: true })}
+                                        {...register('rate', {
+                                            required: true,
+                                        })}
                                         isInvalid={errors.rate}
                                         placeholder="0"
                                     />
@@ -214,24 +325,39 @@ export const ReturnItemForm = ({ returnId, onClose, setItems, products }) => {
                     <div className="hf-item-preview">
                         <div>
                             <span>Meters</span>
-                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator /> m</strong>
+                            <strong>
+                                <NumberFormat
+                                    displayType="text"
+                                    value={line.meters}
+                                    thousandSeparator
+                                />{' '}
+                                m
+                            </strong>
                         </div>
                         <div className="is-total">
                             <span>Line total</span>
-                            <strong>Rs <Money value={line.amount} /></strong>
+                            <strong>
+                                Rs <Money value={line.amount} />
+                            </strong>
                         </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>
-                    <Button variant="link" className="text-muted" onClick={resetForm}>
+                    <span className="me-auto hf-field-hint mt-0">
+                        Enter saves and starts the next item.
+                    </span>
+                    <Button
+                        variant="link"
+                        className="text-muted"
+                        onClick={resetForm}
+                    >
                         Clear
                     </Button>
                     <Button variant="white" onClick={onClose}>
                         Done
                     </Button>
                     <LoadingButton type="submit" processing={processing}>
-                        Save & add next
+                        Save & next
                     </LoadingButton>
                 </Modal.Footer>
             </form>

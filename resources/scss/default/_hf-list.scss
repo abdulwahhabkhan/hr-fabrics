@@ -506,6 +506,44 @@ button.hf-icon-btn {
   // Let wide tables extend instead of clipping, and keep sticky headers working.
   @media (min-width: 992px) {
     overflow: visible;
+
+    // Without the clip, a header row at the top of the panel would paint its square
+    // corners over the panel's rounded border, so round them to match.
+    > .panel-body:first-child > .table-responsive:first-child > .table:first-child,
+    > .panel-body:first-child > .table:first-child {
+      > thead:first-child > tr:first-child {
+        > th:first-child {
+          border-top-left-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        > th:last-child {
+          border-top-right-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        // Once pinned to the viewport the header is no longer inside the rounded frame.
+        @container scroll-state(stuck: top) {
+          > th:first-child,
+          > th:last-child {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+          }
+        }
+      }
+    }
+
+    // Same for the last row (tfoot totals or the last tbody row) of a table that ends the panel.
+    > .panel-body:last-child > .table-responsive:last-child > .table:last-child,
+    > .panel-body:last-child > .table:last-child {
+      > :last-child > tr:last-child {
+        > :first-child {
+          border-bottom-left-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        > :last-child {
+          border-bottom-right-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+      }
+    }
   }
 
   > .panel-body {
@@ -534,11 +572,17 @@ button.hf-icon-btn {
     }
   }
 
+  // The panel already frames the empty state, so drop its own border and follow the panel's corners.
   .table-responsive + .no-data {
     margin-top: 0;
-    border-width: 0 0 1px !important;
+    border: 0 !important;
     border-radius: 0 !important;
     margin-inline: 0;
+
+    &:last-child {
+      border-bottom-left-radius: calc(var(--hf-radius-lg) - 1px) !important;
+      border-bottom-right-radius: calc(var(--hf-radius-lg) - 1px) !important;
+    }
   }
 
   @media (max-width: 767.98px) {

@@ -6,8 +6,17 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { FormField, SegmentedControl } from '@/components/form/FormSection';
 import { NumberFormat } from '@/util/NumberFormat';
-import { notifyMessage, serverSideError, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
+import {
+    LOCATION_SHOP,
+    notifyMessage,
+    serverSideError,
+    UNIT_BOX,
+    UNIT_SUIT,
+    UNIT_THAAN,
+    usePackingUnits,
+} from '@/util/util';
 import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
+import { StockLocationControl } from '@/components/stock/StockLocation';
 
 const UNIT_ICONS = {
     [UNIT_BOX]: 'solar:box-bold-duotone',
@@ -17,10 +26,17 @@ const UNIT_ICONS = {
 
 const toNumber = (value) => parseFloat(value) || 0;
 
-export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, products }) => {
+export const FabricReceivingItemForm = ({
+    item,
+    orderId,
+    onClose,
+    setItems,
+    products,
+}) => {
     const packingUnits = usePackingUnits();
     const isEdit = item.id > 0;
-    const itemDetail = _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
+    const itemDetail =
+        _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
     const [product, setProduct] = useState(itemDetail);
     const [processing, setProcessing] = useState(false);
     const productRef = useRef(null);
@@ -43,6 +59,7 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
             qty: item.qty ?? '',
             size: item.size ?? '',
             total_qty: item.total_qty ?? '',
+            location: item.location ?? LOCATION_SHOP,
         },
     });
 
@@ -55,13 +72,16 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
             return;
         }
 
-        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, {
+            shouldDirty: true,
+        });
         setTimeout(() => setFocus('qty'), 0);
     };
 
     const resetForm = (data = {}) => {
         setProduct(null);
         reset({
+            location: watch('location'),
             voucher_no: data.voucher_no ?? '',
             product: null,
             unit: '',
@@ -87,7 +107,11 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
         })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({ title: 'Success', type: 'success', message: isEdit ? 'Item updated' : 'Item added' });
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: isEdit ? 'Item updated' : 'Item added',
+                });
 
                 if (isEdit) {
                     onClose();
@@ -107,22 +131,40 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
             });
     };
 
-    const units = packingUnits.filter((val) => (product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX));
-    const meters = isThaan ? toNumber(total_qty) : toNumber(qty) * toNumber(size);
+    const units = packingUnits.filter((val) =>
+        product?.is_box ? val === UNIT_BOX : val !== UNIT_BOX,
+    );
+    const meters = isThaan
+        ? toNumber(total_qty)
+        : toNumber(qty) * toNumber(size);
 
     return (
-        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+        <Modal
+            show={true}
+            backdrop="static"
+            size="lg"
+            keyboard={true}
+            onHide={onClose}
+        >
             <form onSubmit={handleSubmit(sendRequest)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{isEdit ? 'Edit Item' : 'Add Item'}</Modal.Title>
+                    <Modal.Title>
+                        {isEdit ? 'Edit Item' : 'Add Item'}
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="hf-item-form">
                     <Row className="g-3">
                         <Col sm={4}>
-                            <FormField label="Voucher no" htmlFor="voucher_no" required>
+                            <FormField
+                                label="Voucher no"
+                                htmlFor="voucher_no"
+                                required
+                            >
                                 <Form.Control
                                     id="voucher_no"
-                                    {...register('voucher_no', { required: true })}
+                                    {...register('voucher_no', {
+                                        required: true,
+                                    })}
                                     isInvalid={errors.voucher_no}
                                     placeholder="Voucher no"
                                 />
@@ -139,8 +181,12 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                                                 field.onChange(selected);
                                                 selectProduct(selected);
                                             }}
-                                            getOptionValue={(option) => option['product_id']}
-                                            getOptionLabel={(option) => option['product_info']}
+                                            getOptionValue={(option) =>
+                                                option['product_id']
+                                            }
+                                            getOptionLabel={(option) =>
+                                                option['product_info']
+                                            }
                                             placeholder="Search product by name, finish or brand..."
                                             isClearable
                                             autoFocus={!isEdit}
@@ -151,7 +197,11 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                                     name="product"
                                     rules={{ required: true }}
                                 />
-                                {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                                {errors.product && (
+                                    <div className="invalid-feedback d-block">
+                                        Please select a product.
+                                    </div>
+                                )}
                             </FormField>
                         </Col>
                     </Row>
@@ -159,20 +209,43 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                     {product && (
                         <div className="hf-item-product">
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                                <span className="hf-cell-title">{product.name}</span>
-                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                <span className="hf-cell-title">
+                                    {product.name}
+                                </span>
+                                {product.finish && (
+                                    <span className="hf-chip">
+                                        {product.finish}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     )}
 
                     <Row className="g-3 mt-1">
-                        <Col md={12}>
+                        <Col md={6}>
+                            <FormField label="Received at" required>
+                                <div>
+                                    <StockLocationControl
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                    />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col md={6}>
                             <FormField label="Unit" required>
                                 <div>
                                     <SegmentedControl
                                         name="unit"
-                                        register={(name) => register(name, { required: true })}
-                                        options={units.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                        options={units.map((value) => ({
+                                            value,
+                                            label: value,
+                                            icon: UNIT_ICONS[value],
+                                        }))}
                                     />
                                 </div>
                             </FormField>
@@ -185,7 +258,10 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                                     step="any"
                                     min={1}
                                     inputMode="decimal"
-                                    {...register('qty', { required: true, min: 1 })}
+                                    {...register('qty', {
+                                        required: true,
+                                        min: 1,
+                                    })}
                                     isInvalid={errors.qty}
                                     placeholder="0"
                                 />
@@ -193,7 +269,11 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                         </Col>
                         {isThaan ? (
                             <Col sm={6} xs={6}>
-                                <FormField label="Total meters" htmlFor="total_qty" required>
+                                <FormField
+                                    label="Total meters"
+                                    htmlFor="total_qty"
+                                    required
+                                >
                                     <InputGroup className="hf-amount">
                                         <Form.Control
                                             id="total_qty"
@@ -201,7 +281,9 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                                             step="any"
                                             min={0}
                                             inputMode="decimal"
-                                            {...register('total_qty', { required: true })}
+                                            {...register('total_qty', {
+                                                required: true,
+                                            })}
                                             isInvalid={errors.total_qty}
                                             placeholder="0"
                                         />
@@ -219,7 +301,9 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                                             step="any"
                                             min={0}
                                             inputMode="decimal"
-                                            {...register('size', { required: true })}
+                                            {...register('size', {
+                                                required: true,
+                                            })}
                                             isInvalid={errors.size}
                                             placeholder="0"
                                         />
@@ -231,20 +315,38 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                     </Row>
 
                     {errors.qty?.message && (
-                        <div className="hf-item-warning">{errors.qty.message}</div>
+                        <div className="hf-item-warning">
+                            {errors.qty.message}
+                        </div>
                     )}
 
                     <div className="hf-item-preview">
                         <div className="is-total">
                             <span>Meters</span>
-                            <strong><NumberFormat displayType="text" value={meters} thousandSeparator decimalScale={2} /> m</strong>
+                            <strong>
+                                <NumberFormat
+                                    displayType="text"
+                                    value={meters}
+                                    thousandSeparator
+                                    decimalScale={2}
+                                />{' '}
+                                m
+                            </strong>
                         </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    {!isEdit && <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>}
                     {!isEdit && (
-                        <Button variant="link" className="text-muted" onClick={() => resetForm()}>
+                        <span className="me-auto hf-field-hint mt-0">
+                            Enter saves and starts the next item.
+                        </span>
+                    )}
+                    {!isEdit && (
+                        <Button
+                            variant="link"
+                            className="text-muted"
+                            onClick={() => resetForm()}
+                        >
                             Clear
                         </Button>
                     )}
@@ -252,7 +354,7 @@ export const FabricReceivingItemForm = ({ item, orderId, onClose, setItems, prod
                         {isEdit ? 'Cancel' : 'Done'}
                     </Button>
                     <LoadingButton type="submit" processing={processing}>
-                        {isEdit ? 'Update item' : 'Save & add next'}
+                        {isEdit ? 'Update item' : 'Save & next'}
                     </LoadingButton>
                 </Modal.Footer>
             </form>

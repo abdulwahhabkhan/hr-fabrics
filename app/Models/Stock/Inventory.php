@@ -3,6 +3,7 @@
 namespace App\Models\Stock;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Model;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\PurchaseReturn;
@@ -40,6 +41,7 @@ final class Inventory extends Model
         'transaction_date' => 'datetime',
         'info' => AsCollection::class,
         'unit' => PackingType::class,
+        'location' => StockLocation::class,
     ];
 
     /** @deprecated */
@@ -159,6 +161,33 @@ final class Inventory extends Model
                     ->orWhere('outbound_on', '>', $date->toDateString());
             })
             ->available();
+    }
+
+    /**
+     * @param  Builder<Inventory>  $query
+     * @return Builder<Inventory>
+     */
+    #[Scope]
+    protected function atLocation(Builder $query, StockLocation|string|null $location): Builder
+    {
+        if (! $location) {
+            return $query;
+        }
+
+        return $query->where(self::qCol('location'), $location instanceof StockLocation ? $location->value : $location);
+    }
+
+    /**
+     * Leave out lots opened at a destination by a stock transfer. Their source line stays in the table
+     * (booked out to the transfer), so ledger-style totals over every line would count the stock twice.
+     *
+     * @param  Builder<Inventory>  $query
+     * @return Builder<Inventory>
+     */
+    #[Scope]
+    protected function withoutTransferArrivals(Builder $query): Builder
+    {
+        return $query->whereNull(self::qCol('parent_id'));
     }
 
     #[Scope]

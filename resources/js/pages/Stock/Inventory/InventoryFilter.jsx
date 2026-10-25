@@ -3,13 +3,14 @@ import { Button, Col, Form, Row } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { Inertia } from '@/util/Inertia';
 import { Icon } from '@iconify/react';
-import { UNIT_THAAN, UNITS } from '@/util/util';
+import { UNIT_THAAN, UNITS, useStockLocations } from '@/util/util';
 import pickBy from 'lodash/pickBy';
 import inventories from '@/routes/stocks/inventories';
 
 export const InventoryFilter = ({ filters }) => {
     const [processing, setProcessing] = useState(false);
     const [units, setUnits] = useState(UNITS);
+    const { locations } = useStockLocations();
     const {
         register,
         formState: { errors },
@@ -33,7 +34,7 @@ export const InventoryFilter = ({ filters }) => {
         <>
             <form action="" className="" onSubmit={handleSubmit(sendRequest)}>
                 <Row>
-                    <Col lg={4}>
+                    <Col lg={3}>
                         <Form.Group className="mb-3">
                             <Form.Label>Product:</Form.Label>
                             <Form.Control
@@ -42,7 +43,20 @@ export const InventoryFilter = ({ filters }) => {
                             />
                         </Form.Group>
                     </Col>
-                    <Col lg={3}>
+                    <Col lg={2}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Location:</Form.Label>
+                            <Form.Control className={'form-select'} as={'select'} {...register('location')}>
+                                <option value="">All Locations</option>
+                                {locations.map(({ id, name }) => (
+                                    <option key={id} value={id}>
+                                        {name}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col lg={2}>
                         <Form.Group className="mb-3">
                             <Form.Label>Unit:</Form.Label>
                             <Form.Control

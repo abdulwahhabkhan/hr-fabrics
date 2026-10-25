@@ -3,6 +3,7 @@
 namespace App\Actions\Inventory;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Models\Catalog\Product;
 use App\Models\Model;
@@ -26,6 +27,8 @@ class IssueInventory
     protected int $productId;
 
     protected PackingType $unit;
+
+    protected ?StockLocation $location = null;
 
     private CarbonInterface $transactionDate;
 
@@ -64,6 +67,13 @@ class IssueInventory
     public function setMeters(float $meters): self
     {
         $this->meters = $meters;
+
+        return $this;
+    }
+
+    public function setLocation(StockLocation $location): self
+    {
+        $this->location = $location;
 
         return $this;
     }
@@ -114,8 +124,9 @@ class IssueInventory
         $stockIssued = [];
         if ($stocks->sum('meters') < $remMeters) {
             $product = $this->productInfo();
+            $location = $this->location ? " at {$this->location->label()}" : '';
             throw ValidationException::withMessages([
-                'product' => "Order {$this->outboundItemId}, Not enough stock for product {$product->id} : {$product->name}, size: {$this->size}, qty: $remQty, meters: $remMeters",
+                'product' => "Order {$this->outboundItemId}, Not enough stock{$location} for product {$product->id} : {$product->name}, size: {$this->size}, qty: $remQty, meters: $remMeters",
             ]);
         }
         foreach ($stocks as $stock) {
@@ -172,6 +183,7 @@ class IssueInventory
         return Inventory::query()
             ->where('product_id', $this->productId)
             ->where('unit', $this->unit)
+            ->atLocation($this->location)
             ->when($this->unit !== PackingType::Thaan, function ($query) {
                 $query->where('size', $this->size);
             })

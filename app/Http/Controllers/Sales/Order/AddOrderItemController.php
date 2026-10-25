@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Sales\Order;
 
+use App\Actions\Inventory\CheckStockAvailability;
 use App\Actions\Outbound\SaleOrders\UpdateOrderTotal;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Sales\OrderItemResource;
 use App\Models\Sales\Order;
@@ -12,6 +14,7 @@ use App\Services\OrderService;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class AddOrderItemController extends Controller
@@ -26,20 +29,32 @@ class AddOrderItemController extends Controller
         Order $order,
         Request $request,
         OrderService $orderService,
-        UpdateOrderTotal $updateOrderTotal
+        UpdateOrderTotal $updateOrderTotal,
+        CheckStockAvailability $checkStockAvailability
     ) {
         $this->orderService = $orderService;
         $validated = $request->validate([
             'item_id' => ['integer'],
             'product' => ['required', 'array'],
-            'unit' => ['required', 'string'],
+            'product.product_id' => ['required', 'integer'],
+            'unit' => ['required', Rule::enum(PackingType::class)],
             'size' => ['required', 'numeric'],
             'qty' => ['required', 'numeric'],
             'price' => ['required', 'numeric'],
             'commission' => ['nullable'],
             'discount' => ['required', 'numeric'],
-
+            'location' => ['nullable', Rule::enum(StockLocation::class)],
         ]);
+        $validated['location'] = StockLocation::tryFrom((string) ($validated['location'] ?? '')) ?? StockLocation::Shop;
+        $unit = PackingType::from($validated['unit']);
+        $checkStockAvailability->handle(
+            (int) $validated['product']['product_id'],
+            $unit,
+            $validated['location'],
+            (int) $validated['qty'],
+            (float) $validated['qty'] * (float) $validated['size'],
+            (float) $validated['size'],
+        );
         unset($validated['over_sold']);
         DB::transaction(function () use ($updateOrderTotal, $validated, $order) {
             $this->addItem($validated, $order);

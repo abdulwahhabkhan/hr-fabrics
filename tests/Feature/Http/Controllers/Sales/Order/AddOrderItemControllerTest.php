@@ -1,15 +1,17 @@
 <?php
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
+use App\Models\Stock\Inventory;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-test('add item without inventory is allowed',
-    function (PackingType $unit, float $size, int $qty, float $price, float $total) {
+test('add item without stock at the location is rejected',
+    function (PackingType $unit, float $size, int $qty, float $price) {
         // Arrange
         $user = $this->getAdmin();
         $order = Order::factory()->create();
@@ -30,19 +32,48 @@ test('add item without inventory is allowed',
             ->postJson(route('ajax.so.item.add', $order->id), $post);
 
         // Assert
-        $response->assertJsonMissingValidationErrors()->assertOk();
-        assertDatabaseHas(OrderItem::class, [
-            'order_id' => $order->id,
-            'product_id' => $product->id,
-            'qty' => $qty,
-        ]);
-        assertDatabaseHas(Order::class, ['id' => $order->id, 'total' => $total]);
-
+        $response->assertUnprocessable()->assertJsonValidationErrors('qty');
+        assertDatabaseCount(OrderItem::class, 0);
     })->with([
-        'thaan' => [PackingType::Thaan, 21, 1, 350, 350 * 21],
-        'box' => [PackingType::Box, 5.5, 2, 1500, 2 * 1500],
-        'suit' => [PackingType::Suit, 6.5, 3, 1500, 3 * 1500],
+        'thaan' => [PackingType::Thaan, 21, 1, 350],
+        'box' => [PackingType::Box, 5.5, 2, 1500],
+        'suit' => [PackingType::Suit, 6.5, 3, 1500],
     ]);
+
+test('add item takes stock only from the selected location', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $order = Order::factory()->create();
+    $product = Product::factory()->create();
+    $this->addInventory($product, PackingType::Box, 3, 5.5);
+    Inventory::query()->update(['location' => StockLocation::WarehouseFSD]);
+    $product['product_id'] = $product->id;
+    $post = [
+        'product' => $product->toArray(),
+        'unit' => PackingType::Box->value,
+        'size' => 5.5,
+        'price' => 1500,
+        'qty' => 2,
+        'discount' => 0,
+        'commission' => '0',
+    ];
+
+    // Act
+    $fromShop = $this->actingAs($user)
+        ->postJson(route('ajax.so.item.add', $order->id), [...$post, 'location' => StockLocation::Shop->value]);
+    $fromWarehouse = $this->actingAs($user)
+        ->postJson(route('ajax.so.item.add', $order->id), [...$post, 'location' => StockLocation::WarehouseFSD->value]);
+
+    // Assert
+    $fromShop->assertUnprocessable()->assertJsonValidationErrors(['qty' => 'available at Shop']);
+    $fromWarehouse->assertOk();
+    assertDatabaseCount(OrderItem::class, 1);
+    assertDatabaseHas(OrderItem::class, [
+        'order_id' => $order->id,
+        'product_id' => $product->id,
+        'location' => StockLocation::WarehouseFSD->value,
+    ]);
+});
 
 test('add thaan to order', function (PackingType $unit, float $size, int $qty, float $price, float $total) {
     // Arrange

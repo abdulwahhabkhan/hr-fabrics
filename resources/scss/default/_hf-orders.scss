@@ -240,3 +240,79 @@
 }
 
 .hf-inventory-parent__caption { font-size: .72rem; color: var(--hf-text-3); }
+
+// ---------------------------------------------------------------------------
+// Stock transfer (Pages/Stock/StockTransfers)
+// ---------------------------------------------------------------------------
+.hf-transfer-route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+
+  &__swap {
+    margin-top: 1.5rem;
+    padding: .4rem .55rem;
+    border-radius: 50%;
+    svg { width: 18px; height: 18px; }
+  }
+
+  @media (max-width: 767.98px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__swap { justify-self: center; margin-top: 0; }
+  }
+}
+
+.hf-transfer-route-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+
+  svg { color: var(--hf-text-3); }
+}
+
+.hf-stock-matrix {
+  font-size: .75rem;
+  background: transparent;
+
+  th { font-weight: 500; color: var(--hf-text-3); }
+  th.is-from { color: var(--hf-navy); font-weight: 600; }
+  td.is-from { background: rgba(var(--hf-brand-rgb), .04); }
+  tr.is-active td { background: var(--hf-brand-50); }
+
+  &__pick {
+    padding: .1rem .4rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: none;
+    color: var(--hf-text);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+
+    &:hover { border-color: var(--hf-border-strong); background: var(--hf-surface); }
+  }
+}
+
+.hf-transfer-summary {
+  margin-top: 1rem;
+  padding: .75rem 1rem;
+  border: 1px dashed var(--hf-border-strong);
+  border-radius: var(--hf-radius);
+  background: var(--hf-surface-2);
+
+  &__move { font-size: .875rem; color: var(--hf-text-2); strong { color: var(--hf-navy); } }
+
+  &__route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: .5rem;
+
+    > div { display: flex; flex-direction: column; gap: .1rem; }
+    span { font-size: .7rem; color: var(--hf-text-3); }
+    strong { font-size: .875rem; font-weight: 600; color: var(--hf-text); font-variant-numeric: tabular-nums; }
+    > svg { color: var(--hf-text-3); width: 18px; height: 18px; }
+  }
+}

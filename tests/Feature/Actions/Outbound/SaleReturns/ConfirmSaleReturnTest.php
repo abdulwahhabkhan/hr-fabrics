@@ -5,6 +5,7 @@
 use App\Actions\Outbound\SaleReturns\ConfirmSaleReturn;
 use App\Enums\Module;
 use App\Enums\PaymentMode;
+use App\Enums\StockLocation;
 use App\Enums\TransactionType;
 use App\Models\Accounts\Account;
 use App\Models\Accounts\Journal;
@@ -91,4 +92,15 @@ test('re-confirming a return replaces its inventory instead of duplicating it', 
     resolve(ConfirmSaleReturn::class)->handle($return, $this->user);
 
     assertDatabaseCount(Inventory::class, 2);
+});
+
+test('returned stock goes back to the location of each item', function () {
+    $return = SalesReturn::factory()
+        ->closed()
+        ->has(SalesReturnItem::factory()->state(['location' => StockLocation::WarehouseFSD]), 'returnItems')
+        ->create(['customer_id' => $this->customer->id, 'payment_mode' => PaymentMode::Credit->value]);
+
+    resolve(ConfirmSaleReturn::class)->handle($return, $this->user);
+
+    expect($return->inventories()->sole()->location)->toBe(StockLocation::WarehouseFSD);
 });

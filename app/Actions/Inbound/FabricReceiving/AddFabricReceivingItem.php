@@ -15,9 +15,12 @@ final class AddFabricReceivingItem
         $item_id = $request->input('item_id');
         $data = $request->only([
             'qty', 'unit', 'size', 'voucher_no', 'total_qty',
-            'size',
+            'location',
         ]);
         ['unit' => $unit, 'qty' => $qty] = $data;
+        if (empty($data['location'])) {
+            unset($data['location']);
+        }
 
         if (mb_strtolower($unit) !== mb_strtolower(PackingType::Thaan->value)) {
             $data['total_qty'] = $qty * ($data['size'] ?? 1);

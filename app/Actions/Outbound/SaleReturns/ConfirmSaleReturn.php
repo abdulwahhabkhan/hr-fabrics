@@ -52,6 +52,7 @@ class ConfirmSaleReturn
             $inventory->product_id = $item->product_id;
             $inventory->stockable_item_id = $item->id;
             $inventory->unit = $item->unit;
+            $inventory->location = $item->location;
             $inventory->size = $item->size;
             $inventory->meters = $item->total_qty;
             $inventory->qty = (int) round($item->qty);

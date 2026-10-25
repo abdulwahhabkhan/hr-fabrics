@@ -4,6 +4,7 @@ namespace App\Actions\Inbound\Return;
 
 use App\Actions\Inventory\ReturnInventory;
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Purchase\PurchaseReturn;
 use App\Models\Purchase\PurchaseReturnItem;
@@ -25,6 +26,8 @@ final class AddReturnItem
         $qty = (int) $payload['qty'];
         $rate = (float) $payload['rate'];
         $size = (float) ($payload['size'] ?? 0);
+        $location = StockLocation::tryFrom((string) ($payload['location'] ?? '')) ?? StockLocation::Shop;
+        $payload['location'] = $location;
         $totalQty = (int) ($qty * $size);
         $total = $rate * $totalQty;
         if ($unit === PackingType::Box->name) {
@@ -44,6 +47,11 @@ final class AddReturnItem
             /** @var PurchaseReturnItem $item */
             $item = PurchaseReturnItem::findOrFail($item_id);
             $item->update($payload);
+            $return->inventories()->where('outbound_item_id', $item->id)->update([
+                'outbound_type' => null,
+                'outbound_id' => null,
+                'outbound_item_id' => null,
+            ]);
         } else {
             /** @var PurchaseReturnItem $item */
             $item = $return->items()->create($payload);
@@ -64,6 +72,8 @@ final class AddReturnItem
             ->available()
             ->where('product_id', $productId)
             ->where('unit', $unit)
+            ->when($unit !== PackingType::Thaan->name, fn ($query) => $query->where('size', $size))
+            ->atLocation($location)
             ->fifo()
             ->lockForUpdate()
             ->get();

@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
 import { Form } from 'react-bootstrap';
-import { getSOUnit } from '@/util/util';
+import { getSOUnit, useStockLocations } from '@/util/util';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
@@ -19,6 +19,7 @@ const OrderGatePass = () => {
     const { order, auth, transaction_date, store } = usePage().props;
     const { items, customer } = order;
     const [group, setGroup] = useState(false);
+    const { locationLabel } = useStockLocations();
 
     const itemsList = useMemo(() => {
         if (!group) {
@@ -26,7 +27,7 @@ const OrderGatePass = () => {
         }
 
         return _.chain(items)
-            .groupBy((row) => row.product_id + row.unit + row.size)
+            .groupBy((row) => row.product_id + row.unit + row.size + row.location)
             .map((row) => ({
                 ..._.first(row),
                 qty: _.sumBy(row, 'qty'),
@@ -128,6 +129,7 @@ const OrderGatePass = () => {
                                         >
                                             UNIT
                                         </th>
+                                        <th width="130px">LOCATION</th>
                                         <th
                                             className="text-center"
                                             width="90px"
@@ -156,6 +158,9 @@ const OrderGatePass = () => {
                                                     item.size,
                                                 )}
                                             </td>
+                                            <td className="text-nowrap">
+                                                {locationLabel(item.location)}
+                                            </td>
                                             <td className="text-center">
                                                 <Qty value={item.qty} />
                                             </td>
@@ -167,7 +172,7 @@ const OrderGatePass = () => {
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colSpan={3} className="text-end">
+                                        <td colSpan={4} className="text-end">
                                             Total
                                         </td>
                                         <td className="text-center">

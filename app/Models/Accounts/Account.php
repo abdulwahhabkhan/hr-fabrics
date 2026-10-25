@@ -215,17 +215,6 @@ class Account extends Model implements Fileable
     }
 
     #[Scope]
-    protected function selectForStoreTransfer(Builder $query): Builder
-    {
-        return $query->select([
-            'id',
-            'id as account_id',
-            'name as account_name',
-            'address->city as city',
-        ]);
-    }
-
-    #[Scope]
     protected function orderByName(Builder $query): Builder
     {
         return $query->orderBy('name');

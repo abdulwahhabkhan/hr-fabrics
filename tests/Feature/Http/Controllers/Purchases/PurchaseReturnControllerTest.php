@@ -201,3 +201,33 @@ test('closing a purchase return posts a real ledger entry with a transaction dat
         'cr' => $por->total,
     ]);
 });
+
+test('closing a purchase return books the held stock only once', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $this->attachPermissions($user, 'purchases.por.update');
+    $por = PurchaseReturn::factory()->create(['transaction_date' => null]);
+    $product = Product::factory()->box()->suppliedBy($por->supplier_id)->create();
+    Inventory::factory()->withPurchase()->create([
+        'product_id' => $product->id, 'unit' => 'Box', 'size' => 5, 'qty' => 4, 'meters' => 20,
+    ]);
+    $this->actingAs($user)->postJson(route('ajax.return.item.save', $por->id), [
+        'product_id' => $product->id, 'unit' => 'Box', 'qty' => 2, 'size' => 5, 'rate' => 100,
+    ])->assertOk();
+
+    // Act
+    $this->actingAs($user)->put(route('purchases.por.update', $por->id), [
+        'bilti_no' => 'Bilti-100',
+        'bill_no' => 'Bill-100',
+        'discount' => 0,
+        'expenses' => 0,
+        'status' => ReturnStatus::Closed->value,
+    ])->assertSessionHasNoErrors();
+
+    // Assert
+    $booked = $por->inventories()->get();
+    expect($booked->sum('qty'))->toBe(2)
+        ->and($booked->sum('meters'))->toEqual(10)
+        ->and($booked->every(fn (Inventory $lot) => $lot->outbound_on !== null))->toBeTrue()
+        ->and(Inventory::query()->available()->where('product_id', $product->id)->sum('meters'))->toEqual(10);
+});

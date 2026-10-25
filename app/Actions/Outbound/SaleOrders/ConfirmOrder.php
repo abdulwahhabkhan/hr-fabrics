@@ -44,6 +44,7 @@ class ConfirmOrder
                 ->setSize($item->size)
                 ->setQuantity($item->qty)
                 ->setUnit($item->unit)
+                ->setLocation($item->location)
                 ->setMeters($item->total_qty)
                 ->issue();
         }

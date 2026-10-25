@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Reports\Products;
 
+use App\Enums\StockLocation;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Catalog\ProductACResource;
 use App\Services\InventoryService;
@@ -16,8 +17,12 @@ class ProductHistoryController extends Controller
         $items = [];
         $products = $productService->autocompleteProducts()->keyBy('id');
         $total_meters = 0;
-        if ($filters = $request->only('product_id')) {
-            $items = $inventoryService->getProductHistory($request->input('product_id'))
+        $filters = $request->only('product_id', 'location');
+        if ($request->filled('product_id')) {
+            $items = $inventoryService->getProductHistory(
+                (int) $request->input('product_id'),
+                StockLocation::tryFrom((string) $request->input('location'))?->value
+            )
                 ->with('account:id,name', 'product:id,name,finish')
                 ->get();
             $total_meters = $items->sum('meters');

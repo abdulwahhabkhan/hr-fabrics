@@ -24,6 +24,7 @@ import {
     FormField,
     OptionCards,
 } from '@/components/form/FormSection';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import returns from '@/routes/sales/returns';
 
 const STATUS_OPEN = 0;
@@ -282,6 +283,7 @@ const ReturnForm = () => {
                                         <th className="w-1">#</th>
                                         <th>Product</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1 text-end">Meters</th>
                                         <th className="w-1 text-end">Rate</th>
                                         <th className="w-1 text-end">
@@ -319,6 +321,9 @@ const ReturnForm = () => {
                                                     row.size,
                                                     row.qty,
                                                 )}
+                                            </td>
+                                            <td>
+                                                <StockLocationBadge location={row.location} />
                                             </td>
                                             <td className="num text-end hf-mono">
                                                 <NumberFormat
@@ -376,7 +381,7 @@ const ReturnForm = () => {
                                 {items.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <th colSpan={3}>Total</th>
+                                            <th colSpan={4}>Total</th>
                                             <th className="num text-end hf-mono">
                                                 <NumberFormat
                                                     displayType="text"

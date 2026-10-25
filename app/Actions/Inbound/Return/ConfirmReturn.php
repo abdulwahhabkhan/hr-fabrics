@@ -40,10 +40,19 @@ class ConfirmReturn
     }
 
     /**
+     * Stock held for the draft is released first so each item is issued exactly once.
+     *
      * @throws Throwable
      */
     private function processInventory(PurchaseReturn $return): void
     {
+        $return->inventories()->update([
+            'outbound_type' => null,
+            'outbound_id' => null,
+            'outbound_item_id' => null,
+            'outbound_on' => null,
+        ]);
+
         $returnStock = resolve(ReturnStock::class);
         foreach ($return->items as $item) {
             $returnStock->handle($return, $item);

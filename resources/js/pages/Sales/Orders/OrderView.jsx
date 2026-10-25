@@ -11,6 +11,7 @@ import Print from '@/components/button/Print.jsx';
 import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import orders from '@/routes/sales/orders';
 import { InvoiceContact } from '@/components/InvoiceContact';
+import { useStockLocations } from '@/util/util';
 
 const OrderView = () => {
     const {
@@ -22,6 +23,7 @@ const OrderView = () => {
         net_balance,
         store,
     } = usePage().props;
+    const { locationLabel } = useStockLocations();
     const { items, user, customer } = order;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const [group, setGroup] = useState(false);
@@ -204,6 +206,11 @@ const OrderView = () => {
                                                                 item.product
                                                                     .name}
                                                         </span>
+                                                        {item.location && (
+                                                            <small className="hidden-print text-muted ms-2">
+                                                                · {locationLabel(item.location)}
+                                                            </small>
+                                                        )}
                                                     </td>
                                                     <td className="text-center text-nowrap">
                                                         {item.unit}{' '}

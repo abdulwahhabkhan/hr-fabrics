@@ -7,7 +7,8 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { FormField, SegmentedControl } from '@/components/form/FormSection';
 import { NumberFormat } from '@/util/NumberFormat';
-import { UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
+import { LOCATION_SHOP, UNIT_BOX, UNIT_SUIT, UNIT_THAAN, usePackingUnits } from '@/util/util';
+import { StockLocationControl } from '@/components/stock/StockLocation';
 
 const UNIT_ICONS = {
     [UNIT_BOX]: 'solar:box-bold-duotone',
@@ -15,7 +16,7 @@ const UNIT_ICONS = {
     [UNIT_THAAN]: 'solar:layers-bold-duotone',
 };
 
-const EMPTY_ITEM = { product: null, unit: '', size: '', qty: '', rate: '', commission: '' };
+const EMPTY_ITEM = { product: null, unit: '', size: '', qty: '', rate: '', commission: '', location: LOCATION_SHOP };
 
 const toNumber = (value) => parseFloat(value) || 0;
 
@@ -124,7 +125,14 @@ export const ReturnItemForm = ({ item, onClose, onSave, products, commission }) 
                     )}
 
                     <Row className="g-3 mt-1">
-                        <Col md={12}>
+                        <Col md={6}>
+                            <FormField label="Return to" required>
+                                <div>
+                                    <StockLocationControl register={(name) => register(name, { required: true })} />
+                                </div>
+                            </FormField>
+                        </Col>
+                        <Col md={6}>
                             <FormField label="Unit" required>
                                 <div>
                                     <SegmentedControl

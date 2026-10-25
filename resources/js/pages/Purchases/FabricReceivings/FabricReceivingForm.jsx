@@ -18,11 +18,18 @@ import Back from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
 import SummaryStat from '@/components/SummaryStat.jsx';
-import { FormActions, FormField } from '@/components/form/FormSection';
+import { FormActions, FormField, OptionCards } from '@/components/form/FormSection';
 import fabricReceivings from '@/routes/purchases/fabric-receivings';
+import { StockLocationBadge } from '@/components/stock/StockLocation';
 import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
 
 const toNumber = (value) => parseFloat(value) || 0;
+
+const statusOptions = {
+    Open: { icon: 'solar:clock-circle-bold-duotone', description: 'Still receiving', tone: 'warning' },
+    Close: { icon: 'solar:check-circle-bold-duotone', description: 'All stock received', tone: 'success' },
+    Cancel: { icon: 'solar:close-circle-bold-duotone', description: 'Not going ahead', tone: 'danger' },
+};
 
 const FabricReceivingForm = () => {
     const {
@@ -175,6 +182,7 @@ const FabricReceivingForm = () => {
                                         <th className="w-1">Voucher No</th>
                                         <th>Product</th>
                                         <th className="w-1">Unit</th>
+                                        <th className="w-1">Location</th>
                                         <th className="w-1 text-end">Qty</th>
                                         <th className="w-1 text-end">Meters</th>
                                         <th className="w-1 text-end">Actions</th>
@@ -190,6 +198,7 @@ const FabricReceivingForm = () => {
                                             size,
                                             qty,
                                             total_qty,
+                                            location,
                                         } = row;
                                         return (
                                             <tr key={id}>
@@ -210,6 +219,9 @@ const FabricReceivingForm = () => {
                                                 </td>
                                                 <td className="text-nowrap">
                                                     {getPOUnit(unit, size, qty)}
+                                                </td>
+                                                <td>
+                                                    <StockLocationBadge location={location} />
                                                 </td>
                                                 <td className="num text-end hf-mono">
                                                     {qty}
@@ -246,7 +258,7 @@ const FabricReceivingForm = () => {
                                 {items.length > 0 && (
                                     <tfoot>
                                         <tr>
-                                            <th colSpan={4}>Total</th>
+                                            <th colSpan={5}>Total</th>
                                             <th className="num text-end hf-mono">
                                                 {totals.qty}
                                             </th>
@@ -325,22 +337,19 @@ const FabricReceivingForm = () => {
                                         <Col sm={12}>
                                             <FormField
                                                 label="Status"
-                                                htmlFor="status"
                                                 required
                                                 hint="Bilti and lot no are required to close the receiving."
                                             >
-                                                <Form.Select
-                                                    id="status"
-                                                    {...register('status', { required: true })}
-                                                    isInvalid={errors.status}
-                                                >
-                                                    <option value="">Select status</option>
-                                                    {status_list?.map((value) => (
-                                                        <option key={value} value={value}>
-                                                            {value}
-                                                        </option>
-                                                    ))}
-                                                </Form.Select>
+                                                <OptionCards
+                                                    name="status"
+                                                    register={(name) => register(name, { required: true })}
+                                                    invalid={!!errors.status}
+                                                    options={status_list?.map((value) => ({
+                                                        value,
+                                                        label: value,
+                                                        ...statusOptions[value],
+                                                    }))}
+                                                />
                                             </FormField>
                                         </Col>
                                         <Col sm={12}>

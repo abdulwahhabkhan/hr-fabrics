@@ -6,7 +6,7 @@ import Moment from '@/components/Moment';
 import React, { useRef } from 'react';
 import { NumberFormat } from '@/util/NumberFormat';
 import { Address } from '@/components/Address';
-import { getPOUnit } from '@/util/util';
+import { getPOUnit, useStockLocations } from '@/util/util';
 import { Col, Row } from 'react-bootstrap';
 import { PreviewAttachments } from '@/components/File.jsx';
 import Print from '@/components/button/Print.jsx';
@@ -23,6 +23,7 @@ const FabricReceivingView = () => {
         transaction_date,
         can_modify,
     } = usePage().props;
+    const { locationLabel } = useStockLocations();
     const { items, supplier } = order;
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
 
@@ -105,6 +106,7 @@ const FabricReceivingView = () => {
                                         <th className="text-center" width="120">
                                             Unit
                                         </th>
+                                        <th width="130">Location</th>
                                         <th className="text-right" width="100">
                                             Qty
                                         </th>
@@ -130,6 +132,7 @@ const FabricReceivingView = () => {
                                                             item.qty,
                                                         )}
                                                     </td>
+                                                    <td>{locationLabel(item.location)}</td>
                                                     <td className="text-right">
                                                         <NumberFormat
                                                             displayType={'text'}

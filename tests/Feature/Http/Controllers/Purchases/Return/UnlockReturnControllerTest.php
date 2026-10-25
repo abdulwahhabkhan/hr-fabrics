@@ -69,7 +69,8 @@ test('unlock po return', function () {
     foreach ($items as $item) {
         assertDatabaseHas(Inventory::class, [
             'id' => $item['inventory_id'],
-            'transaction_date' => null,
+            'transaction_date' => $item['transaction_date'],
+            'outbound_on' => null,
             'outbound_type' => null,
             'outbound_id' => null,
             'outbound_item_id' => null,

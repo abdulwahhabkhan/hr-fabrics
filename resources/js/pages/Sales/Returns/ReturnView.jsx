@@ -10,6 +10,7 @@ import { PreviewAttachments } from '@/components/File';
 import { Col, Form, Row } from 'react-bootstrap';
 import BackButton from '@/components/button/back';
 import Print from '@/components/button/Print.jsx';
+import { useStockLocations } from '@/util/util';
 import returns from '@/routes/sales/returns';
 
 const ReturnView = () => {
@@ -22,6 +23,7 @@ const ReturnView = () => {
         net_balance,
         store,
     } = usePage().props;
+    const { locationLabel } = useStockLocations();
     const { Thaan: thaan_qty, Box: box_qty, Suit: suit_qty } = total_summary;
     const { return_items: items, customer } = so_return;
     const [returnForm, setReturnForm] = useState(false);
@@ -152,6 +154,11 @@ const ReturnView = () => {
                                                     <td>
                                                         {item.product &&
                                                             item.product.name}
+                                                        {item.location && (
+                                                            <small className="hidden-print text-muted ms-2">
+                                                                · {locationLabel(item.location)}
+                                                            </small>
+                                                        )}
                                                     </td>
                                                     <td className="text-center w-1">
                                                         {item.unit}
