@@ -18,11 +18,17 @@ import Back from '@/components/button/back';
 import PreviewButton from '@/components/button/PreviewButton.jsx';
 import NoData from '@/components/NoData.jsx';
 import SummaryStat from '@/components/SummaryStat.jsx';
-import { FormActions, FormField } from '@/components/form/FormSection';
+import { FormActions, FormField, OptionCards } from '@/components/form/FormSection';
 import fabricReceivings from '@/routes/purchases/fabric-receivings';
 import fabricReceivingAjax from '@/routes/ajax/fabric-receiving';
 
 const toNumber = (value) => parseFloat(value) || 0;
+
+const statusOptions = {
+    Open: { icon: 'solar:clock-circle-bold-duotone', description: 'Still receiving', tone: 'warning' },
+    Close: { icon: 'solar:check-circle-bold-duotone', description: 'All stock received', tone: 'success' },
+    Cancel: { icon: 'solar:close-circle-bold-duotone', description: 'Not going ahead', tone: 'danger' },
+};
 
 const FabricReceivingForm = () => {
     const {
@@ -325,22 +331,19 @@ const FabricReceivingForm = () => {
                                         <Col sm={12}>
                                             <FormField
                                                 label="Status"
-                                                htmlFor="status"
                                                 required
                                                 hint="Bilti and lot no are required to close the receiving."
                                             >
-                                                <Form.Select
-                                                    id="status"
-                                                    {...register('status', { required: true })}
-                                                    isInvalid={errors.status}
-                                                >
-                                                    <option value="">Select status</option>
-                                                    {status_list?.map((value) => (
-                                                        <option key={value} value={value}>
-                                                            {value}
-                                                        </option>
-                                                    ))}
-                                                </Form.Select>
+                                                <OptionCards
+                                                    name="status"
+                                                    register={(name) => register(name, { required: true })}
+                                                    invalid={!!errors.status}
+                                                    options={status_list?.map((value) => ({
+                                                        value,
+                                                        label: value,
+                                                        ...statusOptions[value],
+                                                    }))}
+                                                />
                                             </FormField>
                                         </Col>
                                         <Col sm={12}>

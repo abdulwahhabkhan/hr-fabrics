@@ -60,13 +60,17 @@ export function SegmentedControl({ name, options, register, className }) {
 
 /**
  * Radio group rendered as selectable cards (icon, title, description), registered through react-hook-form's `register`.
- * Options may be `disabled`, e.g. a payment mode not allowed for the customer.
+ * Options may be `disabled`, e.g. a payment mode not allowed for the customer, and may set a `tone`
+ * (success, warning, danger) to color the card when selected.
  */
 export function OptionCards({ name, options, register, invalid = false, className }) {
     return (
         <div className={cx('hf-option-cards', { 'is-invalid': invalid }, className)} role="radiogroup">
-            {options.map(({ value, label, description, icon, disabled }) => (
-                <label key={value} className={cx('hf-option-card', { 'is-disabled': disabled })}>
+            {options.map(({ value, label, description, icon, disabled, tone }) => (
+                <label
+                    key={value}
+                    className={cx('hf-option-card', { 'is-disabled': disabled, [`is-${tone}`]: tone })}
+                >
                     <input type="radio" value={value} disabled={disabled} {...register(name)} />
                     <span className="hf-option-card__box">
                         {icon && (
