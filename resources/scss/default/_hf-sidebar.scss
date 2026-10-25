@@ -537,18 +537,12 @@
       z-index: 1045;
     }
 
-    .hf-nav-item:not(.is-hover-disabled):hover > .hf-flyout,
-    .hf-nav-item:not(.is-hover-disabled):focus-within > .hf-flyout,
-    .hf-nav-item.is-flyout-open > .hf-flyout {
+    // Keyboard focus only: a mouse click leaves focus on the button, which
+    // would otherwise keep the flyout open after the pointer moves away.
+    .hf-nav-item:hover > .hf-flyout,
+    .hf-nav-item:has(:focus-visible) > .hf-flyout {
       display: block;
       animation: hf-subnav-in .14s var(--hf-ease);
-    }
-
-    .hf-nav-item.is-flyout-open > .hf-nav-link {
-      background: var(--hf-sidebar-active);
-      color: var(--hf-sidebar-text-strong);
-
-      .hf-nav-icon { background: var(--hf-navy); color: var(--hf-gold); }
     }
 
     // Cascading groups: row shows the title, its links open in a side panel.

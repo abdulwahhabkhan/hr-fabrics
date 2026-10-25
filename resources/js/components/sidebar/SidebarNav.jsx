@@ -37,9 +37,9 @@ function SubnavGroup({ group }) {
     );
 }
 
-function FlyoutLink({ item, onNavigate }) {
+function FlyoutLink({ item }) {
     return (
-        <InertiaLink href={item.path} className={cx('hf-flyout-link', { 'is-active': item.active })} onClick={onNavigate}>
+        <InertiaLink href={item.path} className={cx('hf-flyout-link', { 'is-active': item.active })}>
             {item.title}
         </InertiaLink>
     );
@@ -47,9 +47,9 @@ function FlyoutLink({ item, onNavigate }) {
 
 /**
  * Collapsed-mode cascading row: shows the group title only; its links open in
- * a nested panel on hover, click, focus or ArrowRight.
+ * a nested panel on hover, click, focus or ArrowRight (click acts like hover).
  */
-function FlyoutGroup({ group, isOpen, onOpen, onToggle, onNavigate }) {
+function FlyoutGroup({ group, isOpen, onOpen }) {
     const panelRef = useRef(null);
 
     // Keep the nested panel inside the viewport (groups near the bottom shift up).
@@ -75,7 +75,7 @@ function FlyoutGroup({ group, isOpen, onOpen, onToggle, onNavigate }) {
                 className={cx('hf-flyout-link hf-flyout-group-toggle', { 'is-active': group.active })}
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
-                onClick={onToggle}
+                onClick={onOpen}
                 onFocus={onOpen}
                 onKeyDown={(event) => {
                     if (event.key === 'ArrowRight') {
@@ -101,7 +101,7 @@ function FlyoutGroup({ group, isOpen, onOpen, onToggle, onNavigate }) {
             >
                 <div className="hf-flyout-title">{group.title}</div>
                 {group.children.map((link) => (
-                    <FlyoutLink key={link.name} item={link} onNavigate={onNavigate} />
+                    <FlyoutLink key={link.name} item={link} />
                 ))}
             </div>
         </div>
@@ -112,7 +112,7 @@ function FlyoutGroup({ group, isOpen, onOpen, onToggle, onNavigate }) {
  * Collapsed-mode flyout: first level lists the section's children; nested
  * groups cascade to the right, one at a time.
  */
-function Flyout({ item, onNavigate }) {
+function Flyout({ item }) {
     const [openGroup, setOpenGroup] = useState(null);
 
     return (
@@ -125,12 +125,10 @@ function Flyout({ item, onNavigate }) {
                         group={child}
                         isOpen={openGroup === child.name}
                         onOpen={() => setOpenGroup(child.name)}
-                        onToggle={() => setOpenGroup((open) => (open === child.name ? null : child.name))}
-                        onNavigate={onNavigate}
                     />
                 ) : (
                     <div key={child.name} onMouseEnter={() => setOpenGroup(null)}>
-                        <FlyoutLink item={child} onNavigate={onNavigate} />
+                        <FlyoutLink item={child} />
                     </div>
                 ),
             )}
@@ -140,86 +138,37 @@ function Flyout({ item, onNavigate }) {
 
 /**
  * Expanded: accordion (the active section opens automatically).
- * Collapsed: icon rail; hovering shows a flyout with its pages,
- * clicking an item pins/persists the flyout open until clicked again,
- * closed, or clicked outside.
+ * Collapsed: icon rail; hovering (or keyboard focus) shows a flyout with its
+ * pages. Clicking behaves the same as hovering, so the flyout closes as soon
+ * as the pointer leaves.
  */
 export default function SidebarNav({ collapsed = false }) {
     const items = useSidebarMenu();
     const { url } = usePage();
     const activeSection = items.find((item) => item.active && item.children.length)?.name ?? null;
     const [openSection, setOpenSection] = useState(activeSection);
-    const [pinnedFlyout, setPinnedFlyout] = useState(null);
-    const [hoverDisabledItem, setHoverDisabledItem] = useState(null);
-    const navRef = useRef(null);
 
-    // Follow navigation: open the section that owns the new page and close any open flyout.
+    // Follow navigation: open the section that owns the new page.
     useEffect(() => {
         setOpenSection(activeSection);
-        setPinnedFlyout(null);
-        setHoverDisabledItem(null);
     }, [url, activeSection]);
-
-    // Reset pinned flyout when sidebar collapse state toggles.
-    useEffect(() => {
-        setPinnedFlyout(null);
-        setHoverDisabledItem(null);
-    }, [collapsed]);
-
-    // Close pinned flyout on click outside or Escape key.
-    useEffect(() => {
-        if (!pinnedFlyout) {
-            return;
-        }
-
-        const handlePointerDown = (event) => {
-            if (navRef.current && !navRef.current.contains(event.target)) {
-                setPinnedFlyout(null);
-                setHoverDisabledItem(null);
-            }
-        };
-
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') {
-                setPinnedFlyout(null);
-                setHoverDisabledItem(null);
-            }
-        };
-
-        document.addEventListener('pointerdown', handlePointerDown);
-        document.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            document.removeEventListener('pointerdown', handlePointerDown);
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [pinnedFlyout]);
 
     const handleItemClick = (item) => {
         const isRail = collapsed || (typeof document !== 'undefined' && document.documentElement.classList.contains('hf-sidebar-collapsed'));
 
         if (isRail) {
-            if (pinnedFlyout === item.name) {
-                setPinnedFlyout(null);
-                setHoverDisabledItem(item.name);
-            } else {
-                setPinnedFlyout(item.name);
-                setHoverDisabledItem(null);
-            }
-        } else {
-            const isOpen = openSection === item.name;
-            setOpenSection(isOpen ? null : item.name);
+            return;
         }
+
+        setOpenSection((open) => (open === item.name ? null : item.name));
     };
 
     return (
-        <nav ref={navRef} className="hf-nav" aria-label="Main">
+        <nav className="hf-nav" aria-label="Main">
             {items.map((item, index) => {
                 const startsGroup = item.group && item.group !== items[index - 1]?.group;
                 const hasChildren = item.children.length > 0;
                 const isOpen = hasChildren && openSection === item.name;
-                const isFlyoutOpen = hasChildren && pinnedFlyout === item.name;
-                const isHoverDisabled = hoverDisabledItem === item.name;
 
                 // Fixed-size slot so labels never shift while an icon loads.
                 const icon = (
@@ -235,24 +184,12 @@ export default function SidebarNav({ collapsed = false }) {
                                 <span>{item.group}</span>
                             </div>
                         )}
-                        <div
-                                className={cx('hf-nav-item', {
-                                'is-active': item.active,
-                                'is-open': isOpen,
-                                'is-flyout-open': isFlyoutOpen,
-                                'is-hover-disabled': isHoverDisabled,
-                            })}
-                            onMouseLeave={() => {
-                                if (hoverDisabledItem === item.name) {
-                                    setHoverDisabledItem(null);
-                                }
-                            }}
-                        >
+                        <div className={cx('hf-nav-item', { 'is-active': item.active, 'is-open': isOpen })}>
                             {hasChildren ? (
                                 <button
                                     type="button"
                                     className="hf-nav-link"
-                                    aria-expanded={isOpen || isFlyoutOpen}
+                                    aria-expanded={isOpen}
                                     onClick={() => handleItemClick(item)}
                                 >
                                     {icon}
@@ -289,7 +226,7 @@ export default function SidebarNav({ collapsed = false }) {
 
                             {/* Collapsed-mode flyout (hidden in expanded mode via CSS). */}
                             {hasChildren ? (
-                                <Flyout item={item} onNavigate={() => setPinnedFlyout(null)} />
+                                <Flyout item={item} />
                             ) : (
                                 <div className="hf-flyout" role="tooltip">
                                     <div className="hf-flyout-title">{item.title}</div>
