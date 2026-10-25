@@ -558,11 +558,17 @@ button.hf-icon-btn {
     }
   }
 
+  // The panel already frames the empty state, so drop its own border and follow the panel's corners.
   .table-responsive + .no-data {
     margin-top: 0;
-    border-width: 0 0 1px !important;
+    border: 0 !important;
     border-radius: 0 !important;
     margin-inline: 0;
+
+    &:last-child {
+      border-bottom-left-radius: calc(var(--hf-radius-lg) - 1px) !important;
+      border-bottom-right-radius: calc(var(--hf-radius-lg) - 1px) !important;
+    }
   }
 
   @media (max-width: 767.98px) {
