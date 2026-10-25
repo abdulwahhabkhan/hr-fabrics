@@ -22,7 +22,7 @@ final class FabricReceivingItemResource extends JsonResource
             'fabric_receiving_id' => $this->fabric_receiving_id,
             'voucher_no' => $this->voucher_no,
             'unit' => $this->unit,
-            'location' => $this->location?->value,
+            'location' => $this->location->value,
             'product_name' => $this->product_name,
             'qty' => $this->qty,
             'size' => $this->size,
