@@ -530,6 +530,20 @@ button.hf-icon-btn {
         }
       }
     }
+
+    // Same for the last row (tfoot totals or the last tbody row) of a table that ends the panel.
+    > .panel-body:last-child > .table-responsive:last-child > .table:last-child,
+    > .panel-body:last-child > .table:last-child {
+      > :last-child > tr:last-child {
+        > :first-child {
+          border-bottom-left-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+
+        > :last-child {
+          border-bottom-right-radius: calc(var(--hf-radius-lg) - 1px);
+        }
+      }
+    }
   }
 
   > .panel-body {
