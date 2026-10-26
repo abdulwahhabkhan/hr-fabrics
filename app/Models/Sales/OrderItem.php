@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property float $avg_meter
  * @property int $orders
  * @property float $per_trans
+ * @property-read float|null $inventory_sum_meters
  */
 class OrderItem extends Model
 {

@@ -42,7 +42,7 @@ final class MasterOrderResource extends JsonResource
                 'id' => $item->id,
                 'product_name' => $item->product?->name,
                 'unit' => $item->unit,
-                'location' => $item->location?->label(),
+                'location' => $item->location->label(),
                 'size' => $item->size,
                 'qty' => $item->qty,
                 'meters' => $item->total_qty,
