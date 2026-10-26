@@ -6,7 +6,12 @@ import { Controller, useForm } from 'react-hook-form';
 import StyledSelect from '@/components/StyledSelect';
 import { FormField, SegmentedControl } from '@/components/form/FormSection';
 import { NumberFormat } from '@/util/NumberFormat';
-import { notifyMessage, serverSideError, UNIT_BOX, UNIT_THAAN } from '@/util/util.jsx';
+import {
+    notifyMessage,
+    serverSideError,
+    UNIT_BOX,
+    UNIT_THAAN,
+} from '@/util/util.jsx';
 import poAjax from '@/routes/ajax/po';
 
 const UNIT_ICONS = {
@@ -17,12 +22,26 @@ const UNIT_ICONS = {
 const toNumber = (value) => parseFloat(value) || 0;
 
 function Money({ value }) {
-    return <NumberFormat displayType="text" value={value} thousandSeparator decimalScale={2} />;
+    return (
+        <NumberFormat
+            displayType="text"
+            value={value}
+            thousandSeparator
+            decimalScale={2}
+        />
+    );
 }
 
-export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products }) => {
+export const PurchaseItemForm = ({
+    item,
+    receiptId,
+    onClose,
+    setItems,
+    products,
+}) => {
     const isEdit = item.id > 0;
-    const itemDetail = _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
+    const itemDetail =
+        _.find(products, { product_id: item.product_id ?? 0 }) ?? null;
     const [product, setProduct] = useState(itemDetail);
     const [processing, setProcessing] = useState(false);
     const productRef = useRef(null);
@@ -58,13 +77,23 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
             return;
         }
 
-        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, { shouldDirty: true });
+        setValue('unit', selected.is_box ? UNIT_BOX : UNIT_THAAN, {
+            shouldDirty: true,
+        });
         setTimeout(() => setFocus('qty'), 0);
     };
 
     const resetForm = () => {
         setProduct(null);
-        reset({ voucher_no: '', product: null, unit: '', qty: '', size: '', total_qty: '', price: '' });
+        reset({
+            voucher_no: '',
+            product: null,
+            unit: '',
+            qty: '',
+            size: '',
+            total_qty: '',
+            price: '',
+        });
         setTimeout(() => productRef.current?.focus(), 0);
     };
 
@@ -77,7 +106,11 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
         })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({ title: 'Success', type: 'success', message: isEdit ? 'Item updated' : 'Item added' });
+                notifyMessage({
+                    title: 'Success',
+                    type: 'success',
+                    message: isEdit ? 'Item updated' : 'Item added',
+                });
 
                 if (isEdit) {
                     onClose();
@@ -98,8 +131,12 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
     };
 
     const line = useMemo(() => {
-        const meters = isBox ? toNumber(qty) * toNumber(size) : toNumber(total_qty);
-        const amount = isBox ? toNumber(qty) * toNumber(price) : meters * toNumber(price);
+        const meters = isBox
+            ? toNumber(qty) * toNumber(size)
+            : toNumber(total_qty);
+        const amount = isBox
+            ? toNumber(qty) * toNumber(price)
+            : meters * toNumber(price);
 
         return { meters, amount };
     }, [isBox, qty, size, total_qty, price]);
@@ -107,18 +144,32 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
     const unitOptions = product ? [isBox ? UNIT_BOX : UNIT_THAAN] : [];
 
     return (
-        <Modal show={true} backdrop="static" size="lg" keyboard={true} onHide={onClose}>
+        <Modal
+            show={true}
+            backdrop="static"
+            size="lg"
+            keyboard={true}
+            onHide={onClose}
+        >
             <form onSubmit={handleSubmit(sendRequest)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{isEdit ? 'Edit Item' : 'Add Item'}</Modal.Title>
+                    <Modal.Title>
+                        {isEdit ? 'Edit Item' : 'Add Item'}
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="hf-item-form">
                     <Row className="g-3">
                         <Col sm={4}>
-                            <FormField label="Voucher no" htmlFor="voucher_no" required>
+                            <FormField
+                                label="Voucher no"
+                                htmlFor="voucher_no"
+                                required
+                            >
                                 <Form.Control
                                     id="voucher_no"
-                                    {...register('voucher_no', { required: true })}
+                                    {...register('voucher_no', {
+                                        required: true,
+                                    })}
                                     isInvalid={errors.voucher_no}
                                     placeholder="Voucher no"
                                 />
@@ -135,8 +186,12 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                                 field.onChange(selected);
                                                 selectProduct(selected);
                                             }}
-                                            getOptionValue={(option) => option['product_id']}
-                                            getOptionLabel={(option) => option['product_info']}
+                                            getOptionValue={(option) =>
+                                                option['product_id']
+                                            }
+                                            getOptionLabel={(option) =>
+                                                option['product_info']
+                                            }
                                             placeholder="Search product by name, finish or brand..."
                                             isClearable
                                             autoFocus={!isEdit}
@@ -147,7 +202,11 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                     name="product"
                                     rules={{ required: true }}
                                 />
-                                {errors.product && <div className="invalid-feedback d-block">Please select a product.</div>}
+                                {errors.product && (
+                                    <div className="invalid-feedback d-block">
+                                        Please select a product.
+                                    </div>
+                                )}
                             </FormField>
                         </Col>
                     </Row>
@@ -155,8 +214,14 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                     {product && (
                         <div className="hf-item-product">
                             <div className="d-flex flex-wrap align-items-center gap-2">
-                                <span className="hf-cell-title">{product.name}</span>
-                                {product.finish && <span className="hf-chip">{product.finish}</span>}
+                                <span className="hf-cell-title">
+                                    {product.name}
+                                </span>
+                                {product.finish && (
+                                    <span className="hf-chip">
+                                        {product.finish}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     )}
@@ -167,8 +232,14 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                 <div>
                                     <SegmentedControl
                                         name="unit"
-                                        register={(name) => register(name, { required: true })}
-                                        options={unitOptions.map((value) => ({ value, label: value, icon: UNIT_ICONS[value] }))}
+                                        register={(name) =>
+                                            register(name, { required: true })
+                                        }
+                                        options={unitOptions.map((value) => ({
+                                            value,
+                                            label: value,
+                                            icon: UNIT_ICONS[value],
+                                        }))}
                                     />
                                 </div>
                             </FormField>
@@ -181,7 +252,10 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                     step="any"
                                     min={1}
                                     inputMode="decimal"
-                                    {...register('qty', { required: true, min: 1 })}
+                                    {...register('qty', {
+                                        required: true,
+                                        min: 1,
+                                    })}
                                     isInvalid={errors.qty}
                                     placeholder="0"
                                 />
@@ -197,7 +271,9 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                             step="any"
                                             min={0}
                                             inputMode="decimal"
-                                            {...register('size', { required: true })}
+                                            {...register('size', {
+                                                required: true,
+                                            })}
                                             isInvalid={errors.size}
                                             placeholder="0"
                                         />
@@ -207,7 +283,11 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                             </Col>
                         ) : (
                             <Col sm={4} xs={6}>
-                                <FormField label="Meters" htmlFor="total_qty" required>
+                                <FormField
+                                    label="Meters"
+                                    htmlFor="total_qty"
+                                    required
+                                >
                                     <InputGroup className="hf-amount">
                                         <Form.Control
                                             id="total_qty"
@@ -215,7 +295,9 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                             step="any"
                                             min={0}
                                             inputMode="decimal"
-                                            {...register('total_qty', { required: true })}
+                                            {...register('total_qty', {
+                                                required: true,
+                                            })}
                                             isInvalid={errors.total_qty}
                                             placeholder="0"
                                         />
@@ -225,7 +307,11 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                             </Col>
                         )}
                         <Col sm={4} xs={6}>
-                            <FormField label={isBox ? 'Price / box' : 'Price / meter'} htmlFor="price" required>
+                            <FormField
+                                label={isBox ? 'Price / box' : 'Price / meter'}
+                                htmlFor="price"
+                                required
+                            >
                                 <InputGroup className="hf-amount">
                                     <InputGroup.Text>Rs</InputGroup.Text>
                                     <Form.Control
@@ -234,7 +320,9 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                                         step="any"
                                         min={0}
                                         inputMode="decimal"
-                                        {...register('price', { required: true })}
+                                        {...register('price', {
+                                            required: true,
+                                        })}
                                         isInvalid={errors.price}
                                         placeholder="0"
                                     />
@@ -246,18 +334,36 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                     <div className="hf-item-preview">
                         <div>
                             <span>Meters</span>
-                            <strong><NumberFormat displayType="text" value={line.meters} thousandSeparator decimalScale={2} /> m</strong>
+                            <strong>
+                                <NumberFormat
+                                    displayType="text"
+                                    value={line.meters}
+                                    thousandSeparator
+                                    decimalScale={2}
+                                />{' '}
+                                m
+                            </strong>
                         </div>
                         <div className="is-total">
                             <span>Line total</span>
-                            <strong>Rs <Money value={line.amount} /></strong>
+                            <strong>
+                                Rs <Money value={line.amount} />
+                            </strong>
                         </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    {!isEdit && <span className="me-auto hf-field-hint mt-0">Enter saves and starts the next item.</span>}
                     {!isEdit && (
-                        <Button variant="link" className="text-muted" onClick={resetForm}>
+                        <span className="me-auto hf-field-hint mt-0">
+                            Enter saves and starts the next item.
+                        </span>
+                    )}
+                    {!isEdit && (
+                        <Button
+                            variant="link"
+                            className="text-muted"
+                            onClick={resetForm}
+                        >
                             Clear
                         </Button>
                     )}
@@ -265,7 +371,7 @@ export const PurchaseItemForm = ({ item, receiptId, onClose, setItems, products 
                         {isEdit ? 'Cancel' : 'Done'}
                     </Button>
                     <LoadingButton type="submit" processing={processing}>
-                        {isEdit ? 'Update item' : 'Save & add next'}
+                        {isEdit ? 'Update item' : 'Save & next'}
                     </LoadingButton>
                 </Modal.Footer>
             </form>
