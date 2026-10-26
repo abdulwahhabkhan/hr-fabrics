@@ -32,6 +32,9 @@ use App\Http\Controllers\Sales\Order\SalesReturnController;
 use App\Http\Controllers\Settings\CityController;
 use App\Http\Controllers\Settings\EmployeeController;
 use App\Http\Controllers\Settings\JobController;
+use App\Http\Controllers\Settings\MasterFabricReceivingController;
+use App\Http\Controllers\Settings\MasterOrderAllocationController;
+use App\Http\Controllers\Settings\MasterToolController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Stock\BrandValuationController;
@@ -215,6 +218,20 @@ Route::prefix('settings')->middleware(['auth', 'verified', 'auth.role'])
         Route::resource('cities', CityController::class, ['module' => 'City'])->except('show');
         Route::resource('employees', EmployeeController::class, ['module' => 'Employee'])
             ->only(['index', 'destroy']);
+    });
+
+// Master user tools: guarded by policy on the users.is_master flag, deliberately outside role permissions.
+Route::prefix('settings/master')->middleware(['auth', 'verified'])
+    ->name('settings.master.')->group(function () {
+        Route::get('/', MasterToolController::class)->name('index');
+        Route::get('fabric-receivings', [MasterFabricReceivingController::class, 'index'])
+            ->name('fabric-receivings.index');
+        Route::post('fabric-receivings/{fabric_receiving}/reopen', [MasterFabricReceivingController::class, 'reopen'])
+            ->name('fabric-receivings.reopen');
+        Route::get('orders', [MasterOrderAllocationController::class, 'index'])
+            ->name('orders.index');
+        Route::post('orders/{order}/allocate', [MasterOrderAllocationController::class, 'allocate'])
+            ->name('orders.allocate');
     });
 
 require __DIR__.'/settings.php';

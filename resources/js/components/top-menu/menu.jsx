@@ -31,6 +31,7 @@ import journalReport from '@/routes/reports/journal-report';
 import users from '@/routes/settings/users';
 import roles from '@/routes/settings/roles';
 import cities from '@/routes/settings/cities';
+import master from '@/routes/settings/master';
 // import employees from '@/routes/settings/employees';
 
 const Menu = [
@@ -356,6 +357,13 @@ const Menu = [
                 path: cities.index().url,
                 title: 'Cities',
                 name: 'settings.cities.index',
+            },
+            // Master users only (users.is_master); not part of role permissions.
+            {
+                path: master.index().url,
+                title: 'Master Actions',
+                name: 'settings.master.index',
+                master: true,
             },
             // Employees & attendance disabled for now.
             // {

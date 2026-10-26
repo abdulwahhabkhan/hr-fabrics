@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 
 class SaveStockTransfer
 {
-    public function __construct(private CheckStockAvailability $checkStockAvailability) {}
+    public function __construct(private readonly CheckStockAvailability $checkStockAvailability) {}
 
     /**
      * Create a draft transfer or update an open one. Stock is not moved until the transfer is confirmed.

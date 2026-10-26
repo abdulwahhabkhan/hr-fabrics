@@ -39,6 +39,8 @@ const TopMenuNavList = ({ data, expand, active, topLevel = true }) => {
     const hasPermission = (name) => {
         return _.indexOf(permissions, name) == -1 ? false : true;
     };
+    const isMaster = Boolean(props.auth?.user?.is_master);
+    const isAllowed = (item) => item.always || (item.master && isMaster) || hasPermission(item.name);
 
     const handleClick = (e) => {
         e.preventDefault();
@@ -63,8 +65,8 @@ const TopMenuNavList = ({ data, expand, active, topLevel = true }) => {
     // Nested groups have no permission of their own; show them when any child is allowed.
     const isNestedGroup = !topLevel && data.children;
     const isVisible = isNestedGroup
-        ? data.children.some((child) => child.always || hasPermission(child.name))
-        : data.always || hasPermission(data.name);
+        ? data.children.some(isAllowed)
+        : isAllowed(data);
 
     if (!isVisible) {
         return (

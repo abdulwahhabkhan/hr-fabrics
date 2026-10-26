@@ -8,6 +8,7 @@ use App\Models\Catalog\Product;
 use App\Models\Contracts\Fileable;
 use App\Models\Contracts\Logable;
 use App\Models\Model;
+use App\Models\Sales\Order;
 use App\Models\Stock\Inventory;
 use App\Models\Traits\HasFiles;
 use App\Models\Traits\MorphManayToLog;
@@ -26,6 +27,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read string|null $supplier_name
+ */
 #[UsePolicy(FabricReceivingPolicy::class)]
 class FabricReceiving extends Model implements Fileable, Logable
 {
@@ -82,6 +86,28 @@ class FabricReceiving extends Model implements Fileable, Logable
     public function inventories(): MorphMany
     {
         return $this->morphMany(Inventory::class, 'stockable');
+    }
+
+    /**
+     * Purchase vouchers this receiving was invoiced on. A voucher keeps its receivings as a comma separated id list.
+     *
+     * @return Builder<Purchase>
+     */
+    public function purchases(): Builder
+    {
+        return Purchase::query()->whereRaw('FIND_IN_SET(?, stock_ids)', [$this->id]);
+    }
+
+    /**
+     * Sale orders that were issued stock from this receiving.
+     *
+     * @return Builder<Order>
+     */
+    public function saleOrders(): Builder
+    {
+        return Order::query()->whereIn(Order::qCol('id'), $this->inventories()
+            ->where('outbound_type', Order::morphClass())
+            ->select('outbound_id'));
     }
 
     /**

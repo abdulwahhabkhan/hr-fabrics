@@ -2,10 +2,12 @@
 
 namespace App\Policies;
 
+use App\Enums\OrderAllocation;
 use App\Enums\OrderStatus;
 use App\Models\Sales\Order;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class OrderPolicy
 {
@@ -57,5 +59,23 @@ class OrderPolicy
     public function inventory(User $user, Order $order): bool
     {
         return $order->status === OrderStatus::Close && hasPermission('sales.orders.inventory', $user);
+    }
+
+    /**
+     * A master user can book stock for a confirmed order whose meters are not fully booked.
+     */
+    public function masterAllocate(User $user, Order $order): Response
+    {
+        if (! $user->isMaster()) {
+            return Response::deny('Only master users can allocate orders');
+        }
+        if (! $order->isClosed()) {
+            return Response::deny('Order is not confirmed');
+        }
+        if ($order->allocation === OrderAllocation::Allocated) {
+            return Response::deny('Order is already allocated');
+        }
+
+        return Response::allow();
     }
 }

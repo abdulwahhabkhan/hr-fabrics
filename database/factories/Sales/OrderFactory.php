@@ -3,6 +3,7 @@
 namespace Database\Factories\Sales;
 
 use App\Enums\DiscountType;
+use App\Enums\OrderAllocation;
 use App\Enums\OrderPaid;
 use App\Enums\OrderStatus;
 use App\Enums\PurchaseType;
@@ -82,6 +83,16 @@ class OrderFactory extends Factory
         return $this->state([
             'transaction_date' => today(),
             'status' => OrderStatus::Close,
+        ]);
+    }
+
+    /**
+     * Mark the order's meters as fully booked against stock.
+     */
+    public function allocated(): self
+    {
+        return $this->state([
+            'allocation' => OrderAllocation::Allocated,
         ]);
     }
 

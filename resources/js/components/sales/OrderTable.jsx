@@ -45,6 +45,24 @@ export function OrderStatus({ status }) {
     );
 }
 
+// Mirrors App\Enums\OrderAllocation.
+const ALLOCATION_PILLS = {
+    0: { tone: 'red', icon: 'solar:box-minimalistic-broken', label: 'Unallocated' },
+    1: { tone: 'gold', icon: 'solar:box-minimalistic-bold-duotone', label: 'Partially allocated' },
+    2: { tone: 'green', icon: 'solar:box-minimalistic-bold', label: 'Allocated' },
+};
+
+export function OrderAllocation({ allocation }) {
+    const pill = ALLOCATION_PILLS[allocation] ?? ALLOCATION_PILLS[0];
+
+    return (
+        <span className={`hf-pill tone-${pill.tone}`}>
+            <Icon icon={pill.icon} />
+            {pill.label}
+        </span>
+    );
+}
+
 export function PaymentStatus({ paid }) {
     return paid ? (
         <span className="hf-pill tone-teal">

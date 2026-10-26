@@ -16,7 +16,7 @@ use Throwable;
 
 class ConfirmStockTransfer
 {
-    public function __construct(private CheckStockAvailability $checkStockAvailability) {}
+    public function __construct(private readonly CheckStockAvailability $checkStockAvailability) {}
 
     /**
      * Move the stock: the transferred part of each source lot is booked out to the transfer, and a matching

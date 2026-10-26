@@ -3,6 +3,7 @@
 namespace App\Actions\Outbound\SaleOrders;
 
 use App\Actions\LogAction\RecordAction;
+use App\Enums\OrderAllocation;
 use App\Enums\OrderStatus;
 use App\Models\Accounts\Journal;
 use App\Models\Sales\Order;
@@ -33,7 +34,7 @@ final class UnLockOrder
                 'outbound_item_id' => null,
                 'outbound_on' => null,
             ]);
-            $order->update(['status' => OrderStatus::Open]);
+            $order->update(['status' => OrderStatus::Open, 'allocation' => OrderAllocation::Unallocated]);
         });
 
     }

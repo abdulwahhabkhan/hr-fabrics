@@ -1,0 +1,150 @@
+// ===========================================================================
+// Error pages (404, 403, 500…) — see resources/views/errors/minimal.blade.php
+// ===========================================================================
+
+.hf-error {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem 1rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 100% 0, rgba(var(--hf-gold-rgb), .12), transparent 45%),
+    radial-gradient(circle at 0 100%, rgba(var(--hf-navy-rgb), .08), transparent 45%),
+    var(--hf-bg);
+
+  // faint woven grid behind the card
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(var(--hf-navy-rgb), .035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--hf-navy-rgb), .035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    pointer-events: none;
+  }
+}
+
+.hf-error-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem 2.25rem 2.25rem;
+  text-align: center;
+  background: var(--hf-surface);
+  border: 1px solid var(--hf-border);
+  border-radius: 16px;
+  box-shadow: var(--hf-shadow-lg);
+  animation: hf-error-in .45s var(--hf-ease) both;
+
+  // gold selvedge along the top edge
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 2rem;
+    right: 2rem;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: linear-gradient(90deg, transparent, rgba(var(--hf-gold-rgb), .9) 30%, rgba(var(--hf-gold-rgb), .9) 70%, transparent);
+  }
+
+  @include media-breakpoint-down(sm) {
+    padding: 2rem 1.25rem 1.75rem;
+  }
+}
+
+.hf-error-logo {
+  display: inline-block;
+  margin-bottom: 1.75rem;
+
+  img { display: block; height: 36px; width: auto; }
+}
+
+.hf-error-code {
+  margin-bottom: .75rem;
+  font-family: 'Plus Jakarta Sans', var(--bs-font-sans-serif);
+  font-size: clamp(4.5rem, 18vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.04em;
+  background: linear-gradient(160deg, var(--hf-navy) 35%, var(--hf-gold) 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hf-error-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  color: var(--hf-gold-text);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+
+  &::before,
+  &::after { content: ''; width: 20px; height: 1.5px; background: currentColor; }
+}
+
+.hf-error-title {
+  margin: .6rem 0 .5rem;
+  color: var(--hf-text);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.hf-error-desc {
+  max-width: 22rem;
+  margin: 0 auto 1.75rem;
+  color: var(--hf-text-2);
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+.hf-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .625rem;
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .6rem 1.1rem;
+    font-size: .875rem;
+    font-weight: 500;
+    border-radius: var(--hf-radius);
+  }
+
+  @include media-breakpoint-down(sm) {
+    flex-direction: column-reverse;
+
+    .btn { justify-content: center; }
+  }
+}
+
+.hf-error-footer {
+  position: relative;
+  color: var(--hf-text-3);
+  font-size: .75rem;
+}
+
+@keyframes hf-error-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-error-card { animation: none; }
+}

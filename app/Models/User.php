@@ -51,6 +51,7 @@ class User extends Authenticatable implements PasskeyUser
         'email_verified_at' => 'datetime',
         'active' => 'boolean',
         'password_changed_at' => 'datetime',
+        'is_master' => 'boolean',
     ];
 
     public static function scriptUser(): ?self
@@ -141,6 +142,14 @@ class User extends Authenticatable implements PasskeyUser
     public function isAdmin(): bool
     {
         return $this->role_id === \App\Enums\Role::SuperAdmin->value;
+    }
+
+    /**
+     * Master users can run the admin correction tools. The flag is only set directly in the database.
+     */
+    public function isMaster(): bool
+    {
+        return (bool) $this->is_master;
     }
 
     /**

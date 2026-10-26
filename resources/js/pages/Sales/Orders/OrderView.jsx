@@ -11,7 +11,8 @@ import Print from '@/components/button/Print.jsx';
 import DownloadPdf from '@/components/button/DownloadPdf.jsx';
 import orders from '@/routes/sales/orders';
 import { InvoiceContact } from '@/components/InvoiceContact';
-import { useStockLocations } from '@/util/util';
+import { ORDER_CLOSED, useStockLocations } from '@/util/util';
+import { OrderAllocation } from '@/components/sales/OrderTable.jsx';
 
 const OrderView = () => {
     const {
@@ -111,6 +112,11 @@ const OrderView = () => {
                                 {order.invoice_no}
                             </div>
                             <div className="hidden-print">
+                                {order.status === ORDER_CLOSED && (
+                                    <div className="my-1">
+                                        <OrderAllocation allocation={order.allocation} />
+                                    </div>
+                                )}
                                 <div className="small">
                                     Created At:{' '}
                                     <Moment date={order.created_at} />

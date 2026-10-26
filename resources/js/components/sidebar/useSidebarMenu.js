@@ -31,7 +31,8 @@ export default function useSidebarMenu() {
 
     return useMemo(() => {
         const permissions = props.auth?.permissions ?? [];
-        const allowed = (item) => item.always || permissions.includes(item.name);
+        const isMaster = Boolean(props.auth?.user?.is_master);
+        const allowed = (item) => item.always || (item.master && isMaster) || permissions.includes(item.name);
 
         // Top-level items and links need their own permission; nested groups show when any child is allowed.
         const resolve = (items, nested = false) =>
@@ -59,5 +60,5 @@ export default function useSidebarMenu() {
 
         return resolve(menu);
         // `url` re-evaluates active state after every Inertia visit.
-    }, [url, props.auth?.permissions]);
+    }, [url, props.auth?.permissions, props.auth?.user?.is_master]);
 }

@@ -65,13 +65,9 @@ it('splits a lot when only part of it moves', function () {
     expect($lot->refresh())
         ->qty->toBe(3)
         ->meters->toBe(16.5)
-        ->outbound_id->toBeNull();
-    expect($transfer->inventories()->sole())
-        ->qty->toBe(2)
-        ->meters->toBe(11.0);
-    expect(Inventory::query()->available()->atLocation(StockLocation::WarehouseFSD)->sole())
-        ->qty->toBe(2)
-        ->meters->toBe(11.0);
+        ->outbound_id->toBeNull()
+        ->and($transfer->inventories()->sole())->qty->toBe(2)->meters->toBe(11.0)
+        ->and(Inventory::query()->available()->atLocation(StockLocation::WarehouseFSD)->sole())->qty->toBe(2)->meters->toBe(11.0);
 });
 
 it('moves thaan stock by meters across lots oldest first', function () {
@@ -109,9 +105,8 @@ it('does not use stock held at another location', function () {
     ]);
 
     expect(fn () => resolve(ConfirmStockTransfer::class)->handle($transfer, $this->user))
-        ->toThrow(ValidationException::class, 'Only 0 Box of size 5.5 available at Shop.');
-
-    expect($transfer->refresh()->status)->toBe(StatusText::Open)
+        ->toThrow(ValidationException::class, 'Only 0 Box of size 5.5 available at Shop.')
+        ->and($transfer->refresh()->status)->toBe(StatusText::Open)
         ->and(Inventory::query()->count())->toBe(1);
 });
 

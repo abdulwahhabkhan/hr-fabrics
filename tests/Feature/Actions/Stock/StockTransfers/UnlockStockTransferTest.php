@@ -48,7 +48,6 @@ it('refuses to unlock once the moved stock has been sold', function () {
     ]);
 
     expect(fn () => resolve(UnlockStockTransfer::class)->handle($this->transfer, $this->user))
-        ->toThrow(ValidationException::class, 'has already been used');
-
-    expect($this->transfer->refresh()->status)->toBe(StatusText::Close);
+        ->toThrow(ValidationException::class, 'has already been used')
+        ->and($this->transfer->refresh()->status)->toBe(StatusText::Close);
 });
