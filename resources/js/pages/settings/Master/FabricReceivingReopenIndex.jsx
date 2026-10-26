@@ -9,12 +9,14 @@ import { settings } from '@/config/page-settings';
 import { NumberFormat } from '@/util/NumberFormat';
 import { confirmSwal } from '@/util/swal';
 import NoData from '@/components/NoData.jsx';
+import BackButton from '@/components/button/back';
 import SummaryStat from '@/components/SummaryStat.jsx';
 import PurchaseStatus from '@/components/purchases/PurchaseStatus';
 import { InvoicedStatus } from '@/components/purchases/FabricReceivingTable';
 import fabricReceivings from '@/routes/purchases/fabric-receivings';
 import pos from '@/routes/purchases/pos';
 import orders from '@/routes/sales/orders';
+import master from '@/routes/settings/master';
 import masterReceivings from '@/routes/settings/master/fabric-receivings';
 
 function DateCell({ date }) {
@@ -203,6 +205,7 @@ const FabricReceivingReopenIndex = () => {
             <PageHeader
                 title="Reopen Receivings"
                 description="Find a receiving by its reference number to see its vouchers and sales, then reopen it to correct stock and prices."
+                buttons={<BackButton href={master.index()} label="Master Actions" />}
             />
 
             <PageContent>

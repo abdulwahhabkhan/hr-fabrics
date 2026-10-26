@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Role;
 use App\Models\Sales\Order;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
 
@@ -168,3 +171,24 @@ it('allows inventory on a closed order when user has the permission', function (
 
     expect($user->can('inventory', $order))->toBeTrue();
 });
+
+it('allows a master user to allocate a confirmed order that is not fully allocated', function () {
+    $user = User::factory()->master()->create(['role_id' => Role::factory()->create()->id]);
+    $order = Order::factory()->closed()->create();
+
+    expect($user->can('masterAllocate', $order))->toBeTrue();
+});
+
+it('refuses master allocate', function (Closure $arrange, bool $isMaster, string $message) {
+    $user = User::factory()->create(['role_id' => Role::factory()->create()->id, 'is_master' => $isMaster]);
+    $order = $arrange();
+
+    $response = Gate::forUser($user)->inspect('masterAllocate', $order);
+
+    expect($response->denied())->toBeTrue()
+        ->and((string) $response->message())->toBe($message);
+})->with([
+    'not a master user' => [fn () => Order::factory()->closed()->create(), false, 'Only master users can allocate orders'],
+    'order still open' => [fn () => Order::factory()->create(), true, 'Order is not confirmed'],
+    'order already allocated' => [fn () => Order::factory()->closed()->allocated()->create(), true, 'Order is already allocated'],
+]);

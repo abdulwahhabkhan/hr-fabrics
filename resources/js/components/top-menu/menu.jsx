@@ -31,7 +31,7 @@ import journalReport from '@/routes/reports/journal-report';
 import users from '@/routes/settings/users';
 import roles from '@/routes/settings/roles';
 import cities from '@/routes/settings/cities';
-import masterReceivings from '@/routes/settings/master/fabric-receivings';
+import master from '@/routes/settings/master';
 // import employees from '@/routes/settings/employees';
 
 const Menu = [
@@ -360,9 +360,9 @@ const Menu = [
             },
             // Master users only (users.is_master); not part of role permissions.
             {
-                path: masterReceivings.index().url,
-                title: 'Reopen Receivings',
-                name: 'settings.master.fabric-receivings.index',
+                path: master.index().url,
+                title: 'Master Actions',
+                name: 'settings.master.index',
                 master: true,
             },
             // Employees & attendance disabled for now.

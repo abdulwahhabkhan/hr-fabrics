@@ -4,6 +4,7 @@ namespace App\Actions\Inbound\FabricReceiving;
 
 use App\Actions\Inbound\Purchase\UpdateStockPrice;
 use App\Actions\Outbound\SaleOrders\IssueOrderInventory;
+use App\Actions\Outbound\SaleOrders\SyncOrderAllocation;
 use App\Enums\Module;
 use App\Enums\PackingType;
 use App\Enums\TransactionType;
@@ -70,8 +71,8 @@ final class FabricReceivingConfirmed
     }
 
     /**
-     * Free every line booked by the sale orders that hold this receiving's stock, and return the confirmed ones
-     * in the order they were sold so they can be booked again first-in first-out.
+     * Free every line booked by the sale orders that hold this receiving's stock, mark the open ones unallocated,
+     * and return the confirmed ones in the order they were sold so they can be booked again first-in first-out.
      *
      * @return Collection<int, Order>
      *
@@ -100,6 +101,10 @@ final class FabricReceivingConfirmed
                 'outbound_on' => null,
             ]);
 
-        return $orders->filter(fn (Order $order): bool => $order->isClosed())->values();
+        [$closed, $open] = $orders->partition(fn (Order $order): bool => $order->isClosed());
+        $syncOrderAllocation = resolve(SyncOrderAllocation::class);
+        $open->each(fn (Order $order) => $syncOrderAllocation->handle($order));
+
+        return $closed->values();
     }
 }

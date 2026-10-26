@@ -6,6 +6,7 @@ use App\Actions\Inbound\FabricReceiving\FabricReceivingConfirmed;
 use App\Actions\Inbound\FabricReceiving\MasterReopenFabricReceiving;
 use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Actions\Outbound\SaleOrders\ConfirmOrder;
+use App\Enums\OrderAllocation;
 use App\Enums\PackingType;
 use App\Enums\StatusText;
 use App\Models\Accounts\Journal;
@@ -113,7 +114,8 @@ test('confirming the corrected receiving and voucher reallocates the sale order 
         'transaction_date' => '2026-10-01 00:00:00',
     ]);
     assertDatabaseCount(Inventory::class, 2);
-    expect($this->receiving->refresh()->invoiced)->toBeTrue();
+    expect($this->receiving->refresh()->invoiced)->toBeTrue()
+        ->and($this->order->refresh()->allocation)->toBe(OrderAllocation::Allocated);
     assertDatabaseHas(Journal::class, ['resource_id' => $this->purchase->id, 'posted_at' => '2026-10-02']);
 });
 

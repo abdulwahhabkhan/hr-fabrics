@@ -17,6 +17,11 @@ class DashboardController extends Controller
      */
     protected const int TREND_DAYS = 14;
 
+    /**
+     * Number of confirmed but not fully allocated orders listed on the dashboard.
+     */
+    protected const int UNALLOCATED_LIMIT = 8;
+
     public function __invoke(Request $request): Response
     {
         $today = today();
@@ -25,6 +30,7 @@ class DashboardController extends Controller
             'stats' => Inertia::defer(fn (): array => $this->todayStats($today), 'stats'),
             'trend' => Inertia::defer(fn (): array => $this->salesTrend($today), 'trend'),
             'recent_orders' => $this->recentOrders(),
+            'unallocated_orders' => Inertia::defer(fn (): array => $this->unallocatedOrders(), 'unallocated'),
         ]);
     }
 
@@ -110,5 +116,36 @@ class DashboardController extends Controller
                 'transaction_date' => $order->transaction_date ?? $order->created_at,
             ])
             ->all();
+    }
+
+    /**
+     * Confirmed orders whose meters are not fully booked against stock, oldest first, with the total count.
+     *
+     * @return array{total: int, rows: list<array{id: int, invoice_no: ?string, customer_name: ?string, city: ?string, net_total: int, allocation: int, allocation_label: string, transaction_date: mixed}>}
+     */
+    protected function unallocatedOrders(): array
+    {
+        $query = Order::query()->confirmed()->notFullyAllocated();
+
+        return [
+            'total' => (clone $query)->count(),
+            'rows' => $query
+                ->withCustomer()
+                ->oldest(Order::qCol('transaction_date'))
+                ->oldest(Order::qCol('id'))
+                ->limit(self::UNALLOCATED_LIMIT)
+                ->get()
+                ->map(fn (Order $order): array => [
+                    'id' => $order->id,
+                    'invoice_no' => $order->invoice_no,
+                    'customer_name' => $order->customer_name,
+                    'city' => $order->city,
+                    'net_total' => (int) $order->net_total,
+                    'allocation' => $order->allocation->value,
+                    'allocation_label' => $order->allocation->label(),
+                    'transaction_date' => $order->transaction_date,
+                ])
+                ->all(),
+        ];
     }
 }

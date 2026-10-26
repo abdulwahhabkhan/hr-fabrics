@@ -4,6 +4,7 @@ namespace App\Models\Sales;
 
 use App\Casts\FloorInteger;
 use App\Enums\DiscountType;
+use App\Enums\OrderAllocation;
 use App\Enums\OrderPaid;
 use App\Enums\OrderStatus;
 use App\Models\Accounts\Account;
@@ -49,6 +50,7 @@ class Order extends Model implements Fileable, Journalable, Logable
 
     protected $casts = [
         'agent_rate' => AsCollection::class,
+        'allocation' => OrderAllocation::class,
         'details' => AsCollection::class,
         'total' => FloorInteger::class,
         'total_qty' => 'float',
@@ -135,6 +137,15 @@ class Order extends Model implements Fileable, Journalable, Logable
     protected function confirmed(Builder $query): Builder
     {
         return $query->where('status', OrderStatus::Close);
+    }
+
+    /**
+     * Orders whose meters are not fully booked against stock.
+     */
+    #[Scope]
+    protected function notFullyAllocated(Builder $query): Builder
+    {
+        return $query->where(self::qCol('allocation'), '!=', OrderAllocation::Allocated);
     }
 
     protected function getNetBalanceAttribute()

@@ -8,7 +8,7 @@ import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Moment } from '@/components/Moment';
 import NoData from '@/components/NoData.jsx';
-import { OrderStatus } from '@/components/sales/OrderTable.jsx';
+import { OrderAllocation, OrderStatus } from '@/components/sales/OrderTable.jsx';
 import orders from '@/routes/sales/orders';
 import pos from '@/routes/purchases/pos';
 import reports from '@/routes/reports';
@@ -315,8 +315,88 @@ function RecentOrders({ rows, canView }) {
     );
 }
 
+function UnallocatedOrders({ data, canView }) {
+    const { total, rows } = data;
+
+    return (
+        <Panel className="hf-activity-panel hf-unallocated-panel">
+            <PanelHeader
+                heading={
+                    <>
+                        Confirmed, not allocated{' '}
+                        {total > 0 && <span className="hf-count-badge">{total}</span>}
+                    </>
+                }
+                buttons={
+                    total > rows.length && (
+                        <span className="hf-muted-value small">Oldest {rows.length} of {total}</span>
+                    )
+                }
+            />
+            <PanelBody>
+                {rows.length ? (
+                    <ul className="hf-activity">
+                        {rows.map(({ id, invoice_no, customer_name, city, net_total, allocation, transaction_date }) => (
+                            <li key={id}>
+                                <div className="hf-activity-main">
+                                    {canView ? (
+                                        <InertiaLink href={orders.show(id)} className="hf-link hf-mono">
+                                            {invoice_no || `#${id}`}
+                                        </InertiaLink>
+                                    ) : (
+                                        <span className="hf-mono">{invoice_no || `#${id}`}</span>
+                                    )}
+                                    <span className="hf-activity-party">
+                                        {customer_name}
+                                        {city && <span className="hf-muted-value">, {city}</span>}
+                                    </span>
+                                </div>
+                                <div className="hf-activity-side">
+                                    <span className="hf-mono fw-semibold">
+                                        <Amount value={net_total} />
+                                    </span>
+                                    <span className="hf-muted-value small">
+                                        <Moment date={transaction_date} />
+                                    </span>
+                                </div>
+                                <OrderAllocation allocation={allocation} />
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <NoData
+                        icon="solar:check-circle-bold-duotone"
+                        label="All confirmed orders are allocated."
+                    />
+                )}
+            </PanelBody>
+        </Panel>
+    );
+}
+
+function UnallocatedOrdersSkeleton() {
+    return (
+        <Panel className="hf-activity-panel hf-unallocated-panel">
+            <PanelHeader heading="Confirmed, not allocated" />
+            <PanelBody>
+                <ul className="hf-activity" aria-busy="true">
+                    {[0, 1, 2].map((index) => (
+                        <li key={index}>
+                            <div className="hf-activity-main gap-1">
+                                <span className="hf-skeleton hf-skeleton-line shimmer-loader" />
+                                <span className="hf-skeleton hf-skeleton-line shimmer-loader w-50" />
+                            </div>
+                            <span className="hf-skeleton hf-skeleton-line shimmer-loader" />
+                        </li>
+                    ))}
+                </ul>
+            </PanelBody>
+        </Panel>
+    );
+}
+
 const Dashboard = () => {
-    const { stats, trend, recent_orders, auth } = usePage().props;
+    const { stats, trend, recent_orders, unallocated_orders, auth } = usePage().props;
     const permissions = auth?.permissions ?? [];
     const can = (name) => permissions.includes(name);
     const firstName = auth?.user?.name?.split(' ')[0];
@@ -373,6 +453,13 @@ const Dashboard = () => {
                         canView={can('sales.orders.index')}
                     />
                 </div>
+
+                <Deferred data="unallocated_orders" fallback={<UnallocatedOrdersSkeleton />}>
+                    <UnallocatedOrders
+                        data={unallocated_orders}
+                        canView={can('sales.orders.index')}
+                    />
+                </Deferred>
             </PageContent>
         </>
     );

@@ -9,7 +9,7 @@ use App\Models\Sales\Order;
 final class IssueOrderInventory
 {
     /**
-     * Book stock for every order item, dated on the order's transaction date.
+     * Book stock for every order item, dated on the order's transaction date, then record the order's allocation.
      *
      * @throws UnableToAllocateStockException
      */
@@ -28,5 +28,7 @@ final class IssueOrderInventory
                 ->setMeters($item->total_qty)
                 ->issue();
         }
+
+        resolve(SyncOrderAllocation::class)->handle($order);
     }
 }
