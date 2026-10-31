@@ -76,7 +76,6 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $data['created_by'] = $request->user()->id;
-        $data['size'] ??= 0;
         Product::query()->create($data);
 
         return Redirect::route('catalog.products.index')->with(['success' => 'Product created successfully']);
@@ -111,7 +110,6 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
         $data = $request->validated();
-        $data['size'] ??= 0;
         $product->update($data);
 
         return Redirect::route('catalog.products.index')->with(['success' => 'Product updated successfully']);

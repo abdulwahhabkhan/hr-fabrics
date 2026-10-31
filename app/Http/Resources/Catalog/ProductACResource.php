@@ -19,7 +19,7 @@ class ProductACResource extends JsonResource
         $product_info = [
             $this->name,
             $this->finish,
-            '('.$this->brand_name.')',
+            $this->brand_name ? '('.$this->brand_name.')' : null,
         ];
 
         return [
@@ -32,7 +32,7 @@ class ProductACResource extends JsonResource
             'unit' => $this->unit ?? '',
             'size' => $this->size,
             'brand_id' => $this->brand_id,
-            'product_info' => implode(' ', $product_info),
+            'product_info' => implode(' ', array_filter($product_info)),
         ];
     }
 }

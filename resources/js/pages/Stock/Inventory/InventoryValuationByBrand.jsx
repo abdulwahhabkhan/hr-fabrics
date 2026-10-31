@@ -55,8 +55,7 @@ const InventoryValuationByBrand = () => {
                                                         {index + 1}
                                                     </td>
                                                     <td>
-                                                        {brand_name}
-                                                        {product_name}
+                                                        {product_name ?? brand_name ?? 'No brand'}
                                                     </td>
                                                     {product_name && (
                                                         <td className="w-1">

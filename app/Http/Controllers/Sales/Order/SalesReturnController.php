@@ -140,7 +140,7 @@ class SalesReturnController extends Controller
                     'name' => $item->product?->name,
                     'finish' => $item->product?->finish,
                     'is_box' => (int) $item->product?->is_box,
-                    'product_info' => $item->product?->name.' '.$item->product?->finish.' ('.$item->product?->brand?->name.')',
+                    'product_info' => $item->product?->name.' '.$item->product?->finish.($item->product?->brand ? ' ('.$item->product->brand->name.')' : ''),
                 ],
                 'name' => $item->product?->name,
                 'unit' => $item->unit->value,

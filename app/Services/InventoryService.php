@@ -65,7 +65,8 @@ class InventoryService
     public function inventoryValuationByBrand(?int $brandId = null): Builder
     {
         return Inventory::query()
-            ->joinRelation('product.brand')
+            ->joinRelation('product')
+            ->leftJoin(Brand::tName(), Product::qCol('brand_id'), '=', Brand::qCol('id'))
             ->select([
                 Brand::qCol('name  as brand_name'),
                 Inventory::qCol('cost  as cost'),

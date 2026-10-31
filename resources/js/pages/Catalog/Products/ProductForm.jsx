@@ -164,13 +164,13 @@ const ProductForm = () => {
                                         </label>
                                     </Col>
                                     <Col sm={6} lg={3}>
-                                        <FormField label="Purchase price" htmlFor="cost" required>
+                                        <FormField label="Purchase price" htmlFor="cost">
                                             <InputGroup className="hf-amount">
                                                 <InputGroup.Text>Rs</InputGroup.Text>
                                                 <Form.Control
                                                     id="cost"
                                                     inputMode="decimal"
-                                                    {...register('cost', { required: true })}
+                                                    {...register('cost')}
                                                     isInvalid={errors.cost}
                                                     placeholder={'0'}
                                                 />
@@ -178,13 +178,13 @@ const ProductForm = () => {
                                         </FormField>
                                     </Col>
                                     <Col sm={6} lg={3}>
-                                        <FormField label="Unit price" htmlFor="unit_price" required>
+                                        <FormField label="Unit price" htmlFor="unit_price">
                                             <InputGroup className="hf-amount">
                                                 <InputGroup.Text>Rs</InputGroup.Text>
                                                 <Form.Control
                                                     id="unit_price"
                                                     inputMode="decimal"
-                                                    {...register('unit_price', { required: true })}
+                                                    {...register('unit_price')}
                                                     isInvalid={errors.unit_price}
                                                     placeholder={'0'}
                                                 />
@@ -193,13 +193,13 @@ const ProductForm = () => {
                                     </Col>
                                     {isBox != 1 && (
                                         <Col sm={6} lg={3}>
-                                            <FormField label="Suit price" htmlFor="suit_price" required>
+                                            <FormField label="Suit price" htmlFor="suit_price">
                                                 <InputGroup className="hf-amount">
                                                     <InputGroup.Text>Rs</InputGroup.Text>
                                                     <Form.Control
                                                         id="suit_price"
                                                         inputMode="decimal"
-                                                        {...register('suit_price', { required: true })}
+                                                        {...register('suit_price')}
                                                         isInvalid={errors.suit_price}
                                                         placeholder={'0'}
                                                     />
@@ -209,11 +209,11 @@ const ProductForm = () => {
                                     )}
                                     {isBox == 1 && (
                                         <Col sm={6} lg={3}>
-                                            <FormField label="Size" htmlFor="size" required>
+                                            <FormField label="Size" htmlFor="size">
                                                 <Form.Control
                                                     id="size"
                                                     inputMode="decimal"
-                                                    {...register('size', { required: true })}
+                                                    {...register('size')}
                                                     isInvalid={errors.size}
                                                     placeholder={'e.g. 5.5'}
                                                 />

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PackingType;
+use App\Http\Resources\Catalog\ProductACResource;
 use App\Models\Accounts\Account;
 use App\Models\Catalog\Brand;
 use App\Models\Catalog\Product;
@@ -22,6 +23,16 @@ it('returns products ordered by name with their brand name', function () {
 
     expect($products->pluck('name')->all())->toBe(['Alpha', 'Zebra'])
         ->and($products->first()->brand_name)->toBe('Acme');
+});
+
+it('includes products without a brand in the autocomplete list', function () {
+    $product = Product::factory()->create(['name' => 'Unbranded', 'finish' => 'Matte', 'brand_id' => null]);
+
+    $products = $this->service->autocompleteProducts();
+
+    expect($products->pluck('id'))->toContain($product->id)
+        ->and(ProductACResource::make($products->firstWhere('id', $product->id))->resolve()['product_info'])
+        ->toBe('Unbranded Matte');
 });
 
 it('caches the autocomplete product list', function () {
@@ -82,6 +93,13 @@ it('only returns products that have available inventory', function () {
 
     expect($products->pluck('id'))->toContain($available->id)
         ->not->toContain($unavailable->id);
+});
+
+it('includes products without a brand in the available list', function () {
+    $product = Product::factory()->create(['brand_id' => null]);
+    $this->addInventory($product, PackingType::Thaan, 2, 10);
+
+    expect($this->service->availableProducts()->pluck('id'))->toContain($product->id);
 });
 
 it('caches the available products list', function () {

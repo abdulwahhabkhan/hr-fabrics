@@ -21,15 +21,29 @@ class ProductRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
-            'description' => ['max:240'],
-            'size' => ['nullable', 'numeric'],
-            'cost' => ['required', 'numeric'],
-            'unit_price' => ['required', 'numeric'],
-            'suit_price' => ['required_if:is_box,0', 'nullable', 'numeric'],
+            'description' => ['nullable', 'max:240'],
+            'size' => ['numeric'],
+            'cost' => ['numeric'],
+            'unit_price' => ['numeric'],
+            'suit_price' => ['numeric'],
             'finish' => ['required', 'string', 'max:30'],
-            'brand_id' => ['required', 'exists:brands,id'],
-            'vendor_id' => ['required', 'exists:accounts,id'],
-            'is_box' => ['required', 'boolean'],
+            'brand_id' => ['nullable', 'exists:brands,id'],
+            'vendor_id' => ['nullable', 'exists:accounts,id'],
+            'is_box' => ['boolean'],
         ];
+    }
+
+    /**
+     * Default the optional numeric fields, whose columns do not accept null.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'size' => $this->input('size') ?? 0,
+            'cost' => $this->input('cost') ?? 0,
+            'unit_price' => $this->input('unit_price') ?? 0,
+            'suit_price' => $this->input('suit_price') ?? 0,
+            'is_box' => $this->input('is_box') ?? 0,
+        ]);
     }
 }

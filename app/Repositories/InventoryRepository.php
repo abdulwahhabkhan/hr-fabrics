@@ -65,7 +65,7 @@ class InventoryRepository
         ]);
         if (! $filters['brand_id']) {
             $query->selectRaw("'' as finish");
-            $query->join(Brand::tName(), fn (JoinClause $join) => $join->on(Product::qCol('brand_id'), '=', Brand::qCol('id')));
+            $query->leftJoin(Brand::tName(), fn (JoinClause $join) => $join->on(Product::qCol('brand_id'), '=', Brand::qCol('id')));
             $query->groupBy('brand_id', 'finish');
             $query->groupBy(Brand::qCol('name'));
         } else {

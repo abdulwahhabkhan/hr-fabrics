@@ -158,6 +158,76 @@ test('add suit product', function () {
     $this->assertDatabaseHas(Product::tName(), $body);
 });
 
+test('add product with only name and finish', function (array $optionalFields) {
+    // Arrange
+    $body = ['name' => 'Plain Fabric', 'finish' => 'Wash & Wear'] + $optionalFields;
+
+    // Act
+    $response = $this->post(route('catalog.products.store'), $body);
+
+    // Assert
+    $response->assertSessionHasNoErrors();
+    $response->assertStatus(302);
+    $this->assertDatabaseHas(Product::tName(), [
+        'name' => 'Plain Fabric',
+        'finish' => 'Wash & Wear',
+        'brand_id' => null,
+        'vendor_id' => null,
+        'description' => null,
+        'is_box' => 0,
+        'size' => 0,
+        'cost' => 0,
+        'unit_price' => 0,
+        'suit_price' => 0,
+    ]);
+})->with([
+    'optional fields omitted' => [[]],
+    'optional fields left blank' => [[
+        'description' => '',
+        'size' => '',
+        'cost' => '',
+        'unit_price' => '',
+        'suit_price' => '',
+        'brand_id' => null,
+        'vendor_id' => null,
+        'is_box' => false,
+    ]],
+]);
+
+test('name and finish are required to add a product', function () {
+    // Act
+    $response = $this->post(route('catalog.products.store'), []);
+
+    // Assert
+    $response->assertSessionHasErrors(['name', 'finish']);
+    $this->assertDatabaseCount(Product::tName(), 0);
+});
+
+test('optional product fields are still validated when filled', function () {
+    // Act
+    $response = $this->post(route('catalog.products.store'), [
+        'name' => 'Plain Fabric',
+        'finish' => 'Wash & Wear',
+        'cost' => 'abc',
+        'brand_id' => 999999,
+    ]);
+
+    // Assert
+    $response->assertSessionHasErrors(['cost', 'brand_id']);
+});
+
+test('display edit form for a product without a brand', function () {
+    // Arrange
+    $product = Product::factory()->create(['brand_id' => null]);
+
+    // Act
+    $response = $this->get(route('catalog.products.edit', $product->id));
+
+    // Assert
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page->where('product.brand', null));
+});
+
 test('update box product', function () {
     // Arrange
     $body = getPayload();
