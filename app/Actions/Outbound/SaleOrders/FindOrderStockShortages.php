@@ -8,9 +8,9 @@ use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
 use Illuminate\Support\Collection;
 
-final class FindOrderStockShortages
+final readonly class FindOrderStockShortages
 {
-    public function __construct(private readonly CheckStockAvailability $checkStockAvailability) {}
+    public function __construct(private CheckStockAvailability $checkStockAvailability) {}
 
     /**
      * Describe every product the order cannot be supplied with from the stock at its location. Lines drawing on the
