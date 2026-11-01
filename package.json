@@ -71,7 +71,8 @@
   "allowScripts": {
     "fsevents@2.3.3": true,
     "@parcel/watcher@2.5.6": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "core-js@3.50.0": true
   },
   "overrides": {
     "eslint-plugin-react": {
