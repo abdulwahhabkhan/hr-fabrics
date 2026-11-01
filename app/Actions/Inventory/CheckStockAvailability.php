@@ -40,19 +40,29 @@ class CheckStockAvailability
      */
     public function handle(int $productId, PackingType $unit, StockLocation $location, int $qty, float $meters, float $size = 0): void
     {
+        $shortage = $this->shortage($productId, $unit, $location, $qty, $meters, $size);
+
+        if ($shortage !== null) {
+            throw ValidationException::withMessages(['qty' => $shortage]);
+        }
+    }
+
+    /**
+     * Describe how the stock at the location falls short of the requested quantity and meters, if it does.
+     */
+    public function shortage(int $productId, PackingType $unit, StockLocation $location, int $qty, float $meters, float $size = 0): ?string
+    {
         $available = $this->available($productId, $unit, $location, $size);
         $sizeLabel = $unit !== PackingType::Thaan ? " of size {$size}" : '';
 
         if ($unit !== PackingType::Thaan && $qty > $available['qty']) {
-            throw ValidationException::withMessages([
-                'qty' => "Only {$available['qty']} {$unit->value}{$sizeLabel} available at {$location->label()}.",
-            ]);
+            return "Only {$available['qty']} {$unit->value}{$sizeLabel} available at {$location->label()}.";
         }
 
         if (round($meters, 2) > $available['meters']) {
-            throw ValidationException::withMessages([
-                'qty' => "Only {$available['meters']} meters{$sizeLabel} available at {$location->label()}.",
-            ]);
+            return "Only {$available['meters']} meters{$sizeLabel} available at {$location->label()}.";
         }
+
+        return null;
     }
 }

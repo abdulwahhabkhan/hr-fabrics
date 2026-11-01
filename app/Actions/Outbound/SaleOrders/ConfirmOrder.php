@@ -7,6 +7,7 @@ use App\Exceptions\ActionNotAllowedException;
 use App\Models\Sales\Order;
 use App\Models\User;
 use App\Services\AccountService;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class ConfirmOrder
@@ -18,6 +19,10 @@ class ConfirmOrder
     {
         if (! $order->isClosed()) {
             throw ActionNotAllowedException::actionNotAllowed('Confirm Order for Open order '.$order->id);
+        }
+        $shortages = resolve(FindOrderStockShortages::class)->handle($order);
+        if ($shortages !== []) {
+            throw ValidationException::withMessages(['product' => implode(' ', $shortages)]);
         }
         $accountService = resolve(AccountService::class);
         resolve(RecordAction::class)->handle($order, $user, 'SO confirmed by user');
