@@ -16,6 +16,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PackingType;
 use App\Enums\PaymentMode;
 use App\Enums\PurchaseType;
+use App\Enums\StockLocation;
 use App\Exceptions\UnableToAllocateStockException;
 use App\Facades\Permission;
 use App\Http\Controllers\Sales\Order\OrderController;
@@ -745,6 +746,107 @@ test('order confirm fails when stock cannot be allocated', function () {
 
     // Assert
     $response->assertSessionHasErrors('product');
+});
+
+/**
+ * @return array<string, mixed>
+ */
+function closeOrderPayload(Order $order): array
+{
+    return [
+        'purchase_type' => PurchaseType::InPerson->value,
+        'payment_mode' => PaymentMode::Cash->value,
+        'status' => OrderStatus::Close->value,
+        'discount' => 0,
+        'discount_type' => DiscountType::FixedPerMeter->value,
+        'customer' => $order->customer,
+    ];
+}
+
+test('order confirm is blocked and nothing is posted when stock is not available', function (PackingType $unit, int $stockQty) {
+    // Arrange
+    Permission::fake(['sales.orders.update' => true]);
+    $this->creatCashAccount();
+    $order = Order::factory()->create();
+    $item = OrderItem::factory()->create([
+        'order_id' => $order->id, 'unit' => $unit, 'qty' => 2, 'size' => 5.5, 'total_qty' => 11,
+    ]);
+    if ($stockQty > 0) {
+        $this->addInventory($item->product, $unit, $stockQty, 5.5);
+    }
+
+    // Act
+    $response = $this->put(route('sales.orders.update', $order->id), closeOrderPayload($order));
+
+    // Assert
+    $response->assertSessionHasErrors('product');
+    expect(session('errors')->first('product'))->toContain($item->product->name);
+    assertDatabaseHas(Order::class, ['id' => $order->id, 'status' => OrderStatus::Open->value]);
+    assertDatabaseCount(Journal::class, 0);
+    assertDatabaseMissing(Inventory::class, ['outbound_id' => $order->id]);
+    assertDatabaseMissing(Log::class, ['loggable_id' => $order->id, 'loggable_type' => $order->getMorphClass()]);
+})->with([
+    'box without stock' => [PackingType::Box, 0],
+    'suit without stock' => [PackingType::Suit, 0],
+    'thaan without stock' => [PackingType::Thaan, 0],
+    'box partly in stock' => [PackingType::Box, 1],
+    'suit partly in stock' => [PackingType::Suit, 1],
+    'thaan partly in stock' => [PackingType::Thaan, 1],
+]);
+
+test('order confirm is blocked when the stock is at another location', function () {
+    // Arrange
+    Permission::fake(['sales.orders.update' => true]);
+    $this->creatCashAccount();
+    $order = Order::factory()->create();
+    $item = OrderItem::factory()->thaan()->create(['order_id' => $order->id, 'location' => StockLocation::Shop]);
+    $this->addInventory($item->product, $item->unit, $item->qty, $item->size);
+    Inventory::query()->update(['location' => StockLocation::WarehouseFSD]);
+
+    // Act
+    $response = $this->put(route('sales.orders.update', $order->id), closeOrderPayload($order));
+
+    // Assert
+    $response->assertSessionHasErrors('product');
+    assertDatabaseHas(Order::class, ['id' => $order->id, 'status' => OrderStatus::Open->value]);
+});
+
+test('order confirm is blocked when lines together exceed the stock', function () {
+    // Arrange
+    Permission::fake(['sales.orders.update' => true]);
+    $this->creatCashAccount();
+    $product = Product::factory()->create();
+    $order = Order::factory()->create();
+    OrderItem::factory()->count(2)->create([
+        'order_id' => $order->id, 'product_id' => $product->id, 'unit' => PackingType::Box,
+        'qty' => 2, 'size' => 5.5, 'total_qty' => 11,
+    ]);
+    $this->addInventory($product, PackingType::Box, 3, 5.5);
+
+    // Act
+    $response = $this->put(route('sales.orders.update', $order->id), closeOrderPayload($order));
+
+    // Assert
+    $response->assertSessionHasErrors('product');
+    expect(session('errors')->first('product'))->toContain($product->name, 'Only 3 Box');
+    assertDatabaseHas(Order::class, ['id' => $order->id, 'status' => OrderStatus::Open->value]);
+    assertDatabaseMissing(Inventory::class, ['outbound_id' => $order->id]);
+});
+
+test('order confirm lists every product short of stock', function () {
+    // Arrange
+    Permission::fake(['sales.orders.update' => true]);
+    $this->creatCashAccount();
+    $order = Order::factory()->create();
+    $items = OrderItem::factory()->thaan()->count(2)->create(['order_id' => $order->id]);
+
+    // Act
+    $response = $this->put(route('sales.orders.update', $order->id), closeOrderPayload($order));
+
+    // Assert
+    $response->assertSessionHasErrors('product');
+    expect(session('errors')->first('product'))
+        ->toContain($items[0]->product->name, $items[1]->product->name);
 });
 
 test('sale order create page can be rendered', function () {

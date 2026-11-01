@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Sales\Order;
 
-use App\Actions\Inventory\CheckStockAvailability;
+use App\Actions\Outbound\SaleOrders\FindOrderStockShortages;
 use App\Actions\Outbound\SaleOrders\UpdateOrderTotal;
 use App\Enums\PackingType;
 use App\Enums\StockLocation;
@@ -30,7 +30,7 @@ class AddOrderItemController extends Controller
         Request $request,
         OrderService $orderService,
         UpdateOrderTotal $updateOrderTotal,
-        CheckStockAvailability $checkStockAvailability
+        FindOrderStockShortages $findOrderStockShortages
     ) {
         $this->orderService = $orderService;
         $validated = $request->validate([
@@ -46,15 +46,6 @@ class AddOrderItemController extends Controller
             'location' => ['nullable', Rule::enum(StockLocation::class)],
         ]);
         $validated['location'] = StockLocation::tryFrom((string) ($validated['location'] ?? '')) ?? StockLocation::Shop;
-        $unit = PackingType::from($validated['unit']);
-        $checkStockAvailability->handle(
-            (int) $validated['product']['product_id'],
-            $unit,
-            $validated['location'],
-            (int) $validated['qty'],
-            (float) $validated['qty'] * (float) $validated['size'],
-            (float) $validated['size'],
-        );
         unset($validated['over_sold']);
         DB::transaction(function () use ($updateOrderTotal, $validated, $order) {
             $this->addItem($validated, $order);
@@ -66,6 +57,7 @@ class AddOrderItemController extends Controller
 
         return response()->json([
             'items' => OrderItemResource::collection($items),
+            'stock_warnings' => $findOrderStockShortages->handle($order),
         ]);
     }
 

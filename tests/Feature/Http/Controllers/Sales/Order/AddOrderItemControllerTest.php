@@ -10,7 +10,7 @@ use App\Models\Stock\Inventory;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-test('add item without stock at the location is rejected',
+test('add item without stock at the location is saved with a warning',
     function (PackingType $unit, float $size, int $qty, float $price) {
         // Arrange
         $user = $this->getAdmin();
@@ -32,18 +32,20 @@ test('add item without stock at the location is rejected',
             ->postJson(route('ajax.so.item.add', $order->id), $post);
 
         // Assert
-        $response->assertUnprocessable()->assertJsonValidationErrors('qty');
-        assertDatabaseCount(OrderItem::class, 0);
+        $response->assertOk()->assertJsonCount(1, 'items');
+        expect($response->json('stock_warnings.0'))->toContain($product->name, 'available at Shop');
+        assertDatabaseCount(OrderItem::class, 1);
     })->with([
         'thaan' => [PackingType::Thaan, 21, 1, 350],
         'box' => [PackingType::Box, 5.5, 2, 1500],
         'suit' => [PackingType::Suit, 6.5, 3, 1500],
     ]);
 
-test('add item takes stock only from the selected location', function () {
+test('add item warns only when the selected location is short of stock', function () {
     // Arrange
     $user = $this->getAdmin();
-    $order = Order::factory()->create();
+    $shopOrder = Order::factory()->create();
+    $warehouseOrder = Order::factory()->create();
     $product = Product::factory()->create();
     $this->addInventory($product, PackingType::Box, 3, 5.5);
     Inventory::query()->update(['location' => StockLocation::WarehouseFSD]);
@@ -60,19 +62,46 @@ test('add item takes stock only from the selected location', function () {
 
     // Act
     $fromShop = $this->actingAs($user)
-        ->postJson(route('ajax.so.item.add', $order->id), [...$post, 'location' => StockLocation::Shop->value]);
+        ->postJson(route('ajax.so.item.add', $shopOrder->id), [...$post, 'location' => StockLocation::Shop->value]);
     $fromWarehouse = $this->actingAs($user)
-        ->postJson(route('ajax.so.item.add', $order->id), [...$post, 'location' => StockLocation::WarehouseFSD->value]);
+        ->postJson(route('ajax.so.item.add', $warehouseOrder->id), [...$post, 'location' => StockLocation::WarehouseFSD->value]);
 
     // Assert
-    $fromShop->assertUnprocessable()->assertJsonValidationErrors(['qty' => 'available at Shop']);
-    $fromWarehouse->assertOk();
-    assertDatabaseCount(OrderItem::class, 1);
+    $fromShop->assertOk();
+    expect($fromShop->json('stock_warnings.0'))->toContain('available at Shop');
+    $fromWarehouse->assertOk()->assertJsonPath('stock_warnings', []);
+    assertDatabaseCount(OrderItem::class, 2);
     assertDatabaseHas(OrderItem::class, [
-        'order_id' => $order->id,
+        'order_id' => $warehouseOrder->id,
         'product_id' => $product->id,
         'location' => StockLocation::WarehouseFSD->value,
     ]);
+});
+
+test('add item warns when lines of the order together exceed the stock', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $order = Order::factory()->create();
+    $product = Product::factory()->create();
+    $this->addInventory($product, PackingType::Box, 3, 5.5);
+    $product['product_id'] = $product->id;
+    $post = [
+        'product' => $product->toArray(),
+        'unit' => PackingType::Box->value,
+        'size' => 5.5,
+        'price' => 1500,
+        'qty' => 2,
+        'discount' => 0,
+        'commission' => '0',
+    ];
+
+    // Act
+    $firstLine = $this->actingAs($user)->postJson(route('ajax.so.item.add', $order->id), $post);
+    $secondLine = $this->actingAs($user)->postJson(route('ajax.so.item.add', $order->id), $post);
+
+    // Assert
+    $firstLine->assertOk()->assertJsonPath('stock_warnings', []);
+    $secondLine->assertOk()->assertJsonCount(1, 'stock_warnings');
 });
 
 test('add thaan to order', function (PackingType $unit, float $size, int $qty, float $price, float $total) {

@@ -229,11 +229,21 @@ export const OrderItemForm = ({
         })
             .then((res) => {
                 setItems(res.data.items);
-                notifyMessage({
-                    title: 'Success',
-                    type: 'success',
-                    message: isEdit ? 'Item updated' : 'Item added',
-                });
+                const stockWarnings = res.data.stock_warnings ?? [];
+                notifyMessage(
+                    stockWarnings.length > 0
+                        ? {
+                              title: isEdit ? 'Item updated' : 'Item added',
+                              type: 'warning',
+                              message: stockWarnings.join(' '),
+                              timeout: 6000,
+                          }
+                        : {
+                              title: 'Success',
+                              type: 'success',
+                              message: isEdit ? 'Item updated' : 'Item added',
+                          },
+                );
 
                 if (isEdit) {
                     onClose();
@@ -582,9 +592,11 @@ export const OrderItemForm = ({
                         <div className="hf-item-warning">
                             <Icon icon="solar:danger-triangle-bold-duotone" />
                             {errors.qty?.message ||
-                                (matchedStock
-                                    ? `Only ${matchedStock.qty} pcs / ${matchedStock.meters}m available at ${locationLabel(location)} for this unit and size.`
-                                    : `No stock at ${locationLabel(location)} for this unit and size.`)}
+                                `${
+                                    matchedStock
+                                        ? `Only ${matchedStock.qty} pcs / ${matchedStock.meters}m available at ${locationLabel(location)} for this unit and size.`
+                                        : `No stock at ${locationLabel(location)} for this unit and size.`
+                                } You can save this item, but the invoice cannot be confirmed until stock is available.`}
                         </div>
                     )}
 
