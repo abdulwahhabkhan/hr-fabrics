@@ -78,8 +78,8 @@ test('reopen opens the receiving and its voucher, keeping sold stock booked', fu
         ->invoiced->toBeFalse()
         ->and($this->purchase->refresh())
         ->status->toBe(StatusText::Open)
-        ->transaction_date->toDateString()->toBe('2026-10-02');
-    expect($this->purchase->journal()->exists())->toBeFalse();
+        ->transaction_date->toDateString()->toBe('2026-10-02')
+        ->and($this->purchase->journal()->exists())->toBeFalse();
     assertDatabaseCount(Inventory::class, 1);
     assertDatabaseHas(Inventory::class, [
         'outbound_type' => Order::morphClass(),

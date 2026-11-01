@@ -69,9 +69,8 @@ test('allocate fails without changes when stock does not cover the order', funct
     $order = orderNeedingTwentyMeters($product);
 
     expect(fn () => resolve(MasterAllocateOrder::class)->handle($order, $this->user))
-        ->toThrow(ValidationException::class);
-
-    expect($order->refresh()->allocation)->toBe(OrderAllocation::Unallocated)
+        ->toThrow(ValidationException::class)
+        ->and($order->refresh()->allocation)->toBe(OrderAllocation::Unallocated)
         ->and($order->inventories()->exists())->toBeFalse()
         ->and($order->logs()->exists())->toBeFalse();
 });
