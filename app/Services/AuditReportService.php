@@ -59,16 +59,16 @@ class AuditReportService
     public const AREA_DOCUMENT = 'document';
 
     /** Money is stored as whole numbers in journals; allow rounding of fractional amounts. */
-    private const AMOUNT_TOLERANCE = 1;
+    private const int AMOUNT_TOLERANCE = 1;
 
-    private const QTY_TOLERANCE = 0.01;
+    private const float QTY_TOLERANCE = 0.01;
 
-    private const PRICE_TOLERANCE = 0.005;
+    private const float PRICE_TOLERANCE = 0.005;
 
-    private const CHUNK = 1000;
+    private const int CHUNK = 1000;
 
     /** Longest list of items / receivings spelled out in one issue message. */
-    private const MESSAGE_ITEMS = 3;
+    private const int MESSAGE_ITEMS = 3;
 
     /** @var array<int, array<string, mixed>> */
     private array $issues = [];
@@ -104,7 +104,10 @@ class AuditReportService
     }
 
     /**
-     * Check every document dated (or changed) between the two dates, inclusive, and store the result.
+     * Check every document created between the two dates, inclusive, and store the result.
+     *
+     * A confirmed document must hold its inventory and ledger postings; one that is open (never confirmed, or
+     * reopened) or deleted must hold none, however long ago it was reopened.
      */
     public function run(CarbonInterface $start, CarbonInterface $end, ?User $user = null, string $source = 'console'): AuditReport
     {
@@ -456,7 +459,7 @@ class AuditReportService
      */
     private function receivingIds(object $purchase): array
     {
-        return array_values(array_unique(array_map('intval', array_filter(explode(',', (string) $purchase->stock_ids)))));
+        return array_values(array_unique(array_map(intval(...), array_filter(explode(',', (string) $purchase->stock_ids)))));
     }
 
     /**
@@ -490,7 +493,7 @@ class AuditReportService
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Orphans: postings whose document is missing, deleted or no longer confirmed
+    // Orphans: postings whose document is missing, deleted or open (reopened or never confirmed)
     // ---------------------------------------------------------------------------------------------
 
     private function checkOrphans(): void
@@ -507,7 +510,9 @@ class AuditReportService
             DB::table('inventories as i')
                 ->leftJoin("{$table} as d", 'd.id', '=', "i.{$prefix}_id")
                 ->where("i.{$prefix}_type", $morph)
-                ->whereBetween('i.created_at', [$this->from, $this->to])
+                ->where(fn ($query) => $query
+                    ->where(fn ($query) => $query->whereNull('d.id')->whereBetween('i.created_at', [$this->from, $this->to]))
+                    ->orWhere(fn ($query) => $query->whereNotNull('d.id')->whereBetween('d.created_at', [$this->from, $this->to])))
                 ->where(fn ($query) => $query->whereNull('d.id')
                     ->when($deletedColumn, fn ($query) => $query->orWhereNotNull('d.deleted_at'))
                     ->orWhere(fn ($query) => $query->where('d.status', '<>', $closed)
@@ -542,7 +547,9 @@ class AuditReportService
                     ->when($journalsSoftDeleted, fn ($join) => $join->whereNull('jd.deleted_at')))
                 ->where('j.resource_type', $morph)
                 ->when($journalsSoftDeleted, fn ($query) => $query->whereNull('j.deleted_at'))
-                ->whereBetween('j.created_at', [$this->from, $this->to])
+                ->where(fn ($query) => $query
+                    ->where(fn ($query) => $query->whereNull('d.id')->whereBetween('j.created_at', [$this->from, $this->to]))
+                    ->orWhere(fn ($query) => $query->whereNotNull('d.id')->whereBetween('d.created_at', [$this->from, $this->to])))
                 ->where(fn ($query) => $query->whereNull('d.id')
                     ->when($deletedColumn, fn ($query) => $query->orWhereNotNull('d.deleted_at'))
                     ->orWhere('d.status', '<>', $closed))
@@ -569,7 +576,7 @@ class AuditReportService
         return match (true) {
             $row->doc_id === null => 'Document no longer exists.',
             ($row->deleted_at ?? null) !== null => 'Document is deleted.',
-            default => 'Document is not confirmed (status: '.$row->status.').',
+            default => 'Document is open (status: '.$row->status.'); it should hold no postings.',
         };
     }
 
@@ -578,7 +585,7 @@ class AuditReportService
     // ---------------------------------------------------------------------------------------------
 
     /**
-     * Confirmed, non-deleted documents dated in the range or changed in it.
+     * Confirmed, non-deleted documents created in the range.
      *
      * @param  array<int, string>  $columns
      * @return Collection<int, object>
@@ -589,9 +596,7 @@ class AuditReportService
             ->select(array_merge(['id', 'transaction_date', 'created_at'], $columns))
             ->when(Schema::hasColumn($table, 'deleted_at'), fn ($query) => $query->whereNull('deleted_at'))
             ->where('status', $closedStatus)
-            ->where(fn ($query) => $query
-                ->whereBetween('transaction_date', [$this->from, $this->to])
-                ->orWhereBetween('updated_at', [$this->from, $this->to]))
+            ->whereBetween('created_at', [$this->from, $this->to])
             ->orderBy('id')
             ->get();
     }

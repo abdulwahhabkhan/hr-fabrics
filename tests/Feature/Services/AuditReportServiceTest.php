@@ -6,8 +6,10 @@ use App\Actions\Inbound\FabricReceiving\FabricReceivingConfirmed;
 use App\Actions\Inbound\Purchase\ConfirmPurchaseActions;
 use App\Actions\Inbound\Purchase\UpdatePurchaseTotal;
 use App\Actions\Outbound\SaleOrders\ConfirmOrder;
+use App\Actions\Outbound\SaleOrders\UnLockOrder;
 use App\Actions\Outbound\SaleOrders\UpdateOrderTotal;
 use App\Actions\Outbound\SaleReturns\ConfirmSaleReturn;
+use App\Enums\OrderStatus;
 use App\Enums\PaymentMode;
 use App\Models\Accounts\Account;
 use App\Models\Accounts\Journal;
@@ -56,7 +58,7 @@ function confirmedSale(array $attributes = [], bool $withCommission = false): Or
 {
     $order = Order::factory()->closed()
         ->has($withCommission ? OrderItem::factory()->commission(2) : OrderItem::factory()->thaan(), 'items')
-        ->create($attributes);
+        ->create(['created_at' => now(), ...$attributes]);
     $item = $order->items->first();
     $stock = FabricReceiving::factory()->confirmed()
         ->has(FabricReceivingItem::factory()->state([
@@ -82,7 +84,7 @@ function confirmedSaleReturn(string $paymentMode = 'Credit'): SalesReturn
     $customer = Account::factory()->customer()->create();
     $return = SalesReturn::factory()->closed()
         ->has(SalesReturnItem::factory()->state(['qty' => 2, 'size' => 10, 'total_qty' => 20, 'total_amount' => 1000]), 'returnItems')
-        ->create(['customer_id' => $customer->id, 'payment_mode' => $paymentMode, 'total_amount' => 1000, 'total_qty' => 20]);
+        ->create(['created_at' => now(), 'customer_id' => $customer->id, 'payment_mode' => $paymentMode, 'total_amount' => 1000, 'total_qty' => 20]);
     resolve(ConfirmSaleReturn::class)->handle($return, test()->user);
 
     return $return->refresh();
@@ -93,7 +95,7 @@ function confirmedSaleReturn(string $paymentMode = 'Credit'): SalesReturn
  */
 function confirmedReceiving(): FabricReceiving
 {
-    $stock = FabricReceiving::factory()->hasItems(1)->confirmed()->create(['invoiced' => false]);
+    $stock = FabricReceiving::factory()->hasItems(1)->confirmed()->create(['invoiced' => false, 'created_at' => now()]);
     resolve(FabricReceivingConfirmed::class)->handle($stock);
 
     return $stock->refresh();
@@ -111,6 +113,7 @@ function confirmedPurchase(FabricReceiving $stock, int $price = 4250): Purchase
         'supplier_id' => $stock->supplier_id,
         'total' => 5000,
         'transaction_date' => today(),
+        'created_at' => now(),
     ]);
     PurchaseItem::factory()->create([
         'purchase_id' => $purchase->id,
@@ -143,7 +146,7 @@ test('a confirmed sale with stock booked and ledger posted has no issues', funct
     $report = runAudit();
 
     expect($report->summary['sale']['checked'])->toBe(1)
-        ->and($report->issues)->toBe([]);
+        ->and($report->issues)->toBeEmpty();
 });
 
 test('a confirmed paid sale with an agent commission has no issues', function () {
@@ -154,7 +157,7 @@ test('a confirmed paid sale with an agent commission has no issues', function ()
 
     expect($report->summary['sale']['checked'])->toBe(2)
         ->and($paid->journal)->not->toBeNull()
-        ->and($report->issues)->toBe([]);
+        ->and($report->issues)->toBeEmpty();
 });
 
 test('a sale whose stock booking was removed is reported as not allocated', function () {
@@ -208,7 +211,7 @@ test('a confirmed sale return with inventory and ledger posted has no issues, in
     $report = runAudit();
 
     expect($report->summary['sale_return']['checked'])->toBe(2)
-        ->and($report->issues)->toBe([]);
+        ->and($report->issues)->toBeEmpty();
 });
 
 test('a sale return without inventory or customer credit is reported', function () {
@@ -238,7 +241,7 @@ test('a confirmed receiving with linked inventory and an invoiced purchase has n
 
     expect($report->summary['fabric_receiving']['checked'])->toBe(2)
         ->and($report->summary['fabric_purchase']['checked'])->toBe(1)
-        ->and($report->issues)->toBe([]);
+        ->and($report->issues)->toBeEmpty();
 });
 
 test('a receiving whose inventory is missing, unlinked or the wrong size is reported', function () {
@@ -269,7 +272,7 @@ test('a receiving whose lot was cut for a sale and moved to another location sti
     $report = runAudit();
 
     expect($report->summary['fabric_receiving']['checked'])->toBe(1)
-        ->and($report->issues)->toBe([]);
+        ->and($report->issues)->toBeEmpty();
 });
 
 test('a receiving reopened by a master keeps its booked stock, but loose stock under it is an orphan', function () {
@@ -278,7 +281,7 @@ test('a receiving reopened by a master keeps its booked stock, but loose stock u
     $stock->update(['status' => 'Open']);
     $line->update(['outbound_type' => 'stock.location-transfer', 'outbound_id' => 1]);
 
-    expect(runAudit()->issues)->toBe([]);
+    expect(runAudit()->issues)->toBeEmpty();
 
     $line->update(['outbound_type' => null, 'outbound_id' => null]);
     $report = runAudit();
@@ -367,4 +370,41 @@ test('the report records who ran it, how and over which period', function () {
         ->and($report->source)->toBe('web')
         ->and($report->start_date->toDateString())->toBe(today()->subDays(2)->toDateString())
         ->and($report->end_date->toDateString())->toBe(today()->toDateString());
+});
+
+test('a reopened sale that still holds stock or ledger lines is reported, whenever they were posted', function () {
+    $order = confirmedSale();
+    $order->update(['status' => OrderStatus::Open->value]);
+    Inventory::query()->update(['created_at' => today()->subDays(30)]);
+    Journal::query()->update(['created_at' => today()->subDays(30)]);
+
+    $report = runAudit();
+
+    expect($report->summary['sale']['checked'])->toBe(0)
+        ->and(failedChecks($report, 'sale'))->toBe(['Orphaned inventory', 'Orphaned journal'])
+        ->and($report->issues[0]['id'])->toBe($order->id);
+});
+
+test('a reopened sale with its stock and ledger released has no issues', function () {
+    $order = confirmedSale();
+    resolve(UnLockOrder::class)->handle($order, $this->user);
+
+    $report = runAudit();
+
+    expect($order->refresh()->status)->toBe(OrderStatus::Open)
+        ->and($report->issues)->toBeEmpty();
+});
+
+test('documents are picked by the date they were created, not their transaction date', function () {
+    $old = confirmedSale(['transaction_date' => today()]);
+    $old->forceFill(['created_at' => today()->subDays(20)])->saveQuietly();
+    confirmedSale(['transaction_date' => today()->subDays(20)]);
+
+    $recent = runAudit();
+    $earlier = resolve(AuditReportService::class)->run(today()->subDays(25), today()->subDays(15));
+
+    expect($recent->summary['sale']['checked'])->toBe(1)
+        ->and($earlier->summary['sale']['checked'])->toBe(1)
+        ->and($recent->issues)->toBeEmpty()
+        ->and($earlier->issues)->toBeEmpty();
 });

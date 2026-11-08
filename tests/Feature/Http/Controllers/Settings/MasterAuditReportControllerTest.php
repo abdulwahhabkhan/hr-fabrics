@@ -56,7 +56,7 @@ test('master users see the stored reports, newest first, without their issues', 
 
 test('master users run an audit that is stored and opened', function () {
     $master = auditMaster();
-    $order = Order::factory()->closed()->create(['allocation' => 2]);
+    $order = Order::factory()->closed()->create(['allocation' => 2, 'created_at' => now()]);
 
     $response = actingAs($master)->post(route('settings.master.audit-reports.store'), [
         'start_date' => today()->toDateString(),

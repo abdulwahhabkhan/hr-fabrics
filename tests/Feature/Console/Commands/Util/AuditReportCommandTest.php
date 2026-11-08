@@ -19,7 +19,7 @@ test('a clean day is stored and succeeds', function () {
 });
 
 test('a day with issues is stored and fails, listing them', function () {
-    Order::factory()->closed()->create(['allocation' => 2, 'invoice_no' => '261100001']);
+    Order::factory()->closed()->create(['allocation' => 2, 'invoice_no' => '261100001', 'created_at' => now()]);
 
     artisan(AuditReportCommand::class, ['--start' => today()->toDateString(), '--end' => today()->toDateString()])
         ->expectsOutputToContain('issue(s) found')

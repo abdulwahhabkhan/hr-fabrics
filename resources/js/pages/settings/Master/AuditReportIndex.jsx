@@ -2,10 +2,11 @@ import React from 'react';
 import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
 import { Head, InertiaLink, useForm, usePage } from '@/util/Inertia';
+import { Icon } from '@iconify/react';
 import { Delete } from '@/components/Actions';
 import { Moment, MomentFull } from '@/components/Moment';
 import BackButton from '@/components/button/back';
-import DateRangePicker from '@/components/DateRangePicker';
+import DateRangeSelector from '@/components/DateRangeSelector';
 import LoadingButton from '@/components/LoadingButton';
 import NoData from '@/components/NoData.jsx';
 import PaginationFull from '@/components/PaginationFull.jsx';
@@ -14,7 +15,7 @@ import AuditReportStatus from '@/components/settings/AuditReportStatus';
 import master from '@/routes/settings/master';
 import auditReports from '@/routes/settings/master/audit-reports';
 
-function RunAuditPanel({ today }) {
+function RunAuditControls({ today }) {
     const { data, setData, post, processing } = useForm({ start_date: today, end_date: today });
 
     const submit = (event) => {
@@ -23,26 +24,17 @@ function RunAuditPanel({ today }) {
     };
 
     return (
-        <Panel>
-            <PanelHeader heading="Run an audit" />
-            <PanelBody>
-                <p className="text-body text-opacity-75">
-                    Checks confirmed sales, sale returns, receivings and fabric purchases dated in the range against
-                    their inventory and ledger postings, and stores the result.
-                </p>
-                <form onSubmit={submit} className="d-lg-flex align-items-center gap-3">
-                    <DateRangePicker
-                        startDate={data.start_date}
-                        endDate={data.end_date}
-                        onChangeStart={(value) => setData('start_date', value)}
-                        onChangeEnd={(value) => setData('end_date', value)}
-                    />
-                    <LoadingButton type="submit" variant="theme" processing={processing} disabled={!data.start_date || !data.end_date}>
-                        Run audit
-                    </LoadingButton>
-                </form>
-            </PanelBody>
-        </Panel>
+        <form onSubmit={submit} className="d-flex align-items-center gap-2">
+            <DateRangeSelector
+                today={today}
+                startDate={data.start_date}
+                endDate={data.end_date}
+                onChange={(start, end) => setData({ start_date: start, end_date: end })}
+            />
+            <LoadingButton type="submit" variant="theme" processing={processing} disabled={!data.start_date || !data.end_date}>
+                Run audit
+            </LoadingButton>
+        </form>
     );
 }
 
@@ -112,12 +104,24 @@ const AuditReportIndex = () => {
             <PageHeader
                 title="Audit Reports"
                 description={meta?.total ? `${meta.total} total` : undefined}
-                buttons={<BackButton href={master.index()} label="Master Actions" />}
+                buttons={
+                    <>
+                        <RunAuditControls today={today} />
+                        <BackButton href={master.index()} label="Master Actions" />
+                    </>
+                }
             />
 
             <PageContent>
                 <ValidationErrors errors={errors} />
-                <RunAuditPanel today={today} />
+                <div className="alert alert-info d-flex align-items-start gap-2" role="alert">
+                    <Icon icon="solar:info-circle-bold-duotone" className="fs-5 flex-shrink-0 mt-1" />
+                    <span>
+                        Checks sales, sale returns, receivings and fabric purchases created in the range. Confirmed
+                        ones must have their inventory and ledger postings; open or reopened ones must have none. The
+                        result is stored.
+                    </span>
+                </div>
 
                 <Panel className="hf-table-panel">
                     <PanelHeader heading="History" />

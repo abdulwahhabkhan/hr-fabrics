@@ -627,3 +627,104 @@
     padding: .5rem .5rem .5rem .625rem;
   }
 }
+
+// Date range selector (react-date-range) — larger calendar, high-contrast text.
+.hf-date-range {
+	.rdrDateRangePickerWrapper {
+		font-size: 16px;
+	}
+
+	.rdrCalendarWrapper,
+	.rdrDefinedRangesWrapper {
+		color: #1f2937;
+		font-size: inherit;
+	}
+
+	.rdrDefinedRangesWrapper {
+		width: 11em;
+
+		.rdrStaticRange {
+			font-size: 0.95em;
+			padding: 0.8em 1.2em;
+
+			&:hover .rdrStaticRangeLabel,
+			&:focus .rdrStaticRangeLabel {
+				background: transparent;
+			}
+		}
+
+		.rdrStaticRangeLabel {
+			color: #1f2937;
+			font-weight: 500;
+		}
+
+		.rdrStaticRangeSelected {
+			color: var(--bs-app-theme, #0d6efd) !important;
+			font-weight: 700;
+
+			.rdrStaticRangeLabel {
+				color: inherit;
+			}
+		}
+	}
+
+	.rdrMonth {
+		width: 26em;
+	}
+
+	.rdrMonthAndYearWrapper {
+		height: 3.6em;
+
+		select {
+			color: #111827;
+			font-size: 1em;
+			font-weight: 600;
+		}
+	}
+
+	.rdrWeekDay {
+		color: #374151;
+		font-size: 0.85em;
+		font-weight: 600;
+		line-height: 2.8em;
+	}
+
+	.rdrDay {
+		height: 3em;
+		line-height: 3em;
+	}
+
+	.rdrDayNumber {
+		font-weight: 500;
+
+		span {
+			color: #111827;
+		}
+	}
+
+	.rdrDayPassive .rdrDayNumber span,
+	.rdrDayDisabled .rdrDayNumber span {
+		color: #9ca3af;
+	}
+
+	.rdrDayDisabled {
+		background: transparent;
+	}
+
+	.rdrDayToday .rdrDayNumber span:after {
+		background: var(--bs-app-theme, #0d6efd);
+	}
+
+	.rdrDayInPreview,
+	.rdrDayStartPreview,
+	.rdrDayEndPreview {
+		color: var(--bs-app-theme, #0d6efd) !important;
+	}
+
+	.rdrInRange ~ .rdrDayNumber span,
+	.rdrStartEdge ~ .rdrDayNumber span,
+	.rdrEndEdge ~ .rdrDayNumber span {
+		color: #fff !important;
+		font-weight: 700;
+	}
+}
