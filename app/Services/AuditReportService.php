@@ -23,6 +23,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use stdClass;
 
 /**
  * Verifies that confirmed sales, sale returns, fabric receivings and fabric purchases have the
@@ -189,7 +190,7 @@ class AuditReportService
     /**
      * Meters booked to the order must equal the meters its items need, item by item, and the stored status must agree.
      *
-     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, object>}|null  $item
+     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, stdClass>}|null  $item
      * @param  array{rows: int, qty: float, meters: float, by_item: array<int, float>}|null  $booked
      */
     private function checkOrderAllocation(object $order, ?array $item, ?array $booked): void
@@ -209,8 +210,8 @@ class AuditReportService
             return;
         }
         $short = collect($item['lines'])
-            ->map(fn (object $line): array => [
-                'id' => $line->id,
+            ->map(fn (stdClass $line): array => [
+                'id' => (int) $line->id,
                 'expected' => round((float) $line->total_qty, 2),
                 'actual' => round((float) ($booked['by_item'][$line->id] ?? 0), 2),
             ])
@@ -376,8 +377,8 @@ class AuditReportService
     /**
      * The purchase's receivings must exist, be confirmed and be marked invoiced. Returns the usable ones.
      *
-     * @param  Collection<int, object>  $receivings
-     * @return Collection<int, object>
+     * @param  Collection<int, stdClass>  $receivings
+     * @return Collection<int, stdClass>
      */
     private function checkPurchaseReceivings(object $purchase, Collection $receivings): Collection
     {
@@ -411,9 +412,9 @@ class AuditReportService
      * Every linked receiving must hold stock, every purchase item must find its stock lines, and those lines must
      * carry the item price (the last item wins when a product repeats, as UpdateStockPrice applies them in order).
      *
-     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, object>}|null  $item
-     * @param  Collection<int, object>  $linked
-     * @param  Collection<int|string, Collection<int, object>>  $stock
+     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, stdClass>}|null  $item
+     * @param  Collection<int, stdClass>  $linked
+     * @param  Collection<int|string, Collection<int, stdClass>>  $stock
      */
     private function checkPurchaseStock(object $purchase, ?array $item, Collection $linked, Collection $stock): void
     {
@@ -455,7 +456,7 @@ class AuditReportService
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int, int>
      */
     private function receivingIds(object $purchase): array
     {
@@ -588,7 +589,7 @@ class AuditReportService
      * Confirmed, non-deleted documents created in the range.
      *
      * @param  array<int, string>  $columns
-     * @return Collection<int, object>
+     * @return Collection<int, stdClass>
      */
     private function documents(string $table, int|string $closedStatus, array $columns): Collection
     {
@@ -605,7 +606,7 @@ class AuditReportService
      * Item rows per document: counts, totals and the lines themselves (ids plus the requested extra columns).
      *
      * @param  array<int, string>  $extraColumns
-     * @return array<int, array{rows: int, qty: float, meters: float, amount: float, lines: array<int, object>}>
+     * @return array<int, array{rows: int, qty: float, meters: float, amount: float, lines: array<int, stdClass>}>
      */
     private function itemTotals(string $table, string $foreignKey, Collection $ids, ?string $amountColumn = null, array $extraColumns = []): array
     {
@@ -667,6 +668,7 @@ class AuditReportService
             ->select(['j.resource_id', 'j.id', 'j.reference_no', 'd.account_id', DB::raw('COALESCE(SUM(d.dr), 0) as dr'), DB::raw('COALESCE(SUM(d.cr), 0) as cr')])
             ->get()
             ->each(function (object $row) use (&$result): void {
+                $result[$row->resource_id]['accounts'] ??= [];
                 $result[$row->resource_id]['journals'][$row->id] = $row->reference_no;
                 if ($row->account_id !== null) {
                     $account = $result[$row->resource_id]['accounts'][$row->account_id] ?? ['dr' => 0, 'cr' => 0];
@@ -721,7 +723,7 @@ class AuditReportService
                 "{$count} journals are posted for this {$label} (".implode(', ', $entry['journals']).'); amounts are counted more than once.', 1, $count);
         }
 
-        $accounts = $entry['accounts'] ?? [];
+        $accounts = $entry['accounts'];
 
         return [
             'party_dr' => $accounts[$doc->party_id]['dr'] ?? 0,
@@ -735,7 +737,7 @@ class AuditReportService
      * it, and the lines of each item add up to its meters. Lines split when a lot is cut for a sale or moved, so counts
      * and pieces only match until then.
      *
-     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, object>}|null  $items
+     * @param  array{rows: int, qty: float, meters: float, amount: float, lines: array<int, stdClass>}|null  $items
      * @param  array{rows: int, qty: float, meters: float, by_item: array<int, float>}|null  $stock
      */
     private function compareInventory(string $module, object $doc, ?array $items, ?array $stock): void
@@ -761,8 +763,8 @@ class AuditReportService
             return;
         }
         $different = collect($items['lines'])
-            ->map(fn (object $line): array => [
-                'id' => $line->id,
+            ->map(fn (stdClass $line): array => [
+                'id' => (int) $line->id,
                 'expected' => round((float) $line->total_qty, 2),
                 'actual' => round((float) ($stock['by_item'][$line->id] ?? 0), 2),
             ])

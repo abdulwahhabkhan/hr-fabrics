@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\BelongsToUser;
+use Carbon\CarbonInterface;
 use Database\Factories\AuditReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * One stored run of the sales / purchases audit (see AuditReportService).
  *
+ * @property CarbonInterface $start_date
+ * @property CarbonInterface $end_date
  * @property array<string, array{checked: int, issues: int}> $summary
  * @property array<int, array<string, mixed>> $issues
  */
