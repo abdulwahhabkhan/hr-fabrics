@@ -32,13 +32,22 @@ final class FabricReceivingPolicy
         return false;
     }
 
-    public function delete(User $user, FabricReceiving $stock): bool
+    /**
+     * A receiving reopened by a master user keeps the inventory booked to sale orders and stays on the purchase
+     * vouchers it is invoiced on, so it cannot be deleted while either still references it.
+     */
+    public function delete(User $user, FabricReceiving $stock): Response
     {
-        if ($stock->isOpen() && hasPermission('purchases.fabric-receivings.destroy')) {
-            return true;
+        if (! $stock->isOpen() || ! hasPermission('purchases.fabric-receivings.destroy', $user)) {
+            return Response::deny();
+        }
+        if ($stock->inventories()->exists()) {
+            return Response::deny('Stock has inventory records and cannot be deleted');
         }
 
-        return false;
+        return $stock->purchases()->exists()
+            ? Response::deny('Stock is invoiced on a purchase voucher and cannot be deleted')
+            : Response::allow();
     }
 
     public function unlock(User $user, FabricReceiving $stock): bool

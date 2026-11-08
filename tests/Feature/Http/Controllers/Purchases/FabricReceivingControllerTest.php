@@ -2,6 +2,7 @@
 
 use App\Enums\StatusText;
 use App\Facades\Permission;
+use App\Facades\Permission as PermissionFacade;
 use App\Models\Accounts\Account;
 use App\Models\Action\Log;
 use App\Models\Purchase\FabricReceiving;
@@ -13,7 +14,7 @@ use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function (): void {
-    $this->fakeHavePermission();
+    PermissionFacade::fake(['purchases.fabric-receivings.*' => true]);
 });
 test('fabric receiving list', function () {
     // Arrange
@@ -324,6 +325,20 @@ test('fabric receiving delete forbidden when stock is not open', function () {
     // Assert
     $response->assertForbidden();
     $this->assertDatabaseHas(FabricReceiving::class, ['id' => $stock->id, 'deleted_at' => null]);
+});
+
+test('fabric receiving delete forbidden when reopened stock has inventory', function () {
+    // Arrange
+    Permission::fake(['purchases.fabric-receivings.destroy' => true]);
+    $user = $this->getAdmin();
+    $stock = FabricReceiving::factory()->create();
+    $inventory = Inventory::factory()->withPurchase($stock)->create(['outbound_type' => 'test', 'outbound_id' => 999]);
+    // Act
+    $response = $this->actingAs($user)->delete(route('purchases.fabric-receivings.destroy', $stock->id));
+    // Assert
+    $response->assertForbidden();
+    $this->assertDatabaseHas(FabricReceiving::class, ['id' => $stock->id, 'deleted_at' => null]);
+    $this->assertDatabaseHas(Inventory::class, ['id' => $inventory->id]);
 });
 
 test('fabric receiving preview', function () {

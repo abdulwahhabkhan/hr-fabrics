@@ -56,6 +56,33 @@ it('allows delete on an open stock when user has the destroy permission', functi
     expect($user->can('delete', $stock))->toBeTrue();
 });
 
+it('forbids delete on a reopened stock that still has booked inventory', function () {
+    $user = $this->userWithoutPermissions();
+    $this->attachPermissions($user, 'purchases.fabric-receivings.destroy');
+    $stock = FabricReceiving::factory()->create();
+    Inventory::factory()->withPurchase($stock)->create([
+        'outbound_type' => Order::morphClass(),
+        'outbound_id' => Order::factory()->closed()->create()->id,
+    ]);
+
+    $response = Gate::forUser($user)->inspect('delete', $stock);
+
+    expect($response->denied())->toBeTrue()
+        ->and((string) $response->message())->toBe('Stock has inventory records and cannot be deleted');
+});
+
+it('forbids delete on a reopened stock that is still invoiced on a purchase voucher', function () {
+    $user = $this->userWithoutPermissions();
+    $this->attachPermissions($user, 'purchases.fabric-receivings.destroy');
+    $stock = FabricReceiving::factory()->create();
+    Purchase::factory()->create(['stock_ids' => (string) $stock->id]);
+
+    $response = Gate::forUser($user)->inspect('delete', $stock);
+
+    expect($response->denied())->toBeTrue()
+        ->and((string) $response->message())->toBe('Stock is invoiced on a purchase voucher and cannot be deleted');
+});
+
 it('forbids unlock when stock is open', function () {
     $user = $this->userWithoutPermissions();
     $stock = FabricReceiving::factory()->create();
