@@ -32,6 +32,7 @@ use App\Http\Controllers\Sales\Order\SalesReturnController;
 use App\Http\Controllers\Settings\CityController;
 use App\Http\Controllers\Settings\EmployeeController;
 use App\Http\Controllers\Settings\JobController;
+use App\Http\Controllers\Settings\MasterAuditReportController;
 use App\Http\Controllers\Settings\MasterFabricReceivingController;
 use App\Http\Controllers\Settings\MasterOrderAllocationController;
 use App\Http\Controllers\Settings\MasterToolController;
@@ -201,7 +202,7 @@ Route::prefix('accounts')->middleware(['auth', 'verified', 'auth.role'])
             'attachmentStore',
         ])
             ->name('journals.attachment.store');
-        Route::resource('journals', JournalController::class)->except(['edit', 'update']);
+        Route::resource('journals', JournalController::class)->except(['edit', 'update', 'destroy']);
 
         Route::get('cash-bank/summary', [CashBankController::class, 'index'])->name('cash-bank.summary');
         Route::get('cash-bank/detail', [CashBankController::class, 'detail'])->name('cash-bank.detail');
@@ -232,6 +233,14 @@ Route::prefix('settings/master')->middleware(['auth', 'verified'])
             ->name('orders.index');
         Route::post('orders/{order}/allocate', [MasterOrderAllocationController::class, 'allocate'])
             ->name('orders.allocate');
+        Route::get('audit-reports', [MasterAuditReportController::class, 'index'])
+            ->name('audit-reports.index');
+        Route::post('audit-reports', [MasterAuditReportController::class, 'store'])
+            ->name('audit-reports.store');
+        Route::get('audit-reports/{audit_report}', [MasterAuditReportController::class, 'show'])
+            ->name('audit-reports.show');
+        Route::delete('audit-reports/{audit_report}', [MasterAuditReportController::class, 'destroy'])
+            ->name('audit-reports.destroy');
     });
 
 require __DIR__.'/settings.php';

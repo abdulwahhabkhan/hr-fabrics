@@ -27,7 +27,7 @@ return new class extends Migration
 
     private function createView(): string
     {
-        $ledgers = JournalDetail::query()
+        $ledgers = JournalDetail::withoutGlobalScopes()
             ->select(
                 'account_id',
                 DB::raw('sum(dr) as total_dr'),

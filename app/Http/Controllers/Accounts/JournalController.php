@@ -15,7 +15,6 @@ use App\Models\Accounts\Journal;
 use App\Models\Accounts\JournalDetail;
 use App\Services\AccountService;
 use Carbon\Carbon;
-use DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -67,7 +66,6 @@ class JournalController extends Controller
                 'canAdd' => $request->user()->can('accounts.journals.store'),
                 'canAddSingle' => $request->user()->can('accounts.journals.single'),
                 'canView' => $request->user()->can('accounts.journals.show'),
-                'canDelete' => $request->user()->can('accounts.journals.destroy'),
                 'filters' => $filters,
             ]
         );
@@ -181,26 +179,6 @@ class JournalController extends Controller
                 'user' => $journal->user,
             ]
         );
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     *
-     * @throws Throwable
-     */
-    public function destroy(Journal $journal): RedirectResponse
-    {
-        DB::transaction(function () use ($journal) {
-            $transactions = $journal->transactions()->get();
-            foreach ($transactions as $transaction) {
-                $transaction->delete();
-            }
-            $journal->delete();
-        });
-
-        return Redirect::route('accounts.journals.index')
-            ->with(['success' => 'Journal deleted Successfully']);
     }
 
     public function attachment(Journal $journal)

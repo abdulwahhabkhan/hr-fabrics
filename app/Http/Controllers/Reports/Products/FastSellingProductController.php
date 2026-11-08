@@ -98,6 +98,7 @@ class FastSellingProductController extends Controller
                 'start_date' => $start_date->format('Y-m-d'),
                 'end_date' => $end_date->format('Y-m-d'),
             ],
+            'today' => today()->toDateString(),
         ]);
     }
 

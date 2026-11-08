@@ -172,7 +172,7 @@ test('sale return can be deleted', function () {
     $response->assertRedirect(route('sales.returns.index'));
     assertModelMissing($return);
     assertDatabaseCount(Inventory::class, 0);
-    assertDatabaseCount(Journal::class, 0);
+    expect(Journal::query()->count())->toBe(0);
 });
 
 test('sale returns form loaded', function () {
@@ -278,8 +278,8 @@ test('update cash sale return', function () {
         'status' => ReturnStatus::Closed->value,
     ]);
     $this->assertDatabaseCount(Inventory::class, 1);
-    $this->assertDatabaseCount(Journal::class, 1);
-    $this->assertDatabaseCount(JournalDetail::class, 4);
+    expect(Journal::query()->count())->toBe(1)
+        ->and(JournalDetail::query()->count())->toBe(4);
     $this->verifyJournalDetail($customer->id, $net_amount, 0);
     $this->verifyJournalDetail($customer->id, 0, $net_amount);
     $this->verifyJournalDetail($cashAccount->id, $net_amount, 0);
@@ -340,8 +340,8 @@ test('on update delete existing journal for sales return', function () {
         'amount' => $total_amount,
         'total_amount' => $net_amount,
     ]);
-    $this->assertDatabaseCount(Journal::class, 1);
-    $this->assertDatabaseCount(JournalDetail::class, 3);
+    expect(Journal::query()->count())->toBe(1)
+        ->and(JournalDetail::query()->count())->toBe(3);
     $this->verifyJournalDetail($customer->id, $net_amount, 0);
     $this->verifyJournalDetail($customer->id, 0, $net_amount);
     $this->verifyJournalDetail($cashAccount->id, $net_amount, 0);
@@ -403,8 +403,8 @@ test('update sale credit return', function () {
         'balance' => $balance,
         'total_amount' => $total_amount,
     ]);
-    $this->assertDatabaseCount(Journal::class, 2);
-    $this->assertDatabaseCount(JournalDetail::class, 2);
+    expect(Journal::query()->count())->toBe(2)
+        ->and(JournalDetail::query()->count())->toBe(2);
     $this->verifyJournalDetail($customer->id, $total_amount, 0);
 
 });

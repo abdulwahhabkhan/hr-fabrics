@@ -3,7 +3,7 @@ import cx from 'classnames';
 import { Icon } from '@iconify/react';
 import { Moment } from '@/components/Moment';
 import { settings } from '@/config/page-settings';
-import { Delete, InertiaView } from '@/components/Actions';
+import { InertiaView } from '@/components/Actions';
 import { NumberFormat } from '@/util/NumberFormat';
 import journals from '@/routes/accounts/journals';
 
@@ -20,7 +20,6 @@ function Amount({ value }) {
 export default function JournalTable({
     vouchers,
     canView,
-    canDelete,
     onAttachment,
 }) {
     return (
@@ -138,16 +137,6 @@ export default function JournalTable({
                                                 <InertiaView
                                                     href={journals.show(id)}
                                                 />
-                                            )}
-                                            {canDelete && (
-                                                <span className="hf-icon-btn hf-icon-btn--boxed is-danger">
-                                                    <Delete
-                                                        action={
-                                                            journals.destroy
-                                                        }
-                                                        id={id}
-                                                    />
-                                                </span>
                                             )}
                                         </div>
                                     </td>

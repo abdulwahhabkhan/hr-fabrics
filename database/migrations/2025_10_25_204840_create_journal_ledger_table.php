@@ -28,7 +28,7 @@ return new class extends Migration
 
     private function createView(): string
     {
-        $sql = JournalDetail::query()
+        $sql = JournalDetail::withoutGlobalScopes()
             ->select([
                 Journal::qCol('id as id'),
                 'account_id',

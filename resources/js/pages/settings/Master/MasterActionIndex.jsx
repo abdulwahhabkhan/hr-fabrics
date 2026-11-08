@@ -4,6 +4,7 @@ import { PageContent, PageHeader } from '@/components/page.jsx';
 import { Head, InertiaLink } from '@/util/Inertia';
 import masterReceivings from '@/routes/settings/master/fabric-receivings';
 import masterOrders from '@/routes/settings/master/orders';
+import masterAuditReports from '@/routes/settings/master/audit-reports';
 
 const actions = [
     {
@@ -21,6 +22,14 @@ const actions = [
         title: 'Allocate Order',
         description: 'Book stock for a confirmed sale order that is unallocated or partially allocated, first-in first-out.',
         affects: ['Stock', 'Sale orders'],
+    },
+    {
+        href: masterAuditReports.index(),
+        icon: 'solar:shield-check-bold-duotone',
+        tone: 'navy',
+        title: 'Audit Reports',
+        description: 'Check sales, sale returns, receivings and fabric purchases against their inventory and ledger postings, and keep the report.',
+        affects: ['Stock', 'Ledger'],
     },
 ];
 

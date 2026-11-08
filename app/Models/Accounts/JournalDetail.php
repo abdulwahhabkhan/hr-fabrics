@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read int $total_dr
@@ -21,6 +22,7 @@ class JournalDetail extends Model
 {
     use BelongsToAccount;
     use HasFactory;
+    use SoftDeletes;
 
     protected $guarded = [];
 
@@ -68,6 +70,7 @@ class JournalDetail extends Model
             ->orderBy('journal_id');
 
         return $query
+            ->withoutGlobalScopes()
             ->select('*')
             ->selectRaw('(debit - '.$total.') as balance')
             ->fromSub($sumQuery->toRawSql(), 'ledger')

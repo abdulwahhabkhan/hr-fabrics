@@ -11,7 +11,7 @@ import PaginationFull from '@/components/PaginationFull.jsx';
 import journals from '@/routes/accounts/journals';
 
 const JournalIndex = () => {
-    const { vouchers, canAdd, canView, canDelete, canAddSingle } = usePage().props;
+    const { vouchers, canAdd, canView, canAddSingle } = usePage().props;
     const { data = [], meta } = vouchers;
     const [id, setId] = useState(0);
     const [show, setShow] = useState(false);
@@ -51,12 +51,18 @@ const JournalIndex = () => {
                 <JournalFilter />
             </PageFilters>
             <PageContent>
+                <div className="alert alert-info d-flex align-items-center gap-2" role="alert">
+                    <Icon icon="solar:info-circle-bold-duotone" />
+                    <span>
+                        Vouchers cannot be deleted. To fix a mistake, post a negative (reversing) entry
+                        with the debit and credit swapped.
+                    </span>
+                </div>
                 <Panel className="hf-table-panel">
                     <PanelBody>
                         <JournalTable
                             vouchers={data}
                             canView={canView}
-                            canDelete={canDelete}
                             onAttachment={showAttachmentForm}
                         />
                         {data.length === 0 && <NoData label="No journal entries found." />}

@@ -8,7 +8,6 @@ use App\Models\Purchase\Purchase;
 use App\Models\Purchase\PurchaseItem;
 
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertDatabaseMissing;
 
 test('unlock receipt', function () {
     // Arrange
@@ -40,12 +39,12 @@ test('unlock receipt', function () {
         'id' => $stock->id,
         'invoiced' => false,
     ]);
-    assertDatabaseMissing(Journal::class, [
+    $this->assertSoftDeleted(Journal::class, [
         'resource_type' => Purchase::morphClass(),
         'resource_id' => $receipt->id,
     ]);
 
-    assertDatabaseMissing(JournalDetail::class, [
+    $this->assertSoftDeleted(JournalDetail::class, [
         'account_id' => $receipt->supplier_id,
     ]);
 
