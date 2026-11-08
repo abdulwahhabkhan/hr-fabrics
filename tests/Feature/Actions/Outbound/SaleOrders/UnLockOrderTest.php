@@ -39,9 +39,9 @@ test('unlock reopens a closed order, wiping its journal and releasing allocated 
 
     // Assert
     $order->refresh();
-    expect($order->status)->toBe(OrderStatus::Open);
-    expect(Journal::query()->count())->toBe(0);
-    expect(JournalDetail::query()->count())->toBe(0);
+    expect($order->status)->toBe(OrderStatus::Open)
+        ->and(Journal::query()->count())->toBe(0)
+        ->and(JournalDetail::query()->count())->toBe(0);
     assertDatabaseCount(Inventory::class, 1);
     assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
     assertDatabaseHas(Log::class, [

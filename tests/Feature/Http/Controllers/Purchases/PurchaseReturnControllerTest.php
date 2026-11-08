@@ -152,8 +152,8 @@ test('update purchase return', function (ReturnStatus $status) {
     ]);
     if ($status === ReturnStatus::Open) {
         $this->assertDatabaseCount(Inventory::class, 0);
-        expect(Journal::query()->count())->toBe(0);
-        expect(JournalDetail::query()->count())->toBe(0);
+        expect(Journal::query()->count())->toBe(0)
+            ->and(JournalDetail::query()->count())->toBe(0);
     }
 })->with(ReturnStatus::cases());
 

@@ -29,9 +29,9 @@ test('unlock reopens a closed return, wiping its journal and inventory', functio
 
     resolve(UnlockSaleReturn::class)->handle($return, $user);
 
-    expect($return->refresh()->status)->toBe(ReturnStatus::Open);
-    expect(Journal::query()->count())->toBe(0);
-    expect(JournalDetail::query()->count())->toBe(0);
+    expect($return->refresh()->status)->toBe(ReturnStatus::Open)
+        ->and(Journal::query()->count())->toBe(0)
+        ->and(JournalDetail::query()->count())->toBe(0);
     assertDatabaseCount(Inventory::class, 0);
     assertDatabaseHas(Log::class, [
         'loggable_type' => $return->getMorphClass(),

@@ -76,6 +76,6 @@ test('unlock po return', function () {
         ]);
     }
 
-    expect(Journal::query()->count())->toBe(0);
-    expect(JournalDetail::query()->count())->toBe(0);
+    expect(Journal::query()->count())->toBe(0)
+        ->and(JournalDetail::query()->count())->toBe(0);
 });

@@ -1022,8 +1022,8 @@ test('delete open order removes it with items, journal entries and releases inve
         ->assertSessionHas('success', 'Order deleted successfully');
     $this->assertSoftDeleted($order);
     assertDatabaseCount(OrderItem::class, 0);
-    expect(Journal::query()->count())->toBe(0);
-    expect(JournalDetail::query()->count())->toBe(0);
+    expect(Journal::query()->count())->toBe(0)
+        ->and(JournalDetail::query()->count())->toBe(0);
     assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
 });
 
