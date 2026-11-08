@@ -28,7 +28,14 @@
 }
 
 .hf-cust-table {
-  .hf-cust-cell { min-width: 190px; }
+  .hf-cust-cell {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    column-gap: .75rem;
+    min-width: 190px;
+    .urdu { font-size: .9rem; color: var(--hf-text-2); white-space: nowrap; }
+  }
   > :not(caption) > * > * { padding-inline: .6rem; }
   .hf-cust-name { font-size: .8125rem; }
   .hf-cust-sub {
@@ -47,6 +54,12 @@
   > tbody > tr.is-suspended > td { background: #fdf6f4; }
   > tbody > tr.is-suspended > td:first-child { box-shadow: inset 3px 0 0 #c9503f; }
   > tbody > tr > td:first-child, > thead > tr > th:first-child { padding-left: .9rem; }
+}
+
+// Condensed variant (customers & suppliers lists): 8px cell padding.
+.hf-cust-table.is-condensed {
+  > :not(caption) > * > * { padding: 8px; }
+  > tbody > tr > td:first-child, > thead > tr > th:first-child { padding-left: 8px; }
 }
 
 // Suppliers table reuses .hf-cust-table; address stays on one line.

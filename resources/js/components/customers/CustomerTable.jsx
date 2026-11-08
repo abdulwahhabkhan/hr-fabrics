@@ -1,14 +1,12 @@
 import React from 'react';
 import cx from 'classnames';
-import { Moment } from '@/components/Moment';
-import { settings } from '@/config/page-settings';
 import CustomerActions from './CustomerActions';
 import { CreditValue, CustomerStatus, DiscountValue } from './CustomerBadges';
 
 export default function CustomerTable({ customers, canUpdate }) {
     return (
         <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0 hf-cust-table">
+            <table className="table table-hover align-middle mb-0 hf-cust-table is-condensed">
                 <thead>
                     <tr>
                         <th>Customer</th>
@@ -25,19 +23,15 @@ export default function CustomerTable({ customers, canUpdate }) {
                     {customers.map((customer) => {
                         const {
                             id, name, name_urdu, limit, credit, phone, email, address,
-                            discount, discount_label, updated_at, agent_name, suspended, suspended_at,
+                            discount, discount_label, agent_name, suspended, suspended_at,
                         } = customer;
 
                         return (
                             <tr key={id} className={cx({ 'is-suspended': suspended })}>
                                 <td>
                                     <div className="hf-cust-cell">
-                                        <div className="hf-cust-name">{name}</div>
-                                        {name_urdu && (
-                                            <div className="hf-cust-sub">
-                                                <span className="urdu" dir="rtl" lang="ur">{name_urdu}</span>
-                                            </div>
-                                        )}
+                                        <span className="hf-cust-name">{name}</span>
+                                        {name_urdu && <span className="urdu" dir="rtl" lang="ur">{name_urdu}</span>}
                                     </div>
                                 </td>
                                 <td className="text-nowrap">
@@ -55,9 +49,6 @@ export default function CustomerTable({ customers, canUpdate }) {
                                 <td className="text-nowrap"><DiscountValue discount={discount} label={discount_label} /></td>
                                 <td className="text-nowrap">
                                     <CustomerStatus suspended={suspended} suspendedAt={suspended_at} />
-                                    <div className="hf-cust-sub" title="Last updated">
-                                        <Moment format={settings.DATE_FORMAT} date={updated_at} />
-                                    </div>
                                 </td>
                                 <td className="text-end">
                                     <CustomerActions id={id} suspended={suspended} canUpdate={canUpdate} />

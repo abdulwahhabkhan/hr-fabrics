@@ -15,7 +15,7 @@ const formatAddress = (address) =>
 export default function SupplierTable({ suppliers, onEdit }) {
     return (
         <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0 hf-cust-table">
+            <table className="table table-hover align-middle mb-0 hf-cust-table is-condensed">
                 <thead>
                     <tr>
                         <th>Supplier</th>
