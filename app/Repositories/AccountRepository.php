@@ -164,7 +164,7 @@ class AccountRepository
             ->where('dr', '>', 0)
             ->orderBy('journal_id');
 
-        return JournalDetail::query()
+        return JournalDetail::withoutGlobalScopes()
             ->select('*')
             ->selectRaw('(debit - '.$total.') as  balance')
             ->fromSub($sum_query->toRawSql(), 'ledger')

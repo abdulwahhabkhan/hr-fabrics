@@ -6,8 +6,12 @@ use App\Enums\JournalHead;
 use App\Models\Accounts\Account;
 use App\Models\Accounts\Journal;
 use App\Models\Accounts\JournalDetail;
+use App\Models\Accounts\JournalLedger;
 use App\Models\Action\Log;
+use App\Services\AccountService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function (): void {
@@ -368,4 +372,56 @@ test('journal index and view return posted date without time', function () {
     $showResponse->assertInertia(fn (Assert $page) => $page
         ->where('journal.posted_at', '2026-09-24')
     );
+});
+
+test('journal delete is not available', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $journal = Journal::factory()
+        ->has(JournalDetail::factory()->count(2), 'transactions')
+        ->create(['user_id' => $user->id]);
+
+    // Act
+    $response = $this->actingAs($user)->delete("/accounts/journals/{$journal->id}");
+
+    // Assert
+    $response->assertStatus(405);
+    $this->assertNotSoftDeleted($journal);
+    expect(Route::has('accounts.journals.destroy'))->toBeFalse();
+});
+
+test('soft deleted journals are excluded from balances and ledger views', function () {
+    // Arrange
+    $account = Account::factory()->customer()->create();
+    $kept = Journal::factory()->create();
+    $removed = Journal::factory()->create();
+    JournalDetail::factory()->create(['journal_id' => $kept->id, 'account_id' => $account->id, 'dr' => 500, 'cr' => 0]);
+    JournalDetail::factory()->create(['journal_id' => $removed->id, 'account_id' => $account->id, 'dr' => 300, 'cr' => 0]);
+
+    // Act
+    $removed->transactions()->delete();
+    $removed->delete();
+
+    // Assert
+    expect(JournalLedger::query()->where('account_id', $account->id)->sum('dr'))->toEqual(500)
+        ->and(DB::table('account_summary')->where('id', $account->id)->value('total_dr'))->toEqual(500)
+        ->and(resolve(AccountService::class)->getAccountBalance($account->id))->toBe(500)
+        ->and(Journal::withTrashed()->count())->toBe(2);
+});
+
+test('new journal reference number does not reuse a soft deleted journal id', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $account = Account::factory()->customer()->create();
+    $cash = Account::factory()->cash()->create();
+    $journal = Journal::factory()->create();
+    $journal->delete();
+
+    // Act
+    $this->actingAs($user)->post(route('accounts.journals.single-store'), [
+        'account' => $account, 'amount' => 100, 'date' => '2026-11-08', 'type' => 'debit', 'detail' => 'Fix',
+    ])->assertSessionHasNoErrors();
+
+    // Assert
+    $this->assertDatabaseHas(Journal::class, ['reference_no' => 'JV-'.str((string) ($journal->id + 1))->padLeft(5, '0')]);
 });

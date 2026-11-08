@@ -34,8 +34,8 @@ test('unlock closed sale return order', function () {
     ]);
     // inventory check
     assertDatabaseCount(Inventory::class, 0);
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
 });
 test('unlock closed sale return order failed when inventory sold', function () {
     $this->withoutExceptionHandling();

@@ -10,7 +10,6 @@ use App\Models\Purchase\PurchaseReturn;
 use App\Models\Stock\Inventory;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
 
@@ -77,6 +76,6 @@ test('unlock po return', function () {
         ]);
     }
 
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
 });

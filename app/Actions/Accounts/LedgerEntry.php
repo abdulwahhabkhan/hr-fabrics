@@ -132,7 +132,7 @@ final class LedgerEntry
     private function createJournal(): void
     {
         $journal = new Journal();
-        $id = (int) Journal::query()->max('id');
+        $id = (int) Journal::withTrashed()->max('id');
         $reference_no = str((string) ($id + 1))->padLeft(5, '0')->prepend('JV-');
         $journal->reference_no = $reference_no;
         $journal->user_id = $this->user->id;

@@ -54,8 +54,8 @@ test('unlock reopens closed order', function () {
     $response->assertRedirect(route('sales.orders.edit', $order->id));
     $order->refresh();
     expect($order->status)->toBe(OrderStatus::Open);
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
     assertDatabaseCount(Inventory::class, 1);
     assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
     assertDatabaseHas(Log::class, [

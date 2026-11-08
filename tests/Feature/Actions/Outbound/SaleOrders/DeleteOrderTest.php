@@ -34,7 +34,7 @@ test('delete removes an open order with its items, journal entries and releases 
     resolve(ConfirmOrder::class)->handle($order, $this->user);
     $order->update(['status' => OrderStatus::Open]);
 
-    assertDatabaseCount(Journal::class, 1);
+    expect(Journal::query()->count())->toBe(1);
     assertDatabaseHas(Inventory::class, ['outbound_id' => $order->id]);
 
     // Action
@@ -43,8 +43,8 @@ test('delete removes an open order with its items, journal entries and releases 
     // Assert
     assertSoftDeleted($order);
     assertDatabaseCount(OrderItem::class, 0);
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
     assertDatabaseCount(Inventory::class, 1);
     assertDatabaseHas(Inventory::class, [
         'outbound_type' => null,

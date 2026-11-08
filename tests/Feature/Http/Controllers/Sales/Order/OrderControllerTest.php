@@ -782,7 +782,7 @@ test('order confirm is blocked and nothing is posted when stock is not available
     $response->assertSessionHasErrors('product');
     expect(session('errors')->first('product'))->toContain($item->product->name);
     assertDatabaseHas(Order::class, ['id' => $order->id, 'status' => OrderStatus::Open->value]);
-    assertDatabaseCount(Journal::class, 0);
+    expect(Journal::query()->count())->toBe(0);
     assertDatabaseMissing(Inventory::class, ['outbound_id' => $order->id]);
     assertDatabaseMissing(Log::class, ['loggable_id' => $order->id, 'loggable_type' => $order->getMorphClass()]);
 })->with([
@@ -1022,8 +1022,8 @@ test('delete open order removes it with items, journal entries and releases inve
         ->assertSessionHas('success', 'Order deleted successfully');
     $this->assertSoftDeleted($order);
     assertDatabaseCount(OrderItem::class, 0);
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
     assertDatabaseHas(Inventory::class, ['outbound_id' => null, 'meters' => $item->total_qty]);
 });
 

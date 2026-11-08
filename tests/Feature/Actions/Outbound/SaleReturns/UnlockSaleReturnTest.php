@@ -24,14 +24,14 @@ test('unlock reopens a closed return, wiping its journal and inventory', functio
         ->create(['payment_mode' => PaymentMode::Credit->value, 'total_amount' => 1000]);
     resolve(ConfirmSaleReturn::class)->handle($return, $user);
 
-    assertDatabaseCount(Journal::class, 1);
+    expect(Journal::query()->count())->toBe(1);
     assertDatabaseCount(Inventory::class, 2);
 
     resolve(UnlockSaleReturn::class)->handle($return, $user);
 
     expect($return->refresh()->status)->toBe(ReturnStatus::Open);
-    assertDatabaseCount(Journal::class, 0);
-    assertDatabaseCount(JournalDetail::class, 0);
+    expect(Journal::query()->count())->toBe(0);
+    expect(JournalDetail::query()->count())->toBe(0);
     assertDatabaseCount(Inventory::class, 0);
     assertDatabaseHas(Log::class, [
         'loggable_type' => $return->getMorphClass(),

@@ -95,7 +95,7 @@ test('save purchase return ', function () {
     ]);
 
     $this->assertDatabaseCount(Inventory::class, 0);
-    $this->assertDatabaseCount(JournalDetail::class, 0);
+    expect(JournalDetail::query()->count())->toBe(0);
 });
 
 test('update purchase return', function (ReturnStatus $status) {
@@ -152,8 +152,8 @@ test('update purchase return', function (ReturnStatus $status) {
     ]);
     if ($status === ReturnStatus::Open) {
         $this->assertDatabaseCount(Inventory::class, 0);
-        $this->assertDatabaseCount(Journal::class, 0);
-        $this->assertDatabaseCount(JournalDetail::class, 0);
+        expect(Journal::query()->count())->toBe(0);
+        expect(JournalDetail::query()->count())->toBe(0);
     }
 })->with(ReturnStatus::cases());
 
