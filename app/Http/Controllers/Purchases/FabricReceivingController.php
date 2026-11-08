@@ -192,7 +192,7 @@ final class FabricReceivingController extends Controller
         Request $request,
         RecordAction $recordAction
     ): RedirectResponse {
-        $this->authorize('delete', $fabric_receiving);
+        $this->authorize('destroy', $fabric_receiving);
         $fabric_receiving->delete();
         $fabric_receiving->update(['status' => 'Cancel']);
         FabricReceivingItem::query()

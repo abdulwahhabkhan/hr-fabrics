@@ -33,12 +33,20 @@ final class FabricReceivingPolicy
     }
 
     /**
+     * Query-free check used to show the delete action in listings. The destroy action re-checks with `destroy`.
+     */
+    public function delete(User $user, FabricReceiving $stock): bool
+    {
+        return $stock->isOpen() && hasPermission('purchases.fabric-receivings.destroy', $user);
+    }
+
+    /**
      * A receiving reopened by a master user keeps the inventory booked to sale orders and stays on the purchase
      * vouchers it is invoiced on, so it cannot be deleted while either still references it.
      */
-    public function delete(User $user, FabricReceiving $stock): Response
+    public function destroy(User $user, FabricReceiving $stock): Response
     {
-        if (! $stock->isOpen() || ! hasPermission('purchases.fabric-receivings.destroy', $user)) {
+        if (! $this->delete($user, $stock)) {
             return Response::deny();
         }
         if ($stock->inventories()->exists()) {

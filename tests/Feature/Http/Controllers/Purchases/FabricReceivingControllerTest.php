@@ -36,6 +36,20 @@ test('fabric receiving list', function () {
     );
 });
 
+test('fabric receiving list offers delete without checking inventory', function () {
+    // Arrange
+    $user = $this->getAdmin();
+    $stock = FabricReceiving::factory()->create();
+    Inventory::factory()->withPurchase($stock)->create(['outbound_type' => 'test', 'outbound_id' => 999]);
+    // Act
+    $response = $this->actingAs($user)->get(route('purchases.fabric-receivings.index'));
+    // Assert
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('rows.data.0.id', $stock->id)
+        ->where('rows.data.0.can.delete', true)
+    );
+});
+
 test('fabric create receiving', function () {
     // Arrange
     $user = $this->getAdmin();

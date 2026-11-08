@@ -65,7 +65,7 @@ it('forbids delete on a reopened stock that still has booked inventory', functio
         'outbound_id' => Order::factory()->closed()->create()->id,
     ]);
 
-    $response = Gate::forUser($user)->inspect('delete', $stock);
+    $response = Gate::forUser($user)->inspect('destroy', $stock);
 
     expect($response->denied())->toBeTrue()
         ->and((string) $response->message())->toBe('Stock has inventory records and cannot be deleted');
@@ -77,7 +77,7 @@ it('forbids delete on a reopened stock that is still invoiced on a purchase vouc
     $stock = FabricReceiving::factory()->create();
     Purchase::factory()->create(['stock_ids' => (string) $stock->id]);
 
-    $response = Gate::forUser($user)->inspect('delete', $stock);
+    $response = Gate::forUser($user)->inspect('destroy', $stock);
 
     expect($response->denied())->toBeTrue()
         ->and((string) $response->message())->toBe('Stock is invoiced on a purchase voucher and cannot be deleted');
