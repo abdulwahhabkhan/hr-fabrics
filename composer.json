@@ -124,7 +124,7 @@
       "@php artisan app:setup"
     ],
     "test:arch": "pest --testsuite=Arch",
-    "test:code-coverage": "XDEBUG_MODE=\"coverage\" pest --exclude-testsuite=Arch --parallel --processes=2 --coverage --compact --min=83.2",
+    "test:code-coverage": "XDEBUG_MODE=\"coverage\" pest --exclude-testsuite=Arch --parallel --processes=2 --coverage --compact --min=85.2",
     "pre-package-uninstall": [
       "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
     ]
