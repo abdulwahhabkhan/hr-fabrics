@@ -16,6 +16,7 @@ use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
 use App\Models\Sales\SalesReturn;
 use App\Models\Sales\SalesReturnItem;
+use App\Models\Stock\Conversion;
 use App\Models\Stock\Inventory;
 use App\Models\Stock\StockTransfer;
 use Carbon\CarbonInterface;
@@ -82,6 +83,7 @@ class InventoryService
      * Product movements read from confirmed purchase, sale, return and stock transfer lines,
      * hydrated as Inventory so account/product relations can be eager loaded. When a location is
      * given only movements at that location are returned, and a transfer shows as a single in or out.
+     * A conversion shows the thaans it cut as an out and the stock it produced as an in.
      */
     public function getProductHistory(int $productId, ?string $location = null): Builder
     {
@@ -159,7 +161,9 @@ class InventoryService
             ->unionAll($purchaseReturns)
             ->unionAll($saleReturns)
             ->unionAll($this->transferMovements($productId, 'from_location', 'Transfer Out', $location))
-            ->unionAll($this->transferMovements($productId, 'to_location', 'Transfer In', $location));
+            ->unionAll($this->transferMovements($productId, 'to_location', 'Transfer In', $location))
+            ->unionAll($this->conversionMovements($productId, 'from', 'Conversion Out', $location))
+            ->unionAll($this->conversionMovements($productId, 'to', 'Conversion In', $location));
 
         return Inventory::query()
             ->fromSub($movements, Inventory::tName())
@@ -384,5 +388,34 @@ class InventoryService
             ->confirmed()
             ->where(StockTransfer::qCol('product_id'), $productId)
             ->filterWhere(StockTransfer::qCol($locationColumn), $location);
+    }
+
+    /**
+     * One side of each conversion, shaped like the other product history movements.
+     *
+     * @param  'from'|'to'  $side
+     * @return Builder<Conversion>
+     */
+    private function conversionMovements(int $productId, string $side, string $type, ?string $location): Builder
+    {
+        $column = Conversion::qCol($side, false);
+        $qty = "JSON_UNQUOTE(JSON_EXTRACT({$column}, '$.qty'))";
+        $size = "JSON_UNQUOTE(JSON_EXTRACT({$column}, '$.size'))";
+
+        return Conversion::query()
+            ->selectRaw("CONCAT('CNV-', ".Conversion::qCol('id', false).') as invoice_no')
+            ->selectRaw("JSON_UNQUOTE(JSON_EXTRACT({$column}, '$.unit')) as unit")
+            ->selectRaw("CAST({$size} AS DECIMAL(8,2)) as size")
+            ->selectRaw("CAST({$qty} AS SIGNED) as qty")
+            ->selectRaw('COALESCE('.Conversion::qCol('transaction_date', false).', DATE('.Conversion::qCol('created_at', false).')) as transaction_date')
+            ->selectRaw("ROUND({$qty} * {$size}, 2) as meters")
+            ->selectRaw('CAST(NULL AS UNSIGNED) as account_id')
+            ->addSelect([
+                Conversion::qCol('product_id'),
+                Conversion::qCol('location'),
+            ])
+            ->selectRaw('? as type', [$type])
+            ->where(Conversion::qCol('product_id'), $productId)
+            ->filterWhere(Conversion::qCol('location'), $location);
     }
 }

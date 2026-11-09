@@ -3,6 +3,7 @@
 namespace Database\Factories\Stock;
 
 use App\Enums\PackingType;
+use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Stock\Conversion;
 use App\Models\User;
@@ -35,7 +36,8 @@ class ConversionFactory extends Factory
             'sku' => $product->name,
             'from' => ['unit' => PackingType::Thaan->value, 'size' => 25, 'qty' => 2],
             'to' => ['unit' => PackingType::Suit->value, 'size' => 5, 'qty' => 10],
-
+            'location' => StockLocation::Shop,
+            'transaction_date' => today(),
         ];
     }
 }

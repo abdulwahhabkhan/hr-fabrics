@@ -1,107 +1,43 @@
 import React from 'react';
-import { PageContent, PageHeader } from '@/components/page.jsx';
-import { Panel, PanelBody, PanelHeader } from '@/components/panel/panel';
-import { Head, InertiaLink, usePage } from '@/util/Inertia';
-//import Moment from 'react-moment';
-import { Moment } from '@/components/Moment';
-import { settings } from '@/config/page-settings';
 import { Icon } from '@iconify/react';
-import Pagination from '@/components/Pagination';
-import SearchFilter from '@/components/SearchFilter';
-import { Delete } from '@/components/Actions';
+import { PageContent, PageFilters, PageHeader } from '@/components/page.jsx';
+import { Panel, PanelBody } from '@/components/panel/panel';
+import { Head, InertiaLink, usePage } from '@/util/Inertia';
+import ConversionFilter from '@/components/filters/ConversionFilter';
+import PaginationFull from '@/components/PaginationFull.jsx';
 import NoData from '@/components/NoData.jsx';
+import ConversionTable from '@/components/stock/ConversionTable';
 import conversions from '@/routes/stocks/conversions';
 
-const Coversion = () => {
-    const { items } = usePage().props;
-    const {
-        data,
-        meta: { links },
-    } = items;
+const ConversionIndex = () => {
+    const { items, canAdd } = usePage().props;
+    const { data, meta } = items;
 
     return (
         <>
-            <Head title="Conversion List" />
-            <PageHeader title="Conversion List" />
+            <Head title="Conversions" />
+            <PageHeader
+                title="Conversions"
+                description={meta?.total ? `${meta.total} total` : 'Cut thaan stock into suits or thaans of another length'}
+                buttons={
+                    canAdd && (
+                        <InertiaLink href={conversions.create()} className="btn btn-sm btn-theme">
+                            <Icon icon="solar:add-bold-duotone" /> New Conversion
+                        </InertiaLink>
+                    )
+                }
+            />
+
+            <PageFilters>
+                <ConversionFilter />
+            </PageFilters>
+
             <PageContent>
-                <Panel>
-                    <PanelHeader
-                        heading={'Conversions List'}
-                        buttons={
-                            <>
-                                <InertiaLink
-                                    href={conversions.create()}
-                                    className="btn btn-xs  btn-primary"
-                                >
-                                    <Icon icon={'solar:add-bold-duotone'} />{' '}
-                                    Create Conversion
-                                </InertiaLink>
-                            </>
-                        }
-                    />
+                <Panel className="hf-table-panel">
                     <PanelBody>
-                        <SearchFilter />
-                        <div className={'table-responsive'}>
-                            <table className={'table table-bordered'}>
-                                <thead>
-                                    <tr>
-                                        <th width={'40'}>Sr</th>
-                                        <th>Product</th>
-                                        <th width={'200'}>From</th>
-                                        <th width={'200'}>To</th>
-                                        <th width={'110px'}>Last Modified</th>
-                                        <th width={'70'}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.map(
-                                        (
-                                            { id, sku, from, to, updated_at },
-                                            index,
-                                        ) => {
-                                            return (
-                                                <tr key={id}>
-                                                    <td>{index + 1}</td>
-                                                    <td>{sku}</td>
-                                                    <td>
-                                                        {from.qty +
-                                                            ' ' +
-                                                            from.unit +
-                                                            ' ' +
-                                                            from.size}
-                                                    </td>
-                                                    <td>
-                                                        {to.qty +
-                                                            ' ' +
-                                                            to.unit +
-                                                            ' ' +
-                                                            to.size}
-                                                    </td>
-                                                    <td>
-                                                        <Moment
-                                                            format={
-                                                                settings.DATE_FORMAT
-                                                            }
-                                                            date={updated_at}
-                                                        />
-                                                    </td>
-                                                    <td className={'actions'}>
-                                                        <Delete
-                                                            action={conversions.destroy}
-                                                            id={id}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            );
-                                        },
-                                    )}
-                                </tbody>
-                            </table>
-                            {data.length === 0 && (
-                                <NoData label="No conversions found." />
-                            )}
-                        </div>
-                        <Pagination links={links} />
+                        <ConversionTable items={data} />
+                        {data.length === 0 && <NoData label="No conversions found." />}
+                        <PaginationFull meta={meta} />
                     </PanelBody>
                 </Panel>
             </PageContent>
@@ -109,4 +45,4 @@ const Coversion = () => {
     );
 };
 
-export default Coversion;
+export default ConversionIndex;

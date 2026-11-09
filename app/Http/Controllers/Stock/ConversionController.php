@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Stock;
 
-use App\Exceptions\ActionNotAllowedException;
+use App\Actions\Stock\Conversions\CreateConversion;
+use App\Actions\Stock\Conversions\DeleteConversion;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stock\ConversionRequest;
+use App\Http\Resources\Catalog\ProductACResource;
 use App\Http\Resources\Stock\ConversionResource;
 use App\Models\Stock\Conversion;
 use App\Services\ProductService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ConversionController extends Controller
 {
@@ -20,13 +24,19 @@ class ConversionController extends Controller
      */
     public function index(Request $request): Response
     {
-        $items = Conversion::filter($request)->orderby('updated_at', 'desc')->paginate();
+        $items = Conversion::query()
+            ->with('user:id,name')
+            ->filter($request)
+            ->latest('updated_at')
+            ->paginate()
+            ->appends($request->only('search', 'location'));
 
         return Inertia::render(
             'Stock/Conversion/ConversionIndex',
             [
                 'items' => ConversionResource::collection($items),
-                'filters' => $request->only('search'),
+                'filters' => $request->only('search', 'location'),
+                'canAdd' => $request->user()->can('stocks.conversions.store'),
             ]
         );
     }
@@ -34,35 +44,39 @@ class ConversionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create(ProductService $productService): Response
     {
-        $products = resolve(ProductService::class)->autocompleteProducts();
-
         return Inertia::render(
             'Stock/Conversion/ConversionForm',
             [
-                'products' => $products,
+                'products' => ProductACResource::collection($productService->availableProducts()),
             ]
         );
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Cut thaan stock into suits or thaans of another length.
      *
-     * @throws ActionNotAllowedException
+     * @throws Throwable
      */
-    public function store(ConversionRequest $request): RedirectResponse
+    public function store(ConversionRequest $request, CreateConversion $createConversion): RedirectResponse
     {
-        throw ActionNotAllowedException::actionNotAllowed('Add conversion not supported any more.');
+        $conversion = $createConversion->handle($request->validated(), $request->user());
+
+        return Redirect::route('stocks.conversions.index')
+            ->with(['success' => "Conversion of {$conversion->sku} saved"]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Reverse a conversion and put the thaan stock back.
      *
-     * @throws ActionNotAllowedException
+     * @throws Throwable
      */
-    public function destroy(Conversion $conversion): RedirectResponse
+    public function destroy(Conversion $conversion, DeleteConversion $deleteConversion): RedirectResponse
     {
-        throw ActionNotAllowedException::actionNotAllowed('Delete Conversion not supported any more.');
+        $deleteConversion->handle($conversion);
+
+        return Redirect::route('stocks.conversions.index')
+            ->with(['success' => 'Conversion deleted, the thaan stock is back in stock']);
     }
 }

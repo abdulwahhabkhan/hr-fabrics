@@ -86,7 +86,7 @@ final class FabricReceivingConfirmed
             ->exists();
         if ($bookedOutsideSales) {
             throw ValidationException::withMessages([
-                'status' => 'Stock of this receiving is returned or transferred, it cannot be confirmed again.',
+                'status' => 'Stock of this receiving is returned, transferred or converted, it cannot be confirmed again.',
             ]);
         }
 

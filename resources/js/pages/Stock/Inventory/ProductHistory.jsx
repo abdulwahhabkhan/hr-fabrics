@@ -21,6 +21,8 @@ const MOVEMENT_TYPES = {
     'PO Return': { totalKey: 'purchaseReturns', direction: -1, tone: 'red', icon: 'solar:undo-right-round-bold-duotone' },
     'Transfer In': { totalKey: 'transferredIn', direction: 1, tone: 'teal', icon: 'solar:login-2-bold-duotone' },
     'Transfer Out': { totalKey: 'transferredOut', direction: -1, tone: 'slate', icon: 'solar:logout-2-bold-duotone' },
+    'Conversion In': { direction: 1, tone: 'teal', icon: 'solar:scissors-bold-duotone' },
+    'Conversion Out': { direction: -1, tone: 'slate', icon: 'solar:scissors-bold-duotone' },
 };
 
 const Meters = ({ value, className }) => (

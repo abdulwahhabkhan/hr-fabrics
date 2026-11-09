@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\PackingType;
 use App\Enums\StockLocation;
 use App\Models\Catalog\Product;
 use App\Models\Purchase\FabricReceiving;
 use App\Models\Purchase\FabricReceivingItem;
 use App\Models\Sales\Order;
 use App\Models\Sales\OrderItem;
+use App\Models\Stock\Conversion;
 use App\Models\Stock\StockTransfer;
 use App\Services\InventoryService;
 
@@ -73,4 +75,26 @@ it('limits product history to a location and shows each side of a confirmed tran
         ->and($warehouse->pluck('type')->sort()->values()->all())->toBe(['Purchase', 'Transfer Out'])
         ->and($shop->firstWhere('type', 'Transfer In')->only(['invoice_no', 'meters', 'location']))
         ->toBe(['invoice_no' => $transfer->transfer_no, 'meters' => 30.0, 'location' => StockLocation::Shop]);
+});
+
+it('shows each side of a conversion in product history at its location', function () {
+    $this->getAdmin();
+    $product = Product::factory()->create();
+    $conversion = Conversion::factory()->create([
+        'product_id' => $product->id,
+        'location' => StockLocation::WarehouseFSD,
+        'from' => ['unit' => 'Thaan', 'qty' => 2, 'size' => 25],
+        'to' => ['unit' => 'Suit', 'qty' => 9, 'size' => 5.5],
+    ]);
+    Conversion::factory()->create(['product_id' => $product->id])->delete();
+
+    $service = new InventoryService;
+    $warehouse = $service->getProductHistory($product->id, StockLocation::WarehouseFSD->value)->get();
+    $shop = $service->getProductHistory($product->id, StockLocation::Shop->value)->get();
+
+    expect($shop)->toBeEmpty()
+        ->and($warehouse->firstWhere('type', 'Conversion Out')->only(['invoice_no', 'unit', 'qty', 'meters']))
+        ->toBe(['invoice_no' => "CNV-{$conversion->id}", 'unit' => PackingType::Thaan, 'qty' => 2, 'meters' => 50.0])
+        ->and($warehouse->firstWhere('type', 'Conversion In')->only(['invoice_no', 'unit', 'qty', 'size', 'meters']))
+        ->toBe(['invoice_no' => "CNV-{$conversion->id}", 'unit' => PackingType::Suit, 'qty' => 9, 'size' => 5.5, 'meters' => 49.5]);
 });
