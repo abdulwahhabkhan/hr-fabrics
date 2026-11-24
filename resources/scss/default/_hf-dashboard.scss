@@ -221,6 +221,7 @@
 }
 
 .hf-activity-panel > .panel-body { padding: 0; }
+.hf-activity-panel > .panel-body > .no-data { border-top-left-radius: 0; border-top-right-radius: 0; }
 
 // Confirmed orders still waiting for stock
 .hf-unallocated-panel { margin-top: 1rem; }
