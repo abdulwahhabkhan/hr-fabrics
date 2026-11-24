@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Permission extends Model
@@ -23,10 +22,10 @@ class Permission extends Model
         $section = ['pos' => 'Fabrics', 'fabric-receivings' => 'Vouchers',
             'por' => 'Fabric Returns'];
 
-        return self::all()->groupBy(['section', 'module'])->map(function ($item, $moduleKey) use (
+        return self::all()->groupBy('section')->map(function (Collection $item, $moduleKey) use (
             $section
         ) {
-            $children = $item->map(function ($item, $key) use ($section, $moduleKey) {
+            $children = $item->groupBy('module')->map(function ($item, $key) use ($section, $moduleKey) {
                 $children = $item->map(function ($item) use ($section) {
                     $name = $item['name'];
                     $sec = $section[$item['module']] ?? null;
@@ -41,7 +40,7 @@ class Permission extends Model
                 if (str_contains($label, 'Cutpiece')) {
                     $section_lbl = (string) $key;
                 } else {
-                    $section_lbl = Arr::get($section, $key, (string) $key);
+                    $section_lbl = $section[$key] ?? (string) $key;
                 }
                 // Prefixed with the module: the same section name (e.g. customers) exists in several modules,
                 // and the checkbox tree requires unique node values.
