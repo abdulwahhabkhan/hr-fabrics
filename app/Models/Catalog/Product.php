@@ -4,6 +4,8 @@ namespace App\Models\Catalog;
 
 use App\Models\Accounts\Account;
 use App\Models\Model;
+use App\Models\Purchase\Purchase;
+use App\Models\Purchase\PurchaseItem;
 use App\Models\Stock\Inventory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -79,10 +81,21 @@ final class Product extends Model
         });
     }
 
+    /**
+     * Products whose vendor is the supplier, or that were bought from the supplier on a purchase.
+     */
     #[Scope]
     protected function suppliedBy(Builder $query, int $supplierId): Builder
     {
-        return $query->where(self::qCol('vendor_id'), $supplierId);
+        return $query->where(function (Builder $query) use ($supplierId) {
+            $query->where(self::qCol('vendor_id'), $supplierId)
+                ->orWhereExists(
+                    PurchaseItem::query()
+                        ->join(Purchase::tName(), Purchase::qCol('id'), '=', PurchaseItem::qCol('purchase_id'))
+                        ->whereColumn(PurchaseItem::qCol('product_id'), self::qCol('id'))
+                        ->where(Purchase::qCol('supplier_id'), $supplierId)
+                );
+        });
     }
 
     #[Scope]

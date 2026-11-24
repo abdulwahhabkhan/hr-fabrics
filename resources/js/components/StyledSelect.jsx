@@ -34,6 +34,7 @@ const selectStyles = {
         backgroundColor: "var(--bs-component-dropdown-bg)",
         border: "1px solid var(--bs-component-dropdown-border-color)",
         borderRadius: "var(--bs-border-radius)",
+        overflow: "hidden",
         zIndex: 5,
     }),
     menuList: (base) => ({

@@ -83,6 +83,21 @@ it('limits return products to the given supplier', function () {
         ->not->toContain($otherSupplierProduct->id);
 });
 
+it('includes return products bought from the supplier even when another vendor is set', function () {
+    $supplier = Account::factory()->supplier()->create();
+    $purchased = Product::factory()->suppliedBy(Account::factory()->supplier()->create())->create();
+    $notPurchased = Product::factory()->create();
+    PurchaseItem::factory()->create([
+        'purchase_id' => Purchase::factory()->create(['supplier_id' => $supplier->id])->id,
+        'product_id' => $purchased->id,
+    ]);
+
+    $products = $this->service->getPORProducts($supplier->id);
+
+    expect($products->pluck('id'))->toContain($purchased->id)
+        ->not->toContain($notPurchased->id);
+});
+
 it('only returns products that have available inventory', function () {
     $brand = Brand::factory()->create();
     $available = Product::factory()->create(['name' => 'Available Product', 'brand_id' => $brand->id]);

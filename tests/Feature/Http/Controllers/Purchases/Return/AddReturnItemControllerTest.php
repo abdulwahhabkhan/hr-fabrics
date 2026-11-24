@@ -7,6 +7,8 @@ use App\Enums\ReturnStatus;
 use App\Enums\StockLocation;
 use App\Models\Accounts\Account;
 use App\Models\Catalog\Product;
+use App\Models\Purchase\Purchase;
+use App\Models\Purchase\PurchaseItem;
 use App\Models\Purchase\PurchaseReturn;
 use App\Models\Purchase\PurchaseReturnItem;
 use App\Models\Stock\Inventory;
@@ -297,6 +299,29 @@ it('forbids adding an item to a return that is not open', function () {
 
     // Assert
     $response->assertForbidden();
+});
+
+it('accepts a product bought from the return supplier even when another vendor is set', function () {
+    // Arrange
+    $product = Product::factory()->suit()->suppliedBy(Account::factory()->supplier()->create())->create();
+    PurchaseItem::factory()->create([
+        'purchase_id' => Purchase::factory()->create(['supplier_id' => $this->return->supplier_id])->id,
+        'product_id' => $product->id,
+    ]);
+    $payload = [
+        'product_id' => $product->id,
+        'unit' => PackingType::Suit->name,
+        'qty' => 1,
+        'size' => 5,
+        'rate' => 20,
+        'total_qty' => 5,
+    ];
+
+    // Action
+    $response = postJson(route('ajax.return.item.save', $this->return->id), $payload);
+
+    // Assert
+    $response->assertJsonMissingValidationErrors(['product_id']);
 });
 
 it('rejects a product that is not supplied by the return supplier', function () {

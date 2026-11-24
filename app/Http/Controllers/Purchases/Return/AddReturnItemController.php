@@ -6,7 +6,9 @@ use App\Actions\Inbound\Return\AddReturnItem;
 use App\Enums\StockLocation;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
+use App\Models\Catalog\Product;
 use App\Models\Purchase\PurchaseReturn;
+use Closure;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
@@ -32,10 +34,17 @@ class AddReturnItemController extends Controller
             'location' => ['nullable', Rule::enum(StockLocation::class)],
             'product_id' => [
                 'required',
-                Rule::exists('products', 'id')->where('vendor_id', $return->supplier_id),
+                function (string $attribute, mixed $value, Closure $fail) use ($return): void {
+                    $isSupplied = Product::query()
+                        ->suppliedBy($return->supplier_id)
+                        ->whereKey($value)
+                        ->exists();
+
+                    if (! $isSupplied) {
+                        $fail('The selected product is not supplied by this supplier.');
+                    }
+                },
             ],
-        ], [
-            'product_id.exists' => 'The selected product is not supplied by this supplier.',
         ]);
         try {
             DB::transaction(function () use ($return, $data) {
